@@ -39,7 +39,7 @@ function ResumePageContent() {
     !store.id && !store.header.name && store.experience.length === 0
 
   const handleUploadClick = () => {
-    setHydrated(true)
+    // Store update from applyImportedResume triggers re-render, making isBlank false
   }
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {

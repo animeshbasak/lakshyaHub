@@ -35,9 +35,9 @@ const DIMENSION_LABELS: Record<keyof JdMatch5dResult['dimensions'], string> = {
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
   const color =
-    score >= 80
+    score >= 75
       ? { fill: 'from-emerald-500 to-emerald-400', text: 'text-emerald-400' }
-      : score >= 60
+      : score >= 50
       ? { fill: 'from-amber-500 to-amber-400', text: 'text-amber-400' }
       : { fill: 'from-red-500 to-red-400', text: 'text-red-400' }
 
