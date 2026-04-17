@@ -83,3 +83,20 @@ export function validateProfileSummaryGenOutput(output: unknown): string[] {
     ? []
     : ['Profile summary output must be a non-empty string longer than 20 characters.'];
 }
+
+export function validateJobStructureOutput(output: unknown): string[] {
+  if (!output || typeof output !== 'object') return ['Output must be an object.'];
+  return [];
+}
+
+export function validateResumeImportParseOutput(output: unknown): string[] {
+  if (!output || typeof output !== 'object') {
+    return ['Output must be an object.'];
+  }
+  const v = output as Record<string, unknown>;
+  const errors: string[] = [];
+  if (v.basics && typeof v.basics !== 'object') errors.push('basics must be an object.');
+  if (v.experience && !Array.isArray(v.experience)) errors.push('experience must be an array.');
+  if (v.skills && typeof v.skills !== 'object') errors.push('skills must be an object.');
+  return errors;
+}

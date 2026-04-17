@@ -1,6 +1,6 @@
 'use client'
 // src/app/(dashboard)/discover/page.tsx
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -172,6 +172,33 @@ export default function DiscoverPage() {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
+
+  // Load latest session results on mount so results persist across navigation
+  useEffect(() => {
+    const supabase = createClient()
+    void (async () => {
+      try {
+        const { data: session } = await supabase
+          .from('scrape_sessions')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+        if (!session) return
+        const { data: sessionJobs } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('session_id', session.id)
+          .order('fit_score', { ascending: false })
+        if (sessionJobs && sessionJobs.length > 0) {
+          setJobs(sessionJobs as Job[])
+          setPhase('done')
+        }
+      } catch {
+        // Silently ignore — page loads empty if no previous session
+      }
+    })()
+  }, [])
 
   const addLog = useCallback((type: LocalLog['type'], message: string) => {
     const entry: LocalLog = {

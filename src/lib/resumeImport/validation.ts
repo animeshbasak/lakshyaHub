@@ -36,7 +36,12 @@ function addReason(
 }
 
 function countFakeRoles(parsed: ParsedResumeSchema) {
-  return parsed.experience.filter((item) => item.role.endsWith('.') || (!/\b(engineer|developer|lead|manager|architect|analyst|designer|specialist|director|consultant)\b/i.test(item.role) && item.role.split(/\s+/).length <= 3)).length;
+  const VALID_ROLE_PATTERN = /\b(engineer|developer|lead|manager|architect|analyst|designer|specialist|director|consultant|staff|principal|vp|vice president|intern|associate|head|product|research|scientist|data|business|operations|officer|founder|co-founder|cto|ceo|cfo|sde|swe|devops|qa|tester|technician|executive)\b/i;
+  return parsed.experience.filter((item) => {
+    if (item.role.endsWith('.')) return true;
+    const wordCount = item.role.split(/\s+/).length;
+    return !VALID_ROLE_PATTERN.test(item.role) && wordCount <= 3;
+  }).length;
 }
 
 function countCompanyLocationSwaps(parsed: ParsedResumeSchema) {
@@ -187,14 +192,18 @@ function buildStructuralSummary(input: {
     addReason(reasons, 'company_location_swap', 'Multiple experience entries look like company/location or role/date fields were misaligned.', 'error', -0.2);
   }
 
-  if (missingCoreExperienceCount > 0 && extraction?.inputSignal !== 'docx') {
+  if (missingCoreExperienceCount >= 2 && extraction?.inputSignal !== 'docx') {
     hardDowngrade = true;
-    addReason(reasons, 'missing_core_experience_fields', 'At least one parsed experience entry is missing core role/company fields.', 'error', -0.2);
+    addReason(reasons, 'missing_core_experience_fields', `${missingCoreExperienceCount} experience entries are missing core role/company fields.`, 'error', -0.2);
+  } else if (missingCoreExperienceCount === 1 && extraction?.inputSignal !== 'docx') {
+    addReason(reasons, 'missing_core_experience_fields', 'One experience entry may be missing role or company — review it.', 'warning', -0.08);
   }
 
-  if (fakeRoleCount >= 1) {
+  if (fakeRoleCount >= 2) {
     hardDowngrade = true;
-    addReason(reasons, 'fake_role_nodes', 'At least one experience role looks like a bullet fragment or invalid header.', 'error', -0.2);
+    addReason(reasons, 'fake_role_nodes', `${fakeRoleCount} experience roles look like bullet fragments or invalid headers.`, 'error', -0.2);
+  } else if (fakeRoleCount === 1) {
+    addReason(reasons, 'fake_role_nodes', 'One experience role may need review.', 'warning', -0.08);
   }
 
   if (missingExpectedSections.length >= 2) {

@@ -65,6 +65,12 @@ function ResumePageContent() {
         payload.importReview
       )
       toast.success('Resume imported!')
+      if (payload.importReview.unclassified.length > 0) {
+        toast(`${payload.importReview.unclassified.length} lines couldn't be classified — review the resume carefully.`, { icon: '⚠️' })
+      }
+      if (payload.importReview.confidence === 'low') {
+        toast('Low parse confidence. Check all sections for accuracy.', { icon: '⚠️' })
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not parse resume.')
     } finally {

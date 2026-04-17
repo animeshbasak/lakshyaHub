@@ -9,7 +9,8 @@ export type AiTask =
   | 'cover_letter_draft'
   | 'interview_prep'
   | 'profile_summary_gen'
-  | 'resume_import_parse';
+  | 'resume_import_parse'
+  | 'job_structure';
 
 export type AiProviderName = 'gemini' | 'groq' | 'openrouter' | 'nvidia';
 

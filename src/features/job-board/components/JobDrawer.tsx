@@ -13,7 +13,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-import { updateApplicationStatus } from '@/actions/updateApplication'
+import { updateApplicationStatus, updateApplicationNotes } from '@/actions/updateApplication'
+import { parseSalaryRange } from '@/lib/utils/salaryParser'
 import { JdMatchPanel } from './JdMatchPanel'
 import type { Job, ApplicationStatus, JdMatch5dResult } from '@/types'
 
@@ -22,6 +23,7 @@ import type { Job, ApplicationStatus, JdMatch5dResult } from '@/types'
 interface JobDrawerProps {
   job: Job | null
   applicationId: string | null
+  initialNotes?: string | null
   isOpen: boolean
   onClose: () => void
   onStatusChange: (id: string, status: string) => void
@@ -122,12 +124,17 @@ function AiResultSection({
 export function JobDrawer({
   job,
   applicationId,
+  initialNotes,
   isOpen,
   onClose,
   onStatusChange,
 }: JobDrawerProps) {
   const [currentStatus, setCurrentStatus] = useState<ApplicationStatus>('saved')
   const [markingApplied, setMarkingApplied] = useState(false)
+  const [notes, setNotes] = useState(initialNotes ?? '')
+
+  // Reset notes when switching to a different job
+  useEffect(() => { setNotes(initialNotes ?? '') }, [initialNotes])
   const [coverLetterLoading, setCoverLetterLoading] = useState(false)
   const [interviewPrepLoading, setInterviewPrepLoading] = useState(false)
   const [coverLetterContent, setCoverLetterContent] = useState<string | null>(null)
@@ -279,12 +286,15 @@ export function JobDrawer({
                         {job.company}
                       </div>
                     )}
-                    {job.salary_range && (
-                      <div className="flex items-center gap-2 text-sm text-text-2">
-                        <DollarSign className="w-4 h-4 text-text-muted flex-shrink-0" />
-                        {job.salary_range}
-                      </div>
-                    )}
+                    {job.salary_range && (() => {
+                      const parsed = parseSalaryRange(job.salary_range)
+                      return (
+                        <div className="flex items-center gap-2 text-sm text-text-2">
+                          <DollarSign className="w-4 h-4 text-text-muted flex-shrink-0" />
+                          {parsed ? parsed.display : job.salary_range}
+                        </div>
+                      )
+                    })()}
                     {job.url && (
                       <a
                         href={job.url}
@@ -356,6 +366,25 @@ export function JobDrawer({
                 </>
               )}
             </div>
+
+            {/* Notes */}
+            {applicationId && (
+              <div className="px-6 pb-4">
+                <label className="block text-xs font-bold uppercase tracking-widest text-text-muted mb-2">
+                  Notes
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  onBlur={() => {
+                    if (applicationId) updateApplicationNotes(applicationId, notes)
+                  }}
+                  placeholder="Add notes about this application…"
+                  rows={3}
+                  className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all resize-none"
+                />
+              </div>
+            )}
 
             {/* Sticky action bar */}
             <div className="flex-shrink-0 px-6 py-4 border-t border-white/[0.06] bg-[#111118]">

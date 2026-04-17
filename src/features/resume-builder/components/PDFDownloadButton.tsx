@@ -21,7 +21,7 @@ export function PDFDownloadButton({ data, className }: { data: ResumeData, class
   return (
     <PDFDownloadLink
       document={<TemplateComponent data={data} />}
-      fileName={`${data.header.name || 'Resume'}.pdf`}
+      fileName={`${(data.header.name || 'Resume').replace(/\s+/g, '_').toLowerCase()}.pdf`}
       className={className}
     >
       {({ loading }) => (

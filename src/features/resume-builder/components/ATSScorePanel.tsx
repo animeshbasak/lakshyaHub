@@ -8,6 +8,7 @@ import type { ATSResult } from '@/lib/atsEngine'
 interface ATSScorePanelProps {
   result: ATSResult | null
   loading?: boolean
+  parseConfidence?: 'high' | 'medium' | 'low' | null
 }
 
 function ScoreCircle({ score }: { score: number }) {
@@ -141,7 +142,7 @@ function CheckRow({ check }: { check: CheckItem }) {
   )
 }
 
-export function ATSScorePanel({ result, loading = false }: ATSScorePanelProps) {
+export function ATSScorePanel({ result, loading = false, parseConfidence }: ATSScorePanelProps) {
   const [atsInfoOpen, setAtsInfoOpen] = useState(false)
   const [showAllFailing, setShowAllFailing] = useState(false)
   const [showPassing, setShowPassing] = useState(false)
@@ -193,6 +194,18 @@ export function ATSScorePanel({ result, loading = false }: ATSScorePanelProps) {
         <span className={`text-sm font-bold ${tierColor}`}>{tierLabel}</span>
         {gradeDesc && (
           <span className="text-[11px] text-text-2 text-center leading-snug">{gradeDesc}</span>
+        )}
+        {parseConfidence && parseConfidence !== 'high' && (
+          <span
+            title={`Resume parsed with ${parseConfidence} confidence. Some data may be missing.`}
+            className={`mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+              parseConfidence === 'medium'
+                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                : 'bg-red-500/10 text-red-400 border-red-500/20'
+            }`}
+          >
+            {parseConfidence} parse
+          </span>
         )}
       </div>
 

@@ -6,6 +6,8 @@ import {
   validateCoverLetterDraftOutput,
   validateInterviewPrepOutput,
   validateProfileSummaryGenOutput,
+  validateResumeImportParseOutput,
+  validateJobStructureOutput,
 } from './taskValidators';
 import type { AiResponse } from './router.types';
 
@@ -87,6 +89,78 @@ Format: { "questions": ["<question1>", "<question2>", ...] }`;
     validate: validateInterviewPrepOutput,
     maxTokens: 1500,
     temperature: 0.5,
+  });
+}
+
+export async function runJobStructureTask(title: string, company: string, description: string): Promise<AiResponse> {
+  const prompt = `Extract structured metadata from this job posting.
+
+Title: ${title}
+Company: ${company}
+Description:
+${description.slice(0, 2000)}
+
+Return ONLY valid JSON (no markdown):
+{
+  "seniority": "<junior|mid|senior|lead|staff|principal>",
+  "remote_type": "<remote|hybrid|onsite>",
+  "tech_stack": ["<tech1>", "<tech2>"],
+  "salary_min": <number or null>,
+  "salary_max": <number or null>,
+  "salary_currency": "<INR|USD|null>",
+  "archetype": "<engineering|product|design|data|devops|ai-ml|sales|other>"
+}`;
+  return await aiRouter.execute({
+    task: 'job_structure',
+    input: { prompt },
+    validate: validateJobStructureOutput,
+    maxTokens: 400,
+    temperature: 0.1,
+  });
+}
+
+export async function runResumeImportParseTask(rawText: string): Promise<AiResponse> {
+  const prompt = `Extract structured resume data from the following resume text.
+
+## Resume Text
+${rawText.slice(0, 10000)}
+
+Return a JSON object with this exact structure (omit any field you cannot determine):
+{
+  "basics": {
+    "name": "", "title": "", "email": "", "phone": "",
+    "location": "", "linkedin": "", "github": "", "portfolio": ""
+  },
+  "summary": "",
+  "experience": [
+    {
+      "company": "", "role": "", "location": "",
+      "startDate": "", "endDate": "",
+      "bullets": ["<achievement or responsibility>"]
+    }
+  ],
+  "education": [
+    { "institution": "", "degree": "", "field": "", "startDate": "", "endDate": "", "score": "" }
+  ],
+  "skills": {
+    "core": ["<skill>"],
+    "grouped": [{ "category": "<category>", "values": ["<skill>"] }]
+  },
+  "sideProjects": [
+    { "name": "", "description": "", "technologies": [], "link": "", "bullets": [] }
+  ]
+}
+
+Rules:
+- Return ONLY valid JSON, no markdown fences.
+- For experience bullets, each bullet is a separate string in the array.
+- Dates should be in "Mon YYYY" format or "YYYY" if only year available.`;
+  return await aiRouter.execute({
+    task: 'resume_import_parse',
+    input: { prompt },
+    validate: validateResumeImportParseOutput,
+    maxTokens: 3000,
+    temperature: 0.1,
   });
 }
 

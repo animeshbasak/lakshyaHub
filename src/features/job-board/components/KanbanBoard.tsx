@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowUpDown, Filter } from 'lucide-react'
 import type { Application, Job, ApplicationStatus } from '@/types'
 import { KanbanCard } from './KanbanCard'
 import { updateApplicationStatus } from '@/actions/updateApplication'
@@ -170,9 +170,30 @@ function DroppableColumn({
   )
 }
 
+type SortMode = 'fit_desc' | 'fit_asc' | 'date_desc'
+type ScoreBand = 'all' | '90plus' | '70to89' | '50to69' | 'below50'
+
+const SCORE_BAND_LABELS: Record<ScoreBand, string> = {
+  all: 'All',
+  '90plus': '90+',
+  '70to89': '70–89',
+  '50to69': '50–69',
+  'below50': '<50',
+}
+
+function matchesBand(score: number, band: ScoreBand): boolean {
+  if (band === 'all') return true
+  if (band === '90plus') return score >= 90
+  if (band === '70to89') return score >= 70 && score < 90
+  if (band === '50to69') return score >= 50 && score < 70
+  return score < 50
+}
+
 export function KanbanBoard({ initialData }: KanbanBoardProps) {
   const [apps, setApps] = useState<LocalApp[]>(initialData)
   const [activeApp, setActiveApp] = useState<LocalApp | null>(null)
+  const [sortMode, setSortMode] = useState<SortMode>('date_desc')
+  const [scoreBand, setScoreBand] = useState<ScoreBand>('all')
 
   // AddJobModal: track which column "+" was clicked; null = closed
   const [addModalStatus, setAddModalStatus] = useState<ApplicationStatus | null>(null)
@@ -186,14 +207,18 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
     })
   )
 
-  const columnsData = useMemo(
-    () =>
-      COLUMNS.map((col) => ({
-        ...col,
-        apps: apps.filter((a) => a.application.status === col.status),
-      })),
-    [apps]
-  )
+  const columnsData = useMemo(() => {
+    const sorted = [...apps].sort((a, b) => {
+      if (sortMode === 'fit_desc') return (b.job.fit_score ?? 0) - (a.job.fit_score ?? 0)
+      if (sortMode === 'fit_asc') return (a.job.fit_score ?? 0) - (b.job.fit_score ?? 0)
+      return new Date(b.application.updated_at).getTime() - new Date(a.application.updated_at).getTime()
+    })
+    const filtered = sorted.filter((a) => matchesBand(a.job.fit_score ?? 0, scoreBand))
+    return COLUMNS.map((col) => ({
+      ...col,
+      apps: filtered.filter((a) => a.application.status === col.status),
+    }))
+  }, [apps, sortMode, scoreBand])
 
   function handleDragStart(event: DragStartEvent) {
     const data = event.active.data.current
@@ -272,6 +297,42 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
 
   return (
     <>
+      {/* Sort / Filter toolbar */}
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <ArrowUpDown className="w-3.5 h-3.5 text-text-muted" />
+          {(['date_desc', 'fit_desc', 'fit_asc'] as SortMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setSortMode(mode)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
+                sortMode === mode
+                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
+                  : 'bg-white/[0.03] text-text-muted border border-white/10 hover:text-white'
+              }`}
+            >
+              {mode === 'date_desc' ? 'Newest' : mode === 'fit_desc' ? 'Fit ↓' : 'Fit ↑'}
+            </button>
+          ))}
+        </div>
+        <div className="w-px h-5 bg-white/10" aria-hidden />
+        <div className="flex items-center gap-1.5">
+          <Filter className="w-3.5 h-3.5 text-text-muted" />
+          {(Object.keys(SCORE_BAND_LABELS) as ScoreBand[]).map((band) => (
+            <button
+              key={band}
+              onClick={() => setScoreBand(band)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
+                scoreBand === band
+                  ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
+                  : 'bg-white/[0.03] text-text-muted border border-white/10 hover:text-white'
+              }`}
+            >
+              {SCORE_BAND_LABELS[band]}
+            </button>
+          ))}
+        </div>
+      </div>
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
@@ -326,6 +387,7 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
         isOpen={drawerApp !== null}
         job={drawerApp?.job ?? null}
         applicationId={drawerApp?.application.id ?? null}
+        initialNotes={drawerApp?.application.notes ?? null}
         onClose={() => setDrawerApp(null)}
         onStatusChange={(id, status) => {
           setApps((prev) =>

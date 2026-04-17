@@ -20,6 +20,20 @@ export async function updateApplicationStatus(
   return error ? { error: error.message } : { success: true }
 }
 
+export async function updateApplicationNotes(applicationId: string, notes: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('applications')
+    .update({ notes, updated_at: new Date().toISOString() })
+    .eq('id', applicationId)
+    .eq('user_id', user.id)
+
+  return error ? { error: error.message } : { success: true }
+}
+
 export async function saveJobToBoard(jobId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

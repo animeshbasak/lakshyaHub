@@ -104,20 +104,16 @@ export const ACTORS: Record<string, ActorConfig> = {
   },
 
   /**
-   * curious_coder/naukri-jobs-scraper
-   * Input: { keyword: string, location: string, maxJobs: number }
-   * ⚠️ NOTE: `keyword` is unconfirmed — actor page is not publicly indexable.
-   *    If this fails with "Field input.keyword is required" or similar,
-   *    try changing `keyword` → `searchQuery` (used by shahidirfan variant).
-   *    Fallback: switch actorId to `shahidirfan/naukri-jobs-scraper`
-   *    which is confirmed to use { searchQuery, location, maxJobs }.
+   * shahidirfan/naukri-jobs-scraper
+   * Input: { searchQuery: string, location: string, maxJobs: number }
+   * ✅ VERIFIED: confirmed field is `searchQuery` (not `keyword`)
    */
   naukri: {
-    id: 'curious_coder/naukri-jobs-scraper',
+    id: 'shahidirfan/naukri-jobs-scraper',
     label: 'Naukri',
     tier: 1,
     buildInput: (query, location, limit) => ({
-      keyword: query,
+      searchQuery: query,
       location: location,
       maxJobs: limit,
     }),

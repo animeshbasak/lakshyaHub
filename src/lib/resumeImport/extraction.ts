@@ -44,7 +44,7 @@ function createExtractedLine(input: {
     xEnd: input.xEnd ?? 0,
     y: input.y ?? 0,
     tokenCount: text.split(/\s+/).filter(Boolean).length,
-    bulletHint: /^[•\-*]\s+/.test(text),
+    bulletHint: /^[•\-–—›»·*]\s+/.test(text),
     uppercaseRatio: getUppercaseRatio(text),
     spacedCapsHint: /^(?:[A-Z]\s+){2,}[A-Z]$/.test(text),
     source: input.source,

@@ -4,7 +4,8 @@ import { computeDedupHash } from '@/lib/dedup'
 import { scrapeJobsWithFallback } from '@/lib/scrapers'
 import { buildSearchQueries } from '@/lib/scrapers/buildSearchQuery'
 import { enrichJobDetails } from '@/lib/scrapers/enrichJobDetails'
-import { runJdMatch5dTask } from '@/lib/ai/taskRunner'
+import { runJdMatch5dTask, runJobStructureTask } from '@/lib/ai/taskRunner'
+import { applyPostScrapeFilters } from '@/lib/filters/jobFilters'
 import type { ScrapeConfig } from '@/lib/scrapers/types'
 import type { ResumeProfile } from '@/types'
 
@@ -55,7 +56,9 @@ export async function scrapeJobs(config: ScrapeConfig) {
 
   try {
     // 4. Run Scraper
-    const { jobs: rawJobs, summary } = await scrapeJobsWithFallback(config, APIFY_API_TOKEN, log)
+    const { jobs: rawJobsUnfiltered, summary } = await scrapeJobsWithFallback(config, APIFY_API_TOKEN, log)
+    const rawJobs = applyPostScrapeFilters(rawJobsUnfiltered)
+    await log('info', `Filtered to ${rawJobs.length} India-relevant jobs (from ${rawJobsUnfiltered.length} raw).`)
 
     // 5. Enrich and Score (Top 50 only for cost/speed)
     await log('info', `Processing ${rawJobs.length} jobs... Enriching top 50 with full details.`)
@@ -84,6 +87,15 @@ export async function scrapeJobs(config: ScrapeConfig) {
           }
         }
 
+        // Extract structured metadata (seniority, remote_type, tech_stack, salary)
+        let structured: Record<string, unknown> | null = null
+        if (enriched.description) {
+          const structResult = await runJobStructureTask(enriched.title, enriched.company, enriched.description)
+          if (structResult.success && structResult.output) {
+            structured = structResult.output as Record<string, unknown>
+          }
+        }
+
         return {
           user_id: user.id,
           session_id: session.id,
@@ -96,7 +108,7 @@ export async function scrapeJobs(config: ScrapeConfig) {
           salary_range: raw.salary || null,
           fit_score,
           fit_breakdown,
-          raw_data: raw,
+          raw_data: { ...raw, structured },
           dedup_hash,
           scraped_at: new Date().toISOString(),
         }

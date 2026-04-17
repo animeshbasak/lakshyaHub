@@ -17,6 +17,7 @@ export interface RawJobPartial {
   url: string
   salary?: string
   source: string
+  [key: string]: unknown
 }
 
 export type RawJob = RawJobPartial

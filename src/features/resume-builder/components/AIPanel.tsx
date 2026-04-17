@@ -520,7 +520,7 @@ export function AIPanel() {
             : undefined
         }
       >
-        <ATSScorePanel result={atsResult} loading={atsLoading} />
+        <ATSScorePanel result={atsResult} loading={atsLoading} parseConfidence={store.importReview?.confidence ?? null} />
       </SectionCard>
 
       {/* Bullet Improve section */}

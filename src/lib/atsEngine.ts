@@ -59,7 +59,28 @@ export const ATS_CHECKS: ATSCheck[] = [
     label: 'Specific tools and technologies named',
     tip: 'Name exact tools in bullets — "used React and TypeScript" beats "used modern frameworks"',
     test: (r) => {
-      const KNOWN_TOOLS = ['react','angular','vue','typescript','javascript','python','java','sql','docker','kubernetes','aws','gcp','azure','node','express','django','flask','spring','git','github','gitlab','figma','jira','confluence','webpack','vite','jest','pytest','tensorflow','pytorch','pandas','tableau','powerbi','salesforce','hubspot','wordpress','shopify','graphql','rest','mongodb','postgresql','mysql','redis','kafka','elasticsearch','terraform','ansible','jenkins','cicd','linux'];
+      const KNOWN_TOOLS = [
+        // Languages & runtimes
+        'react','angular','vue','typescript','javascript','python','java','sql','node','go','rust','kotlin','swift','scala','ruby',
+        // Frontend & UI
+        'next.js','nextjs','tailwind','framer','zustand','redux','tanstack','vite','webpack','rollup','esbuild','storybook','shadcn','radix','dnd-kit','framer-motion','css','scss','html',
+        // Backend & APIs
+        'express','fastapi','django','flask','spring','nestjs','graphql','rest','trpc','prisma','drizzle','supabase','firebase','appwrite',
+        // Databases & storage
+        'mongodb','postgresql','mysql','sqlite','redis','elasticsearch','kafka','pinecone','weaviate','qdrant','neon','planetscale',
+        // Cloud & DevOps
+        'docker','kubernetes','aws','gcp','azure','vercel','netlify','github','gitlab','jenkins','cicd','terraform','ansible','linux','nginx','ci/cd',
+        // AI / LLM
+        'claude','gemini','openai','groq','ollama','langchain','llamaindex','langgraph','rag','whisper','anthropic','huggingface','openrouter','nvidia',
+        // Testing & observability
+        'jest','vitest','pytest','playwright','cypress','rtl','sentry','datadog','kibana','growthbook','superset','pagespace',
+        // Tools & workflow
+        'figma','jira','git','postman','webdriverio','puppeteer','pnpm','bun','yarn','npm','confluence',
+        // Analytics & BI
+        'tableau','powerbi','grafana','amplitude','mixpanel',
+        // Mobile & desktop
+        'react-native','flutter','electron',
+      ];
       const allText = [
         ...r.skills.flatMap(s => s.values ? s.values.split(',') : []),
         ...r.experience.flatMap(e => e.bullets || []).map(b => b.text)

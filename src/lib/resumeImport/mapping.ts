@@ -80,7 +80,7 @@ function normalizeDashes(value: string) {
 }
 
 function cleanHeaderValue(value: string) {
-  return normalizeLine(value).replace(/^[•\-*]\s*/, '').trim();
+  return normalizeLine(value).replace(/^[•\-–—›»·*]\s*/, '').trim();
 }
 
 function createDraftNode(): ExperienceDraftNode {
@@ -98,7 +98,7 @@ function createDraftNode(): ExperienceDraftNode {
 }
 
 export function stripBullet(line: string) {
-  return line.replace(/^[•\-*]\s*/, '').trim();
+  return line.replace(/^[•\-–—›»·*]\s*/, '').trim();
 }
 
 function hasRoleKeyword(line: string) {
@@ -142,7 +142,7 @@ function looksLikeCompanyLocationLine(line: string) {
     return false;
   }
 
-  if (/^[•\-*]\s+/.test(line)) {
+  if (/^[•\-–—›»·*]\s+/.test(line)) {
     return false;
   }
 
@@ -310,7 +310,7 @@ function looksLikeProjectHeader(line: string) {
 }
 
 function looksLikeTechnologyStackLine(line: string) {
-  if (/^[•\-*]\s+/.test(line) || DATE_RANGE_REGEX.test(line)) {
+  if (/^[•\-–—›»·*]\s+/.test(line) || DATE_RANGE_REGEX.test(line)) {
     return false;
   }
 
@@ -362,7 +362,7 @@ function classifyContactLines(block: ResumeSectionBlock) {
       blockIndex: block.sourceBlockIndexes[0] ?? 0,
       lineIndex: index,
       pageIndex: 0,
-      bulletHint: /^[•\-*]\s+/.test(line),
+      bulletHint: /^[•\-–—›»·*]\s+/.test(line),
       reasons,
     } satisfies TypedResumeLine;
   });
@@ -376,7 +376,7 @@ function classifyExperienceLines(block: ResumeSectionBlock) {
     const reasons: string[] = [];
     const previous = typedLines[typedLines.length - 1];
 
-    if (/^[•\-*]\s+/.test(line)) {
+    if (/^[•\-–—›»·*]\s+/.test(line)) {
       kind = 'bullet_line';
       reasons.push('Explicit bullet marker.');
     } else if (
@@ -417,7 +417,7 @@ function classifyExperienceLines(block: ResumeSectionBlock) {
       blockIndex: block.sourceBlockIndexes[0] ?? 0,
       lineIndex: index,
       pageIndex: 0,
-      bulletHint: /^[•\-*]\s+/.test(line),
+      bulletHint: /^[•\-–—›»·*]\s+/.test(line),
       reasons,
     });
   });
@@ -457,7 +457,7 @@ function classifySectionLines(block: ResumeSectionBlock): TypedResumeLine[] {
       blockIndex: block.sourceBlockIndexes[0] ?? 0,
       lineIndex: index,
       pageIndex: 0,
-      bulletHint: /^[•\-*]\s+/.test(line),
+      bulletHint: /^[•\-–—›»·*]\s+/.test(line),
       reasons: [`Classified from ${block.kind} section context.`],
     } satisfies TypedResumeLine;
   });
@@ -867,6 +867,17 @@ function parseSkillsBlock(parsed: ParsedResumeSchema, block: ResumeSectionBlock)
   parsed.skills.raw = uniqueList([...parsed.skills.raw, ...block.typedLines.map((line) => cleanHeaderValue(line.text))]);
 
   block.typedLines.forEach((line) => {
+    // Table-style: "Category  Value1, Value2" (2+ spaces or tab separator, no colon)
+    // Handles PDF table layouts where label and values are in separate columns on the same row.
+    const tableMatch = line.text.match(/^([A-Z][a-zA-Z /]{1,30})[\t ]{2,}(.+)$/);
+    if (tableMatch) {
+      const tableCategory = tableMatch[1].trim();
+      const tableValues = splitSkillsLine(tableMatch[2]);
+      parsed.skills.core = uniqueList([...parsed.skills.core, ...tableValues]);
+      upsertSkillGroup(parsed.skills.grouped, tableCategory, tableValues);
+      return;
+    }
+
     const [rawCategory, ...rest] = line.text.split(':');
     const hasExplicitCategory = rest.length > 0;
     const values = splitSkillsLine(line.text);
@@ -884,8 +895,8 @@ function parseSkillsBlock(parsed: ParsedResumeSchema, block: ResumeSectionBlock)
 function buildProjectFromGroup(group: string[]): ParsedResumeProjectItem | null {
   const [header = '', ...rest] = group;
   const headerParts = splitProjectHeader(header);
-  const bullets = rest.filter((line) => /^[•\-*]\s+/.test(line)).map((line) => stripBullet(line));
-  const prose = rest.filter((line) => !/^[•\-*]\s+/.test(line));
+  const bullets = rest.filter((line) => /^[•\-–—›»·*]\s+/.test(line)).map((line) => stripBullet(line));
+  const prose = rest.filter((line) => !/^[•\-–—›»·*]\s+/.test(line));
   const technologies = prose.flatMap((line) => (looksLikeTechnologyStackLine(line) ? splitSkillsLine(line) : []));
   const description = prose.filter((line) => !looksLikeTechnologyStackLine(line)).join(' ');
   const link =
@@ -919,7 +930,7 @@ function parseProjectLines(lines: string[], options?: { allowLooseHeaders?: bool
       !standaloneLearning &&
       !looksLikeTechnologyStackLine(line) &&
       !looksLikeEducationLine(line) &&
-      !/^[•\-*]\s+/.test(line) &&
+      !/^[•\-–—›»·*]\s+/.test(line) &&
       line.split(/\s+/).length <= 6;
 
     if (projectHeader || standaloneLearning || looseHeader) {

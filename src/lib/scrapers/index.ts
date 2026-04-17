@@ -79,8 +79,8 @@ export async function scrapeJobsWithFallback(
   //   (a) user selected 'web', OR
   //   (b) we still have fewer jobs than requested
   const needsMoreJobs = allJobs.length < config.limit
-  if (hasWebSource || (needsMoreJobs && allJobs.length > 0)) {
-    const reason = hasWebSource ? 'Web / Company Sites selected' : `only ${allJobs.length}/${config.limit} jobs found — expanding search`
+  if (hasWebSource || needsMoreJobs) {
+    const reason = hasWebSource ? 'Web / Company Sites selected' : `only ${allJobs.length}/${config.limit} jobs found — expanding via Google Jobs`
     log('info', `Running Google Jobs (${reason})...`)
     const googleActor = ACTORS['google_jobs']
     const { jobs, error } = await runActor(
