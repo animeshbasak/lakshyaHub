@@ -1,0 +1,118 @@
+// src/app/login/page.tsx
+'use client'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Sparkles, ArrowRight, GitBranch, Mail } from 'lucide-react'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (error) {
+      toast.error(error.message)
+    } else {
+      toast.success('Check your email for the login link!')
+    }
+    setLoading(false)
+  }
+
+  const handleSocialLogin = async (provider: 'github' | 'google') => {
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-bg flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
+      
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md relative z-10"
+      >
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500 to-purple-500 shadow-xl shadow-cyan-500/20 mx-auto mb-6 flex items-center justify-center text-white">
+            <Sparkles className="w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
+          <p className="text-text-muted">Sign in to your unified career dashboard</p>
+        </div>
+
+        <div className="p-8 rounded-[32px] bg-white/[0.03] border border-white/5 backdrop-blur-xl shadow-2xl">
+          <div className="space-y-4 mb-8">
+            <button 
+              onClick={() => handleSocialLogin('github')}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl bg-white text-bg font-bold hover:scale-[1.02] transition-all"
+            >
+              <GitBranch className="w-5 h-5" />
+              Continue with GitHub
+            </button>
+          </div>
+
+          <div className="relative mb-8 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/5"></div>
+            </div>
+            <span className="relative px-4 text-[10px] font-black uppercase tracking-widest text-white/30 bg-[#0A0A0B]">
+              Or Magic Link
+            </span>
+          </div>
+
+          <form onSubmit={handleMagicLink} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] pl-1">Email Address</label>
+              <input 
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-sm text-white focus:border-cyan-500/50 outline-none transition-all"
+              />
+            </div>
+            <button 
+              disabled={loading}
+              className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white animate-spin rounded-full" />
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  Send Magic Link
+                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center mt-8 text-[11px] text-text-muted font-medium uppercase tracking-widest">
+          Secure Authentication by <span className="text-white">Supabase</span>
+        </p>
+      </motion.div>
+    </div>
+  )
+}
