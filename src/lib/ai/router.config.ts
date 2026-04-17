@@ -15,11 +15,7 @@ const DEFAULT_TASK_ROUTING: Record<AiTask, Array<'gemini' | 'groq' | 'openrouter
 };
 
 function readEnvValue(name: string) {
-  const val = process.env[name] || '';
-  if (val) return val;
-  // fallback: try bare key without AI_PROVIDER_ prefix
-  const bare = name.replace(/^AI_PROVIDER_/, '');
-  return process.env[bare] || '';
+  return process.env[name] || '';
 }
 
 function readProviderEnabled(name: string) {
