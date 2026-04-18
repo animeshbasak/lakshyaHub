@@ -13,6 +13,11 @@ import {
   Loader2,
   ExternalLink,
   Plus,
+  Zap,
+  ChevronDown,
+  ArrowUpDown,
+  Building2,
+  DollarSign,
 } from 'lucide-react'
 import { scrapeJobs } from '@/actions/scrapeJobs'
 import { saveJobToBoard } from '@/actions/updateApplication'
@@ -42,27 +47,51 @@ const ALL_SOURCES: { key: UserSource; label: string }[] = [
 // ─── Log entry ────────────────────────────────────────────────────────────────
 
 function LogEntry({ log }: { log: LocalLog }) {
+  const colorFor: Record<LocalLog['type'], string> = {
+    info: 'var(--fg-3)',
+    success: 'var(--emerald)',
+    warn: 'var(--amber)',
+    error: 'var(--red)',
+  }
   const iconMap: Record<LocalLog['type'], React.ReactNode> = {
-    info: <Info className="w-4 h-4 text-cyan-400 flex-shrink-0" />,
-    success: <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />,
-    warn: <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />,
-    error: <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />,
+    info: <Info size={11} style={{ color: colorFor.info }} />,
+    success: <CheckCircle size={11} style={{ color: colorFor.success }} />,
+    warn: <AlertTriangle size={11} style={{ color: colorFor.warn }} />,
+    error: <XCircle size={11} style={{ color: colorFor.error }} />,
   }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="flex items-start gap-2.5 py-2 border-b border-white/[0.04] last:border-0"
+      transition={{ duration: 0.18 }}
+      className="mono"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '70px 18px 1fr',
+        gap: 8,
+        alignItems: 'center',
+        padding: '3px 0',
+        fontSize: 11.5,
+      }}
     >
+      <span style={{ color: 'var(--fg-4)' }}>{log.timestamp}</span>
       {iconMap[log.type]}
-      <div className="min-w-0">
-        <p className="text-xs text-text-2">{log.message}</p>
-        <p className="text-[10px] text-text-muted mt-0.5 font-mono">{log.timestamp}</p>
-      </div>
+      <span style={{ color: colorFor[log.type] }}>{log.message}</span>
     </motion.div>
   )
+}
+
+// ─── Grade badge ──────────────────────────────────────────────────────────────
+
+function GradeBadge({ grade }: { grade: string }) {
+  const variant =
+    grade === 'A' ? 'emerald' :
+    grade === 'B' ? 'cyan' :
+    grade === 'C' ? 'amber' :
+    grade === 'D' ? 'amber' :
+    'red'
+  return <span className={`badge ${variant}`}>Grade {grade}</span>
 }
 
 // ─── Job result card ──────────────────────────────────────────────────────────
@@ -79,93 +108,115 @@ function JobResultCard({
   index: number
 }) {
   const isSaved = savedIds.has(job.id)
+  const grade = (job.fit_breakdown as unknown as { grade?: string } | null)?.grade
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut', delay: index * 0.05 }}
-      className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-5 hover:border-white/10 transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.4)] group"
+      transition={{ duration: 0.25, ease: 'easeOut', delay: index * 0.04 }}
+      className="card card-pad"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        gap: 16,
+      }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-              {job.source}
-            </span>
-          </div>
-          <h3 className="text-base font-semibold text-white leading-tight mb-0.5 truncate">
-            {job.title}
-          </h3>
-          <p className="text-sm text-text-2 font-medium">{job.company}</p>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 14.5, fontWeight: 500, color: 'var(--fg)' }}>{job.title}</span>
+          <span className="badge">{job.source}</span>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 8,
+            fontSize: 12.5,
+            color: 'var(--fg-2)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <Building2 size={12} style={{ color: 'var(--fg-4)' }} /> {job.company}
+          </span>
           {job.location && (
-            <p className="text-[11px] text-text-muted mt-1 flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {job.location}
-            </p>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <MapPin size={12} style={{ color: 'var(--fg-4)' }} /> {job.location}
+            </span>
+          )}
+          {job.salary_range && (
+            <span
+              className="mono"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--emerald)' }}
+            >
+              <DollarSign size={12} /> {job.salary_range}
+            </span>
           )}
         </div>
-        <div className="flex-shrink-0 flex flex-col items-end gap-1">
-          {job.fit_score > 0 && <FitBadge score={job.fit_score} size="default" />}
-          {(() => {
-            const grade = (job.fit_breakdown as unknown as { grade?: string } | null)?.grade
-            if (!grade) return null
-            const cls =
-              grade === 'A' ? 'bg-emerald-500/15 text-emerald-400' :
-              grade === 'B' ? 'bg-green-500/15 text-green-400' :
-              grade === 'C' ? 'bg-amber-500/15 text-amber-400' :
-              grade === 'D' ? 'bg-orange-500/15 text-orange-400' :
-              'bg-red-500/15 text-red-400'
-            return <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-md ${cls}`}>{grade}</span>
-          })()}
-        </div>
+        {job.description && (
+          <p
+            className="text-3"
+            style={{
+              fontSize: 12.5,
+              margin: '0 0 10px',
+              lineHeight: 1.5,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {job.description}
+          </p>
+        )}
       </div>
 
-      {job.description && (
-        <p className="text-sm text-text-2 mt-3 line-clamp-2 leading-relaxed">
-          {job.description}
-        </p>
-      )}
-
-      {job.salary_range && (
-        <p className="text-xs text-text-2 mt-2 font-medium">{job.salary_range}</p>
-      )}
-
-      <div className="flex items-center justify-between mt-4 gap-2">
-        {job.url && (
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            View Job
-          </a>
-        )}
-        <div className="flex-1" />
-        <button
-          onClick={() => onSave(job.id)}
-          disabled={isSaved}
-          aria-label={isSaved ? 'Already saved to board' : 'Add to board'}
-          className={`min-h-[44px] flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
-            isSaved
-              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
-              : 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white hover:opacity-90'
-          }`}
-        >
-          {isSaved ? (
-            <>
-              <CheckCircle className="w-4 h-4" />
-              Saved
-            </>
-          ) : (
-            <>
-              <Plus className="w-4 h-4" />
-              Add to Board
-            </>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: 10,
+          minWidth: 120,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {job.fit_score > 0 && <FitBadge score={job.fit_score} size="default" />}
+          {grade && <GradeBadge grade={grade} />}
+        </div>
+        <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+          {job.url && (
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn sm ghost"
+              title="View original"
+              aria-label="View original job posting"
+            >
+              <ExternalLink size={12} />
+            </a>
           )}
-        </button>
+          <button
+            onClick={() => onSave(job.id)}
+            disabled={isSaved}
+            aria-label={isSaved ? 'Already saved to board' : 'Add to board'}
+            className={`btn sm ${isSaved ? '' : 'primary'}`}
+            style={isSaved ? { color: 'var(--emerald)' } : {}}
+          >
+            {isSaved ? (
+              <>
+                <CheckCircle size={12} /> Saved
+              </>
+            ) : (
+              <>
+                <Plus size={12} /> Save
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </motion.div>
   )
@@ -183,6 +234,8 @@ export default function DiscoverPage() {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [sourceErrors, setSourceErrors] = useState<string[]>([])
+  const [fitFilter, setFitFilter] = useState<'all' | '90' | '80' | '70'>('all')
+  const [sortMode, setSortMode] = useState<'fit' | 'new'>('fit')
   const logEndRef = useRef<HTMLDivElement>(null)
 
   // Load latest session results on mount so results persist across navigation
@@ -299,178 +352,363 @@ export default function DiscoverPage() {
 
   const isRunning = phase === 'running'
 
+  // Derive filtered + sorted jobs
+  const filteredJobs = (() => {
+    let list = [...jobs]
+    if (fitFilter === '90') list = list.filter((j) => j.fit_score >= 90)
+    else if (fitFilter === '80') list = list.filter((j) => j.fit_score >= 80 && j.fit_score < 90)
+    else if (fitFilter === '70') list = list.filter((j) => j.fit_score >= 70 && j.fit_score < 80)
+    if (sortMode === 'fit') list.sort((a, b) => b.fit_score - a.fit_score)
+    return list
+  })()
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] px-8 py-8">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Discover Jobs</h1>
-        <p className="text-sm text-text-2 mt-1">
-          Scrape live listings and find your best-fit roles
-        </p>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '360px 1fr',
+        minHeight: 'calc(100vh - var(--topbar-h))',
+      }}
+    >
+      {/* ─── Left column: query panel ───────────────────────────────── */}
+      <div
+        style={{
+          borderRight: '1px solid var(--hair)',
+          padding: 22,
+          background: 'var(--bg-1)',
+          overflow: 'auto',
+        }}
+      >
+        <div style={{ marginBottom: 18 }}>
+          <h1 className="h1" style={{ fontSize: 19, marginBottom: 4 }}>
+            Discover jobs
+          </h1>
+          <p className="text-3" style={{ fontSize: 12, margin: 0 }}>
+            Live scrape · AI-scored against your resume
+          </p>
+        </div>
+
+        <div className="eyebrow" style={{ marginBottom: 8 }}>Role / Title</div>
+        <div style={{ position: 'relative', marginBottom: 14 }}>
+          <Search
+            size={14}
+            style={{ position: 'absolute', left: 11, top: 10, color: 'var(--fg-4)' }}
+          />
+          <input
+            className="input"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="e.g. Senior Product Manager"
+            style={{ paddingLeft: 32 }}
+            onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleRunSearch()}
+          />
+        </div>
+
+        <div className="eyebrow" style={{ marginBottom: 8 }}>Location</div>
+        <div style={{ position: 'relative', marginBottom: 14 }}>
+          <MapPin
+            size={14}
+            style={{ position: 'absolute', left: 11, top: 10, color: 'var(--fg-4)' }}
+          />
+          <input
+            className="input"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g. Bangalore, Remote"
+            style={{ paddingLeft: 32 }}
+          />
+        </div>
+
+        <div className="eyebrow" style={{ marginBottom: 8 }}>Sources</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+          {ALL_SOURCES.map(({ key, label }) => {
+            const active = selectedSources.includes(key)
+            return (
+              <button
+                key={key}
+                onClick={() => toggleSource(key)}
+                aria-pressed={active}
+                className={`chip ${active ? 'active' : ''}`}
+              >
+                <span
+                  className="dot"
+                  style={{ background: active ? 'var(--cyan)' : 'var(--fg-4)' }}
+                />
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        {selectedSources.length === 0 && (
+          <p style={{ fontSize: 11.5, color: 'var(--amber)', marginTop: -6, marginBottom: 10 }}>
+            Select at least one source
+          </p>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div
+            role="alert"
+            className="card"
+            style={{
+              padding: '10px 12px',
+              marginBottom: 12,
+              borderColor: 'rgba(239,68,68,0.25)',
+              background: 'rgba(239,68,68,0.05)',
+            }}
+          >
+            <p style={{ fontSize: 12, color: 'var(--red)', margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        <button
+          onClick={handleRunSearch}
+          disabled={isRunning || !query.trim() || selectedSources.length === 0}
+          className="btn primary lg"
+          style={{ width: '100%', marginBottom: 10 }}
+        >
+          {isRunning ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Scraping...
+            </>
+          ) : (
+            <>
+              <Zap size={14} fill="currentColor" strokeWidth={2} />
+              Run search
+              <span
+                className="mono"
+                style={{ marginLeft: 'auto', fontSize: 10, opacity: 0.5 }}
+              >
+                ⏎
+              </span>
+            </>
+          )}
+        </button>
+
+        {phase === 'done' && (
+          <button
+            onClick={() => {
+              setPhase('idle')
+              setLogs([])
+              setJobs([])
+            }}
+            className="btn ghost"
+            style={{ width: '100%', marginBottom: 10 }}
+          >
+            New search
+          </button>
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '10px 11px',
+            border: '1px solid var(--hair)',
+            borderRadius: 'var(--radius-sm)',
+            background: 'rgba(168,85,247,0.04)',
+            fontSize: 11.5,
+            color: 'var(--fg-3)',
+          }}
+        >
+          <Globe size={14} style={{ color: 'var(--purple)', flexShrink: 0 }} />
+          <span>
+            Also searches{' '}
+            <span style={{ color: 'var(--fg-2)', fontWeight: 500 }}>40+ company portals</span>{' '}
+            via Greenhouse & Lever
+          </span>
+        </div>
       </div>
 
-      {sourceErrors.length > 0 && (
-        <div className="mb-5 flex items-start gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
-          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-semibold text-amber-400 mb-1">Some sources had issues — results may be incomplete</p>
-            <ul className="space-y-0.5">
-              {sourceErrors.map((e, i) => (
-                <li key={i} className="text-[11px] text-amber-400/70 font-mono">{e}</li>
-              ))}
-            </ul>
+      {/* ─── Right column: results / logs ───────────────────────────── */}
+      <div style={{ overflow: 'auto' }}>
+        {/* Idle empty state */}
+        {phase === 'idle' && logs.length === 0 && jobs.length === 0 && (
+          <div style={{ display: 'grid', placeItems: 'center', padding: 40, minHeight: 400 }}>
+            <div style={{ textAlign: 'center', maxWidth: 400 }}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  margin: '0 auto 18px',
+                  borderRadius: 16,
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--hair)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: 'var(--cyan)',
+                  boxShadow: 'inset 0 0 40px rgba(34,211,238,0.06)',
+                }}
+              >
+                <Search size={24} />
+              </div>
+              <h3 className="h2" style={{ marginBottom: 6 }}>Ready when you are</h3>
+              <p className="text-3" style={{ fontSize: 13, margin: '0 0 18px' }}>
+                Configure your search on the left, then press{' '}
+                <span className="kbd">⏎</span>.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="flex gap-6">
-        {/* ── Left column: Query builder ──────────────────────────────── */}
-        <div className="w-[400px] flex-shrink-0">
-          <div className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.4)] sticky top-8">
-            <h2 className="text-base font-semibold text-white mb-5">Search Query</h2>
-
-            {/* Role input */}
-            <div className="mb-4">
-              <label className="block text-xs font-bold uppercase tracking-widest text-text-2 mb-2">
-                Role / Title
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="e.g. Senior Product Manager"
-                  className="w-full bg-[#1a1a24] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]"
-                  onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleRunSearch()}
-                />
-              </div>
+        {/* Running: live log stream */}
+        {isRunning && (
+          <div style={{ padding: '22px 26px', maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <Loader2 size={14} className="animate-spin" style={{ color: 'var(--cyan)' }} />
+              <span style={{ fontSize: 13 }}>Scraping live job boards...</span>
             </div>
-
-            {/* Location input */}
-            <div className="mb-4">
-              <label className="block text-xs font-bold uppercase tracking-widest text-text-2 mb-2">
-                Location
-              </label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="e.g. Bangalore, Remote"
-                  className="w-full bg-[#1a1a24] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]"
-                />
-              </div>
-            </div>
-
-            {/* Sources multi-select */}
-            <div className="mb-6">
-              <label className="block text-xs font-bold uppercase tracking-widest text-text-2 mb-2">
-                Sources
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {ALL_SOURCES.map(({ key, label }) => (
-                  <button
-                    key={key}
-                    onClick={() => toggleSource(key)}
-                    aria-pressed={selectedSources.includes(key)}
-                    className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold border transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
-                      selectedSources.includes(key)
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                        : 'bg-white/[0.03] text-text-2 border-white/10 hover:border-white/20 hover:text-white'
-                    }`}
-                  >
-                    <Globe className="w-3.5 h-3.5 inline mr-1.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {selectedSources.length === 0 && (
-                <p className="text-xs text-amber-400 mt-2">Select at least one source</p>
-              )}
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20" role="alert">
-                <p className="text-sm text-red-400">{error}</p>
-              </div>
-            )}
-
-            {/* Run button */}
-            <button
-              onClick={handleRunSearch}
-              disabled={isRunning || !query.trim() || selectedSources.length === 0}
-              className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+            <div
+              className="card"
+              style={{ padding: '14px 16px', background: 'var(--bg-1)' }}
             >
-              {isRunning ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Searching…
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4" />
-                  Run Search
-                </>
-              )}
-            </button>
-
-            {phase === 'done' && (
-              <button
-                onClick={() => { setPhase('idle'); setLogs([]); setJobs([]) }}
-                className="w-full min-h-[44px] mt-3 flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-text-2 font-medium px-5 py-3 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
-              >
-                New Search
-              </button>
-            )}
+              <AnimatePresence initial={false}>
+                {logs.map((log) => (
+                  <LogEntry key={log.id} log={log} />
+                ))}
+              </AnimatePresence>
+              <div ref={logEndRef} />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* ── Right column: Session log + results ─────────────────────── */}
-        <div className="flex-1 min-w-0">
-          {/* Session log (shown while running or has logs) */}
-          <AnimatePresence>
+        {/* Done */}
+        {phase === 'done' && (
+          <div style={{ padding: '18px 26px 60px' }}>
+            {/* Collapsed log */}
             {logs.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-5 mb-5 shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
+              <details
+                style={{
+                  padding: '8px 12px',
+                  marginBottom: 14,
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--hair)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: 12,
+                  color: 'var(--fg-3)',
+                }}
               >
-                <div className="flex items-center gap-2 mb-4">
-                  {isRunning && (
-                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
-                  )}
-                  <h2 className="text-sm font-semibold text-white">
-                    {isRunning ? 'Searching…' : 'Session Log'}
-                  </h2>
-                </div>
-                <div className="max-h-48 overflow-y-auto">
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    listStyle: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <CheckCircle size={12} style={{ color: 'var(--emerald)' }} />
+                  <span>
+                    Scrape complete ·{' '}
+                    <span className="mono" style={{ color: 'var(--fg-2)' }}>
+                      {jobs.length} jobs
+                    </span>
+                  </span>
+                  <ChevronDown size={12} style={{ marginLeft: 'auto' }} />
+                </summary>
+                <div style={{ marginTop: 10 }}>
                   {logs.map((log) => (
                     <LogEntry key={log.id} log={log} />
                   ))}
-                  <div ref={logEndRef} />
                 </div>
-              </motion.div>
+              </details>
             )}
-          </AnimatePresence>
 
-          {/* Job results */}
-          {jobs.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-white">
-                  {jobs.length} Results
-                </h2>
-                <span className="text-xs text-text-muted">
-                  {savedIds.size} saved to board
-                </span>
+            {/* Source errors banner */}
+            {sourceErrors.length > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  alignItems: 'flex-start',
+                  padding: '10px 14px',
+                  background: 'rgba(251,191,36,0.05)',
+                  border: '1px solid rgba(251,191,36,0.2)',
+                  borderRadius: 10,
+                  marginBottom: 14,
+                }}
+              >
+                <AlertTriangle size={14} style={{ color: 'var(--amber)', marginTop: 2, flexShrink: 0 }} />
+                <div style={{ flex: 1, fontSize: 12, minWidth: 0 }}>
+                  <div style={{ color: 'var(--amber)', fontWeight: 600, marginBottom: 2 }}>
+                    Some sources had issues — results may be incomplete
+                  </div>
+                  <ul className="mono text-3" style={{ fontSize: 11, margin: 0, padding: 0, listStyle: 'none' }}>
+                    {sourceErrors.map((e, i) => (
+                      <li key={i}>{e}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div className="flex flex-col gap-4">
-                {jobs.map((job, i) => (
+            )}
+
+            {/* Toolbar */}
+            {jobs.length > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 14,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span className="mono" style={{ fontSize: 11.5, color: 'var(--fg-3)' }}>
+                  {filteredJobs.length} results
+                </span>
+                <span style={{ color: 'var(--fg-4)', fontSize: 11.5 }}>
+                  · {savedIds.size} saved
+                </span>
+                <span style={{ flex: 1 }} />
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 4,
+                    background: 'var(--bg-inset)',
+                    padding: 2,
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--hair)',
+                  }}
+                >
+                  {[
+                    { id: 'all' as const, l: 'All' },
+                    { id: '90' as const, l: '90+' },
+                    { id: '80' as const, l: '80–89' },
+                    { id: '70' as const, l: '70–79' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setFitFilter(f.id)}
+                      style={{
+                        height: 24,
+                        padding: '0 10px',
+                        fontSize: 11.5,
+                        borderRadius: 5,
+                        color: fitFilter === f.id ? 'var(--fg)' : 'var(--fg-3)',
+                        background: fitFilter === f.id ? 'var(--bg-3)' : 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {f.l}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="btn sm ghost"
+                  onClick={() => setSortMode(sortMode === 'fit' ? 'new' : 'fit')}
+                >
+                  <ArrowUpDown size={12} /> {sortMode === 'fit' ? 'By fit' : 'By date'}
+                </button>
+              </div>
+            )}
+
+            {/* Results */}
+            {jobs.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {filteredJobs.map((job, i) => (
                   <JobResultCard
                     key={job.id}
                     job={job}
@@ -479,40 +717,39 @@ export default function DiscoverPage() {
                     index={i}
                   />
                 ))}
+                {filteredJobs.length === 0 && (
+                  <div
+                    className="text-3"
+                    style={{ textAlign: 'center', fontSize: 13, padding: '30px 0' }}
+                  >
+                    No jobs match this filter.
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-
-          {/* Pre-search empty state */}
-          {phase === 'idle' && logs.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-80 gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
-                <Search className="w-8 h-8 text-cyan-400" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-base font-semibold text-white mb-1">
-                  Configure your search above
-                </h3>
-                <p className="text-sm text-text-2">
-                  Enter a role and location, pick your sources, then hit Run Search
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '40px 0',
+                }}
+              >
+                <CheckCircle size={32} style={{ color: 'var(--emerald)' }} />
+                <p className="text-2" style={{ fontSize: 13, margin: 0, textAlign: 'center' }}>
+                  Search complete. Jobs saved to your board.{' '}
+                  <a
+                    href="/board"
+                    style={{ color: 'var(--cyan)', textDecoration: 'none' }}
+                  >
+                    View board →
+                  </a>
                 </p>
               </div>
-            </div>
-          )}
-
-          {/* Done state with no jobs fetched inline */}
-          {phase === 'done' && jobs.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-40 gap-3">
-              <CheckCircle className="w-10 h-10 text-emerald-400" />
-              <p className="text-sm text-text-2 text-center">
-                Search complete. Jobs saved to your board.{' '}
-                <a href="/board" className="text-cyan-400 hover:underline">
-                  View board →
-                </a>
-              </p>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

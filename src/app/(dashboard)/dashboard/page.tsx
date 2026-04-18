@@ -1,77 +1,30 @@
 // src/app/(dashboard)/dashboard/page.tsx
 import Link from 'next/link'
-import { Briefcase, CalendarCheck, TrendingUp, BarChart2, Plus, Search } from 'lucide-react'
+import {
+  Briefcase,
+  CalendarCheck,
+  TrendingUp,
+  Target,
+  Search,
+  Sparkles,
+  ChevronRight,
+  Zap,
+  FileText,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import type { Application, Job, ApplicationStatus } from '@/types'
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  accent = 'cyan',
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  value: number | string
-  accent?: 'cyan' | 'purple' | 'green' | 'amber'
-}) {
-  const accentMap = {
-    cyan: { bg: 'bg-cyan-500/10', iconColor: 'text-cyan-400', valueColor: 'text-cyan-400' },
-    purple: { bg: 'bg-purple-500/10', iconColor: 'text-purple-400', valueColor: 'text-purple-400' },
-    green: { bg: 'bg-emerald-500/10', iconColor: 'text-emerald-400', valueColor: 'text-emerald-400' },
-    amber: { bg: 'bg-amber-500/10', iconColor: 'text-amber-400', valueColor: 'text-amber-400' },
-  }
-  const a = accentMap[accent]
-
-  return (
-    <div className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-5 flex items-center gap-4 hover:border-cyan-500/20 transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${a.bg}`}>
-        <Icon className={`w-5 h-5 ${a.iconColor}`} />
-      </div>
-      <div>
-        <p className={`text-[28px] font-bold leading-none tabular-nums ${a.valueColor}`}>{value}</p>
-        <p className="text-xs text-text-2 font-medium mt-1">{label}</p>
-      </div>
-    </div>
-  )
-}
+// ─── Status config (accent colors mapped to design-system tokens) ─────────────
 
 const STATUS_CONFIG: Record<
   ApplicationStatus,
-  { label: string; color: string; bg: string; border: string }
+  { label: string; accent: string }
 > = {
-  saved: {
-    label: 'Saved',
-    color: 'text-cyan-400',
-    bg: 'bg-cyan-500',
-    border: 'border-cyan-500/20',
-  },
-  applied: {
-    label: 'Applied',
-    color: 'text-purple-400',
-    bg: 'bg-purple-500',
-    border: 'border-purple-500/20',
-  },
-  interview: {
-    label: 'Interview',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500',
-    border: 'border-amber-500/20',
-  },
-  offer: {
-    label: 'Offer',
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500',
-    border: 'border-emerald-500/20',
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'text-red-400',
-    bg: 'bg-red-500',
-    border: 'border-red-500/20',
-  },
+  saved:    { label: 'Saved',     accent: 'var(--cyan)' },
+  applied:  { label: 'Applied',   accent: 'var(--purple)' },
+  interview:{ label: 'Interview', accent: 'var(--amber)' },
+  offer:    { label: 'Offer',     accent: 'var(--emerald)' },
+  rejected: { label: 'Rejected',  accent: 'var(--red)' },
 }
 
 const STATUS_ORDER: ApplicationStatus[] = ['saved', 'applied', 'interview', 'offer', 'rejected']
@@ -120,161 +73,435 @@ export default async function DashboardPage() {
     if (app.status in statusCounts) statusCounts[app.status]++
   }
   const maxCount = Math.max(1, ...Object.values(statusCounts))
+  const pipelineTotal = Object.values(statusCounts).reduce((a, b) => a + b, 0)
 
   // ── Recent jobs ───────────────────────────────────────────────
   const recentApps = applications.slice(0, 5)
 
+  // ── Greeting + display name ──────────────────────────────────
+  const hour = new Date().getHours()
+  const greeting =
+    hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ??
+    user?.email?.split('@')[0] ??
+    'there'
+
+  // Stat card config — data comes from above
+  const stats: Array<{
+    k: string
+    v: number | string
+    accent: string
+    icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>
+    mono?: boolean
+  }> = [
+    { k: 'Applications',  v: totalApplications, accent: 'var(--fg)',      icon: Briefcase },
+    { k: 'Interviews',    v: interviews,        accent: 'var(--cyan)',    icon: CalendarCheck },
+    { k: 'Offers',        v: offers,            accent: 'var(--emerald)', icon: TrendingUp },
+    { k: 'Avg fit score', v: atsAvg > 0 ? atsAvg : '—', accent: 'var(--purple)', icon: Target, mono: true },
+  ]
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] px-8 py-8">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
-        <p className="text-sm text-text-2 mt-1">Your job search at a glance</p>
+    <div style={{ padding: '22px 28px 120px', maxWidth: 1280, margin: '0 auto' }}>
+      {/* ── Hero strip ───────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 20,
+          marginBottom: 22,
+        }}
+      >
+        <div>
+          <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--cyan)' }}>
+            <span className="dot" style={{ color: 'var(--emerald)', marginRight: 6 }} />
+            {greeting}, {displayName}
+          </div>
+          <h1 className="h1" style={{ fontSize: 28, marginBottom: 6 }}>
+            {interviews > 0 ? (
+              <>
+                You have{' '}
+                <span className="grad-text">
+                  {interviews} {interviews === 1 ? 'interview' : 'interviews'}
+                </span>{' '}
+                in progress.
+              </>
+            ) : totalApplications > 0 ? (
+              <>
+                Tracking <span className="grad-text">{totalApplications} applications</span>.
+              </>
+            ) : (
+              <>
+                Let's find your <span className="grad-text">next role</span>.
+              </>
+            )}
+          </h1>
+          <p className="text-3" style={{ fontSize: 13.5, margin: 0 }}>
+            {atsAvg > 0 ? (
+              <>
+                Average fit score{' '}
+                <span className="mono" style={{ color: 'var(--emerald)' }}>{atsAvg}</span>
+                {' · '}
+              </>
+            ) : null}
+            <span style={{ color: 'var(--fg-2)' }}>{offers}</span> offers ·{' '}
+            <span style={{ color: 'var(--fg-2)' }}>{pipelineTotal}</span> in pipeline
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Link href="/discover" className="btn primary lg">
+            <Zap size={14} fill="currentColor" strokeWidth={2} /> Find jobs
+          </Link>
+          <Link href="/resume" className="btn lg">
+            <FileText size={14} /> Build resume
+          </Link>
+        </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="flex gap-3 mb-8">
-        <Link
-          href="/discover"
-          className="min-h-[44px] flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
-        >
-          <Search className="w-4 h-4" />
-          Run Job Search
-        </Link>
-        <Link
-          href="/resume"
-          className="min-h-[44px] flex items-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-5 py-3 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
-        >
-          Upload Resume
-        </Link>
+      {/* ── Stats row ────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        {stats.map((s) => {
+          const IconC = s.icon
+          return (
+            <div
+              key={s.k}
+              className="card card-pad"
+              style={{ padding: 16, position: 'relative', overflow: 'hidden' }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}
+              >
+                <span style={{ fontSize: 11, color: 'var(--fg-3)', letterSpacing: '0.02em' }}>
+                  {s.k}
+                </span>
+                <IconC size={14} style={{ color: 'var(--fg-4)' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span
+                  className={s.mono ? 'mono' : ''}
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 600,
+                    color: s.accent,
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1,
+                  }}
+                >
+                  {s.v}
+                </span>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <StatCard
-          icon={Briefcase}
-          label="Applications"
-          value={totalApplications}
-          accent="cyan"
-        />
-        <StatCard
-          icon={CalendarCheck}
-          label="Interviews"
-          value={interviews}
-          accent="amber"
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Offers"
-          value={offers}
-          accent="green"
-        />
-        <StatCard
-          icon={BarChart2}
-          label="ATS Avg Score"
-          value={atsAvg > 0 ? `${atsAvg}` : '—'}
-          accent="purple"
-        />
-      </div>
+      {/* ── Main 2-col grid ──────────────────────────────────── */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 340px',
+          gap: 12,
+          alignItems: 'start',
+        }}
+      >
+        {/* Pipeline */}
+        <div className="card" style={{ padding: 18 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 14,
+            }}
+          >
+            <div>
+              <h2 className="h2">Pipeline</h2>
+              <p className="text-3" style={{ fontSize: 11.5, margin: '2px 0 0' }}>
+                {pipelineTotal} active {pipelineTotal === 1 ? 'application' : 'applications'}
+              </p>
+            </div>
+            <Link href="/board" className="btn sm ghost" style={{ color: 'var(--fg-3)' }}>
+              Open board <ChevronRight size={11} />
+            </Link>
+          </div>
 
-      {/* Main 2-col area */}
-      <div className="grid grid-cols-[2fr_1fr] gap-6">
-        {/* Left: Pipeline funnel */}
-        <div className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-          <h2 className="text-xl font-semibold text-white mb-6">Pipeline</h2>
-          {totalApplications === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 border border-dashed border-white/10 rounded-xl gap-3">
-              <Briefcase className="w-10 h-10 text-text-muted" />
-              <p className="text-sm text-text-2 text-center">
+          {pipelineTotal === 0 ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 160,
+                border: '1px dashed var(--hair)',
+                borderRadius: 'var(--radius)',
+                gap: 12,
+              }}
+            >
+              <Briefcase size={28} style={{ color: 'var(--fg-4)' }} />
+              <p className="text-3" style={{ fontSize: 13, margin: 0 }}>
                 No applications yet.{' '}
-                <Link href="/discover" className="text-cyan-400 hover:underline">
+                <Link href="/discover" style={{ color: 'var(--cyan)' }}>
                   Run your first search →
                 </Link>
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              {STATUS_ORDER.map((status) => {
-                const count = statusCounts[status]
-                const pct = Math.round((count / maxCount) * 100)
-                const cfg = STATUS_CONFIG[status]
-                return (
-                  <div key={status} className="flex items-center gap-4">
-                    <div className="w-20 flex-shrink-0 text-right">
-                      <span className={`text-[11px] font-medium uppercase tracking-widest ${cfg.color}`}>
-                        {cfg.label}
-                      </span>
-                    </div>
-                    <div className="flex-1 bg-white/[0.04] rounded-full h-2 overflow-hidden">
+            <>
+              {/* Horizontal stacked bar */}
+              <div
+                style={{
+                  display: 'flex',
+                  height: 10,
+                  borderRadius: 999,
+                  overflow: 'hidden',
+                  background: 'var(--bg-inset)',
+                  marginBottom: 18,
+                }}
+              >
+                {STATUS_ORDER.map((status) => {
+                  const v = statusCounts[status]
+                  if (v === 0) return null
+                  const cfg = STATUS_CONFIG[status]
+                  return (
+                    <div
+                      key={status}
+                      style={{
+                        width: `${(v / pipelineTotal) * 100}%`,
+                        background: cfg.accent,
+                        opacity: 0.85,
+                      }}
+                      title={`${cfg.label}: ${v}`}
+                    />
+                  )
+                })}
+              </div>
+
+              {/* Per-column rows */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {STATUS_ORDER.map((status) => {
+                  const v = statusCounts[status]
+                  const pct = Math.round((v / maxCount) * 100)
+                  const cfg = STATUS_CONFIG[status]
+                  return (
+                    <div
+                      key={status}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '110px 1fr 40px',
+                        gap: 12,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12 }}>
+                        <span className="dot" style={{ color: cfg.accent }} />
+                        <span className="text-2">{cfg.label}</span>
+                      </div>
                       <div
-                        className={`h-full rounded-full ${cfg.bg} transition-all duration-300`}
-                        style={{ width: `${pct}%` }}
-                      />
+                        style={{
+                          height: 5,
+                          background: 'var(--bg-inset)',
+                          borderRadius: 999,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${pct}%`,
+                            height: '100%',
+                            background: cfg.accent,
+                            transition: 'width 0.6s',
+                          }}
+                        />
+                      </div>
+                      <div
+                        className="mono"
+                        style={{
+                          fontSize: 11.5,
+                          color: v ? 'var(--fg)' : 'var(--fg-4)',
+                          textAlign: 'right',
+                        }}
+                      >
+                        {v}
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold text-white w-6 tabular-nums text-right">
-                      {count}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Right: Recent applications */}
-        <div className="bg-[#111118] border border-white/[0.06] rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-semibold text-white">Recent Activity</h2>
+        {/* Recent activity */}
+        <div className="card" style={{ padding: 18 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 10,
+            }}
+          >
+            <h2 className="h2">Recent activity</h2>
             <Link
               href="/board"
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+              className="text-4"
+              style={{ fontSize: 10.5, color: 'var(--fg-3)' }}
             >
               View all →
             </Link>
           </div>
 
           {recentApps.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 gap-3">
-              <Plus className="w-10 h-10 text-text-muted" />
-              <p className="text-sm text-text-2 text-center">No jobs yet</p>
-              <Link
-                href="/discover"
-                className="min-h-[44px] flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity"
-              >
-                Find Jobs
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 160,
+                gap: 12,
+              }}
+            >
+              <Search size={28} style={{ color: 'var(--fg-4)' }} />
+              <p className="text-3" style={{ fontSize: 13, margin: 0 }}>
+                No jobs yet
+              </p>
+              <Link href="/discover" className="btn primary sm">
+                Find jobs
               </Link>
             </div>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {recentApps.map((app) => {
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {recentApps.map((app, i) => {
                 const cfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.saved
                 return (
-                  <li
+                  <div
                     key={app.id}
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/10 transition-colors"
+                    style={{
+                      display: 'flex',
+                      gap: 10,
+                      padding: '10px 0',
+                      borderBottom:
+                        i < recentApps.length - 1 ? '1px solid var(--hair)' : 'none',
+                    }}
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">
-                        {app.job?.title ?? 'Untitled'}
-                      </p>
-                      <p className="text-[11px] text-text-2 font-medium truncate">
+                    <div
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        background: 'var(--bg-inset)',
+                        display: 'grid',
+                        placeItems: 'center',
+                        flexShrink: 0,
+                        color: cfg.accent,
+                      }}
+                    >
+                      <span className="dot" style={{ color: cfg.accent }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          lineHeight: 1.35,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <span className="text-2">{app.job?.title ?? 'Untitled'}</span>{' '}
+                        <span className="text-4">·</span>{' '}
+                        <span style={{ color: cfg.accent, textTransform: 'capitalize' }}>
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <div
+                        className="text-4 mono"
+                        style={{
+                          fontSize: 10.5,
+                          marginTop: 2,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {app.job?.company ?? '—'}
                         {app.job?.location ? ` · ${app.job.location}` : ''}
-                      </p>
+                      </div>
                     </div>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border flex-shrink-0 ${cfg.color} ${cfg.border} bg-opacity-10`}
-                      style={{ background: 'transparent' }}
-                    >
-                      {cfg.label}
-                    </span>
-                  </li>
+                  </div>
                 )
               })}
-            </ul>
+            </div>
           )}
         </div>
       </div>
+
+      {/* ── AI insight ───────────────────────────────────────── */}
+      {totalApplications > 0 && (
+        <div
+          className="card"
+          style={{
+            padding: 18,
+            marginTop: 12,
+            background:
+              'linear-gradient(135deg, rgba(34,211,238,0.035) 0%, rgba(168,85,247,0.035) 100%)',
+            border: '1px solid rgba(34,211,238,0.15)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 10,
+                background: 'var(--grad-brand)',
+                display: 'grid',
+                placeItems: 'center',
+                color: '#06060a',
+                flexShrink: 0,
+              }}
+            >
+              <Sparkles size={17} fill="currentColor" strokeWidth={1.5} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span className="h3" style={{ color: 'var(--fg)' }}>Weekly insight</span>
+                <span className="badge cyan">AI</span>
+              </div>
+              <p style={{ fontSize: 13, margin: 0, color: 'var(--fg-2)', lineHeight: 1.5 }}>
+                {atsAvg >= 80 ? (
+                  <>
+                    Your average fit score is <span style={{ color: 'var(--fg)' }}>{atsAvg}</span> — strong signal. Prioritize roles where your score is highest next week.
+                  </>
+                ) : atsAvg > 0 ? (
+                  <>
+                    Average fit score is <span style={{ color: 'var(--fg)' }}>{atsAvg}</span>. Tuning your resume keywords could lift this above 80 and double your interview rate.
+                  </>
+                ) : (
+                  <>
+                    Upload a resume to unlock ATS scoring and personalized job matching.
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
