@@ -105,8 +105,19 @@ function JobResultCard({
             </p>
           )}
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex flex-col items-end gap-1">
           {job.fit_score > 0 && <FitBadge score={job.fit_score} size="default" />}
+          {(() => {
+            const grade = (job.fit_breakdown as unknown as { grade?: string } | null)?.grade
+            if (!grade) return null
+            const cls =
+              grade === 'A' ? 'bg-emerald-500/15 text-emerald-400' :
+              grade === 'B' ? 'bg-green-500/15 text-green-400' :
+              grade === 'C' ? 'bg-amber-500/15 text-amber-400' :
+              grade === 'D' ? 'bg-orange-500/15 text-orange-400' :
+              'bg-red-500/15 text-red-400'
+            return <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-md ${cls}`}>{grade}</span>
+          })()}
         </div>
       </div>
 
@@ -171,6 +182,7 @@ export default function DiscoverPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
+  const [sourceErrors, setSourceErrors] = useState<string[]>([])
   const logEndRef = useRef<HTMLDivElement>(null)
 
   // Load latest session results on mount so results persist across navigation
@@ -225,6 +237,7 @@ export default function DiscoverPage() {
     setLogs([])
     setJobs([])
     setError(null)
+    setSourceErrors([])
     addLog('info', `Starting search for "${query}" in "${location || 'any location'}"...`)
     addLog('info', `Sources: ${selectedSources.join(', ')}`)
 
@@ -245,6 +258,9 @@ export default function DiscoverPage() {
 
       if ('success' in result && result.success) {
         addLog('success', `Found ${result.jobsFound} jobs, saved ${result.jobsSaved}.`)
+        if (result.errors && result.errors.length > 0) {
+          setSourceErrors(result.errors)
+        }
 
         // Fetch saved jobs for this session from Supabase
         if (result.sessionId) {
@@ -292,6 +308,20 @@ export default function DiscoverPage() {
           Scrape live listings and find your best-fit roles
         </p>
       </div>
+
+      {sourceErrors.length > 0 && (
+        <div className="mb-5 flex items-start gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-amber-400 mb-1">Some sources had issues — results may be incomplete</p>
+            <ul className="space-y-0.5">
+              {sourceErrors.map((e, i) => (
+                <li key={i} className="text-[11px] text-amber-400/70 font-mono">{e}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-6">
         {/* ── Left column: Query builder ──────────────────────────────── */}

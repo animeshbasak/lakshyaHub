@@ -75,7 +75,8 @@ function mergeAiIntoParsed(base: ParsedResumeSchema, ai: Partial<ParsedResumeSch
     } else {
       merged.experience = base.experience.map((entry, i) => {
         const aiEntry = ai.experience?.[i];
-        if (!entry.bullets.length && aiEntry?.bullets?.length) {
+        const bulletsEmpty = entry.bullets.length === 0 || entry.bullets.every((b) => !b.trim());
+        if (bulletsEmpty && aiEntry?.bullets?.length) {
           return { ...entry, bullets: aiEntry.bullets };
         }
         return entry;
@@ -133,12 +134,8 @@ export async function parseResumeFile(file: File) {
   try {
     const result = parseResumeArtifacts(extracted);
 
-    if (result.confidence === 'medium' || result.confidence === 'low') {
-      const enhanced = await tryAiEnhanceParse(result.rawText, result.parsed);
-      return { ...result, parsed: enhanced };
-    }
-
-    return result;
+    const enhanced = await tryAiEnhanceParse(result.rawText, result.parsed);
+    return { ...result, parsed: enhanced };
   } catch (err) {
     throw new ResumeImportError(
       'Resume text was extracted but could not be structured. Try re-saving your file and uploading again.',

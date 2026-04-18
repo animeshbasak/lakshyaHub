@@ -56,7 +56,7 @@ export async function scrapeJobs(config: ScrapeConfig) {
 
   try {
     // 4. Run Scraper
-    const { jobs: rawJobsUnfiltered, summary } = await scrapeJobsWithFallback(config, APIFY_API_TOKEN, log)
+    const { jobs: rawJobsUnfiltered, summary, errors: scrapeErrors } = await scrapeJobsWithFallback(config, APIFY_API_TOKEN, log)
     const rawJobs = applyPostScrapeFilters(rawJobsUnfiltered)
     await log('info', `Filtered to ${rawJobs.length} India-relevant jobs (from ${rawJobsUnfiltered.length} raw).`)
 
@@ -162,7 +162,8 @@ export async function scrapeJobs(config: ScrapeConfig) {
       jobsFound: rawJobs.length,
       jobsSaved: finalBatch.length,
       sessionId: session.id,
-      summary
+      summary,
+      errors: scrapeErrors,
     }
 
   } catch (err) {

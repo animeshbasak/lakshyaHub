@@ -1,5 +1,6 @@
 import { ACTORS, SOURCE_ACTORS } from '@/lib/scrapers/actorIds'
 import { runActor } from '@/lib/scrapers/apifyRunner'
+import { searchDirectSources } from '@/lib/scrapers/directSources'
 import type { ScrapeConfig, RawJob, LogCallback, UserSource } from '@/lib/scrapers/types'
 
 export type { ScrapeConfig, RawJob, UserSource }
@@ -18,11 +19,12 @@ export async function scrapeJobsWithFallback(
   config: ScrapeConfig,
   token: string,
   log: LogCallback,
-): Promise<{ jobs: RawJob[]; summary: string }> {
+): Promise<{ jobs: RawJob[]; summary: string; errors: string[] }> {
 
   const perSourceLimit = config.limit
   const allJobs: RawJob[] = []
   const seen = new Set<string>()  // dedup by lower(title)+lower(company)
+  const collectedErrors: string[] = []
 
   function addJobs(jobs: RawJob[]) {
     for (const job of jobs) {
@@ -52,6 +54,7 @@ export async function scrapeJobsWithFallback(
 
         if (error) {
           log('warn', `✗ ${actor.label} failed: ${error}`)
+          collectedErrors.push(`${actor.label}: ${error}`)
           continue  // try next actor for this source
         }
 
@@ -64,6 +67,7 @@ export async function scrapeJobsWithFallback(
         return jobs
       }
       log('error', `All ${source} actors failed — no results found`)
+      collectedErrors.push(`${source}: all actors failed`)
       return []
     })
 
@@ -99,10 +103,24 @@ export async function scrapeJobsWithFallback(
     }
   }
 
+  // Always run direct sources (Greenhouse/Lever/RemoteOK) — free, no Apify
+  log('info', 'Running direct company portals (Greenhouse, Lever, RemoteOK)...')
+  const { jobs: directJobs, errors: directErrors } = await searchDirectSources(
+    config.query,
+    config.location,
+    config.limit,
+  )
+  collectedErrors.push(...directErrors)
+  const directBefore = allJobs.length
+  addJobs(directJobs)
+  if (directJobs.length > 0) {
+    log('success', `Direct portals: +${allJobs.length - directBefore} jobs (Greenhouse, Lever, RemoteOK)`)
+  }
+
   const summary = allJobs.length === 0
     ? 'No jobs found from any source'
     : `${allJobs.length} unique jobs from: ${[...new Set(allJobs.map(j => j.source))].join(', ')}`
 
   log(allJobs.length > 0 ? 'success' : 'error', summary)
-  return { jobs: allJobs, summary }
+  return { jobs: allJobs, summary, errors: collectedErrors }
 }
