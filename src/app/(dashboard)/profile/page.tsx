@@ -18,6 +18,7 @@ import {
   ShieldAlert,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { clearAllCloudData } from '@/actions/resumeActions'
 import type { ResumeProfile, YearsExperience } from '@/types'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -210,6 +211,11 @@ export default function ProfilePage() {
   const [clearConfirm, setClearConfirm] = useState(false)
   const [clearDone, setClearDone] = useState(false)
   const clearConfirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [cloudConfirm, setCloudConfirm] = useState(false)
+  const [cloudBusy, setCloudBusy] = useState(false)
+  const [cloudDone, setCloudDone] = useState<string | null>(null)
+  const [cloudError, setCloudError] = useState<string | null>(null)
+  const cloudConfirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Motion config respecting prefers-reduced-motion
   const makeMotion = (delay = 0) =>
@@ -295,6 +301,7 @@ export default function ProfilePage() {
   useEffect(() => {
     return () => {
       if (clearConfirmTimerRef.current) clearTimeout(clearConfirmTimerRef.current)
+      if (cloudConfirmTimerRef.current) clearTimeout(cloudConfirmTimerRef.current)
     }
   }, [])
 
@@ -419,6 +426,31 @@ export default function ProfilePage() {
     setClearConfirm(false)
     setClearDone(true)
     setTimeout(() => setClearDone(false), 3000)
+  }
+
+  async function handleClearCloud() {
+    if (!cloudConfirm) {
+      setCloudConfirm(true)
+      setCloudError(null)
+      if (cloudConfirmTimerRef.current) clearTimeout(cloudConfirmTimerRef.current)
+      cloudConfirmTimerRef.current = setTimeout(() => setCloudConfirm(false), 5000)
+      return
+    }
+    if (cloudConfirmTimerRef.current) clearTimeout(cloudConfirmTimerRef.current)
+    setCloudBusy(true)
+    setCloudError(null)
+    try {
+      const res = await clearAllCloudData()
+      const total = Object.values(res.counts).reduce((a, b) => a + b, 0)
+      setCloudDone(`Deleted ${total} rows across ${Object.keys(res.counts).length} tables`)
+      setCloudConfirm(false)
+      setTimeout(() => setCloudDone(null), 5000)
+    } catch (e) {
+      setCloudError(e instanceof Error ? e.message : 'Unknown error')
+      setCloudConfirm(false)
+    } finally {
+      setCloudBusy(false)
+    }
   }
 
   // ── Render ─────────────────────────────────────────────────────
@@ -787,6 +819,72 @@ export default function ProfilePage() {
               Clear all local data
             </button>
           )}
+
+          {/* Cloud wipe — removes Supabase rows */}
+          <div style={{ height: 1, background: 'var(--hair)', margin: '18px 0' }} />
+          <div>
+            <p className="text-xs text-text-2" style={{ marginBottom: 10 }}>
+              Also wipe server-side applications, jobs, scrape sessions, and saved
+              resumes. Your auth account is kept — only user data is removed.
+            </p>
+            {cloudDone ? (
+              <div className="flex items-center gap-2">
+                <Check size={13} style={{ color: 'var(--emerald)' }} />
+                <span className="text-xs" style={{ color: 'var(--emerald)' }}>
+                  {cloudDone}
+                </span>
+              </div>
+            ) : cloudError ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <AlertTriangle size={13} style={{ color: 'var(--red)' }} />
+                <span className="text-xs" style={{ color: 'var(--red)' }}>
+                  {cloudError}
+                </span>
+                <button
+                  onClick={() => {
+                    setCloudError(null)
+                    setCloudConfirm(false)
+                  }}
+                  className="btn ghost sm"
+                >
+                  Dismiss
+                </button>
+              </div>
+            ) : cloudConfirm ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-xs" style={{ color: 'var(--red)' }}>
+                  Permanently delete all cloud data? This cannot be undone.
+                </span>
+                <button
+                  onClick={handleClearCloud}
+                  disabled={cloudBusy}
+                  className="btn danger sm"
+                >
+                  {cloudBusy ? 'Deleting...' : 'Yes, delete everything'}
+                </button>
+                <button
+                  onClick={() => {
+                    if (cloudConfirmTimerRef.current)
+                      clearTimeout(cloudConfirmTimerRef.current)
+                    setCloudConfirm(false)
+                  }}
+                  className="btn ghost sm"
+                  disabled={cloudBusy}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleClearCloud}
+                className="btn danger"
+                disabled={cloudBusy}
+              >
+                <ShieldAlert size={13} />
+                Delete all cloud data
+              </button>
+            )}
+          </div>
         </motion.div>
       </div>
     </div>

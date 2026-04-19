@@ -3,6 +3,39 @@ import { createClient } from '@/lib/supabase/server'
 import { ResumeData } from '@/types'
 import { syncResumeProfile } from '@/lib/syncResumeProfile'
 
+export async function clearAllCloudData() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const uid = user.id
+  const tables = [
+    'scrape_sessions',
+    'applications',
+    'jobs',
+    'resumes',
+  ] as const
+
+  const counts: Record<string, number> = {}
+  for (const t of tables) {
+    const { count, error } = await supabase
+      .from(t)
+      .delete({ count: 'exact' })
+      .eq('user_id', uid)
+    if (error) throw new Error(`Failed to clear ${t}: ${error.message}`)
+    counts[t] = count ?? 0
+  }
+
+  const { error: profileErr } = await supabase
+    .from('resume_profiles')
+    .delete()
+    .eq('id', uid)
+  if (profileErr) throw new Error(`Failed to clear resume_profiles: ${profileErr.message}`)
+  counts['resume_profiles'] = 1
+
+  return { success: true, counts }
+}
+
 export async function saveResume(data: ResumeData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
