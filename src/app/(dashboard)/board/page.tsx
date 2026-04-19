@@ -1,4 +1,6 @@
 // src/app/(dashboard)/board/page.tsx
+import Link from 'next/link'
+import { Compass, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { KanbanBoard } from '@/features/job-board/components/KanbanBoard'
 import type { Application, Job } from '@/types'
@@ -111,7 +113,42 @@ export default async function BoardPage() {
         className="flex-1 overflow-hidden"
         style={{ padding: '14px 26px 20px' }}
       >
-        <KanbanBoard initialData={initialData} />
+        {totalCount === 0 ? (
+          <div className="h-full flex items-center justify-center">
+            <div
+              className="max-w-md w-full text-center rounded-2xl px-8 py-12"
+              style={{
+                background: 'var(--bg-inset)',
+                border: '1px dashed var(--hair)',
+              }}
+            >
+              <div
+                className="mx-auto mb-5 w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ background: 'var(--bg-2)', border: '1px solid var(--hair)' }}
+              >
+                <Compass className="w-6 h-6" style={{ color: 'var(--fg-2)' }} />
+              </div>
+              <h2 className="h3" style={{ marginBottom: 8 }}>Your pipeline is empty</h2>
+              <p style={{ fontSize: 13, color: 'var(--fg-3)', marginBottom: 22, lineHeight: 1.55 }}>
+                Find roles on Discover and save the ones worth pursuing. They&rsquo;ll land here, ready to move through Saved → Applied → Interview → Offer.
+              </p>
+              <Link
+                href="/discover"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-colors"
+                style={{
+                  background: 'var(--fg)',
+                  color: 'var(--bg-1)',
+                  border: '1px solid var(--fg)',
+                }}
+              >
+                Find your first job
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <KanbanBoard initialData={initialData} />
+        )}
       </div>
     </div>
   )
