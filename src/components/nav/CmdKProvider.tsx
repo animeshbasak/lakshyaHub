@@ -329,12 +329,12 @@ export function CmdKProvider({ children }: { children: React.ReactNode }) {
                       gap: 10,
                       padding: '8px 10px',
                       borderRadius: 7,
-                      background: active ? 'rgba(34,211,238,0.10)' : 'transparent',
+                      background: active ? 'var(--bg-2)' : 'transparent',
                       color: active ? 'var(--fg)' : 'var(--fg-2)',
                       cursor: 'pointer',
                       fontSize: 13,
                       border: active
-                        ? '1px solid rgba(34,211,238,0.25)'
+                        ? '1px solid var(--hair-strong, rgba(255,255,255,0.12))'
                         : '1px solid transparent',
                     }}
                   >

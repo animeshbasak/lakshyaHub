@@ -9,7 +9,7 @@ export function BrandMark({ size = 28 }: { size?: number }) {
         display: 'grid',
         placeItems: 'center',
         boxShadow:
-          '0 2px 8px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
+          '0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
         flexShrink: 0,
       }}
     >
