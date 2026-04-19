@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { BrandMark } from './BrandMark'
 import { useCmdK } from './CmdKProvider'
+import { useTweaks } from './TweaksProvider'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -27,7 +28,7 @@ const NAV_ITEMS = [
   { href: '/resume', label: 'Resume', icon: FileText },
 ]
 
-const NAV_SECONDARY = [{ href: '/profile', label: 'Settings', icon: Settings }]
+const NAV_SECONDARY = [{ href: '/profile', label: 'Profile', icon: Settings }]
 
 function getInitials(user: User): string {
   const name = user.user_metadata?.full_name as string | undefined
@@ -42,6 +43,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { open: openCmdK } = useCmdK()
+  const { tweaks } = useTweaks()
   const [user, setUser] = useState<User | null>(null)
   const [collapsed, setCollapsed] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -81,6 +83,7 @@ export function Sidebar() {
 
   return (
     <aside
+      data-nav-role="sidebar"
       style={{
         position: 'fixed',
         top: 0,
@@ -193,23 +196,6 @@ export function Sidebar() {
         )}
       </Link>
 
-      <Link
-        href="/resume"
-        className="btn ghost"
-        style={{
-          width: '100%',
-          height: 32,
-          marginTop: 6,
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          padding: collapsed ? 0 : '0 12px',
-          gap: 9,
-          color: 'var(--fg-2)',
-        }}
-      >
-        <FileText size={14} />
-        {!collapsed && <span>Build Resume</span>}
-      </Link>
-
       <div style={{ height: 1, background: 'var(--hair)', margin: '14px 0 10px' }} />
 
       {/* Primary nav */}
@@ -228,7 +214,7 @@ export function Sidebar() {
             href={item.href}
             label={item.label}
             Icon={item.icon}
-            badge={item.badge}
+            badge={tweaks.showBadges ? item.badge : undefined}
             active={isActive(item.href)}
             collapsed={collapsed}
           />
@@ -269,10 +255,11 @@ export function Sidebar() {
             width: 28,
             height: 28,
             borderRadius: 7,
-            background: 'linear-gradient(135deg, #a855f7 0%, #22d3ee 100%)',
+            background: 'var(--bg-3)',
+            border: '1px solid var(--hair)',
             display: 'grid',
             placeItems: 'center',
-            color: '#06060a',
+            color: 'var(--fg)',
             fontWeight: 600,
             fontSize: 12,
             flexShrink: 0,
