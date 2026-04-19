@@ -47,8 +47,8 @@ export default async function BoardPage() {
 
   return (
     <div
-      className="flex flex-col h-screen overflow-hidden"
-      style={{ background: 'var(--bg-1)', color: 'var(--fg)' }}
+      className="flex flex-col overflow-hidden"
+      style={{ height: 'calc(100vh - var(--topbar-h))', background: 'var(--bg-1)', color: 'var(--fg)' }}
     >
       {/* Page Header */}
       <div
@@ -97,8 +97,8 @@ export default async function BoardPage() {
                 margin: '0 2px',
               }}
             />
-            <StatPill label="Saved" value={savedCount} tone="cyan" />
-            <StatPill label="Applied" value={appliedCount} tone="purple" />
+            <StatPill label="Saved" value={savedCount} />
+            <StatPill label="Applied" value={appliedCount} />
             <StatPill label="Interview" value={interviewCount} tone="amber" />
             <StatPill label="Offer" value={offerCount} tone="emerald" />
             <StatPill label="Rejected" value={rejectedCount} tone="red" />
@@ -117,7 +117,7 @@ export default async function BoardPage() {
   )
 }
 
-type Tone = 'cyan' | 'purple' | 'emerald' | 'amber' | 'red'
+type Tone = 'emerald' | 'amber' | 'red'
 
 function StatPill({
   label,
@@ -129,8 +129,6 @@ function StatPill({
   tone?: Tone
 }) {
   const toneVar: Record<Tone, string> = {
-    cyan: 'var(--cyan)',
-    purple: 'var(--purple)',
     emerald: 'var(--emerald)',
     amber: 'var(--amber)',
     red: 'var(--red)',

@@ -20,8 +20,8 @@ const STATUS_CONFIG: Record<
   ApplicationStatus,
   { label: string; accent: string }
 > = {
-  saved:    { label: 'Saved',     accent: 'var(--cyan)' },
-  applied:  { label: 'Applied',   accent: 'var(--purple)' },
+  saved:    { label: 'Saved',     accent: 'var(--fg-3)' },
+  applied:  { label: 'Applied',   accent: 'var(--fg-2)' },
   interview:{ label: 'Interview', accent: 'var(--amber)' },
   offer:    { label: 'Offer',     accent: 'var(--emerald)' },
   rejected: { label: 'Rejected',  accent: 'var(--red)' },
@@ -96,9 +96,9 @@ export default async function DashboardPage() {
     mono?: boolean
   }> = [
     { k: 'Applications',  v: totalApplications, accent: 'var(--fg)',      icon: Briefcase },
-    { k: 'Interviews',    v: interviews,        accent: 'var(--cyan)',    icon: CalendarCheck },
+    { k: 'Interviews',    v: interviews,        accent: 'var(--fg)',      icon: CalendarCheck },
     { k: 'Offers',        v: offers,            accent: 'var(--emerald)', icon: TrendingUp },
-    { k: 'Avg fit score', v: atsAvg > 0 ? atsAvg : '—', accent: 'var(--purple)', icon: Target, mono: true },
+    { k: 'Avg fit score', v: atsAvg > 0 ? atsAvg : '—', accent: 'var(--fg)', icon: Target, mono: true },
   ]
 
   return (
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
         }}
       >
         <div>
-          <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--cyan)' }}>
+          <div className="eyebrow" style={{ marginBottom: 8, color: 'var(--fg-3)', letterSpacing: '0.12em' }}>
             <span className="dot" style={{ color: 'var(--emerald)', marginRight: 6 }} />
             {greeting}, {displayName}
           </div>
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
             <div
               key={s.k}
               className="card card-pad"
-              style={{ padding: 16, position: 'relative', overflow: 'hidden' }}
+              style={{ padding: 16, position: 'relative', overflow: 'hidden', border: '1px solid var(--hair)' }}
             >
               <div
                 style={{
@@ -254,7 +254,7 @@ export default async function DashboardPage() {
               <Briefcase size={28} style={{ color: 'var(--fg-4)' }} />
               <p className="text-3" style={{ fontSize: 13, margin: 0 }}>
                 No applications yet.{' '}
-                <Link href="/discover" style={{ color: 'var(--cyan)' }}>
+                <Link href="/discover" style={{ color: 'var(--fg)' }}>
                   Run your first search →
                 </Link>
               </p>
@@ -458,9 +458,8 @@ export default async function DashboardPage() {
           style={{
             padding: 18,
             marginTop: 12,
-            background:
-              'linear-gradient(135deg, rgba(34,211,238,0.035) 0%, rgba(168,85,247,0.035) 100%)',
-            border: '1px solid rgba(34,211,238,0.15)',
+            background: 'var(--bg-2)',
+            border: '1px solid var(--hair)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
@@ -481,7 +480,7 @@ export default async function DashboardPage() {
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span className="h3" style={{ color: 'var(--fg)' }}>Weekly insight</span>
-                <span className="badge cyan">AI</span>
+                <span className="badge">AI</span>
               </div>
               <p style={{ fontSize: 13, margin: 0, color: 'var(--fg-2)', lineHeight: 1.5 }}>
                 {atsAvg >= 80 ? (

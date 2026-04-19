@@ -87,7 +87,7 @@ function LogEntry({ log }: { log: LocalLog }) {
 function GradeBadge({ grade }: { grade: string }) {
   const variant =
     grade === 'A' ? 'emerald' :
-    grade === 'B' ? 'cyan' :
+    grade === 'B' ? 'emerald' :
     grade === 'C' ? 'amber' :
     grade === 'D' ? 'amber' :
     'red'
@@ -432,7 +432,7 @@ export default function DiscoverPage() {
               >
                 <span
                   className="dot"
-                  style={{ background: active ? 'var(--cyan)' : 'var(--fg-4)' }}
+                  style={{ background: active ? 'var(--fg)' : 'var(--fg-4)' }}
                 />
                 {label}
               </button>
@@ -508,12 +508,12 @@ export default function DiscoverPage() {
             padding: '10px 11px',
             border: '1px solid var(--hair)',
             borderRadius: 'var(--radius-sm)',
-            background: 'rgba(168,85,247,0.04)',
+            background: 'var(--bg-2)',
             fontSize: 11.5,
             color: 'var(--fg-3)',
           }}
         >
-          <Globe size={14} style={{ color: 'var(--purple)', flexShrink: 0 }} />
+          <Globe size={14} style={{ color: 'var(--fg-3)', flexShrink: 0 }} />
           <span>
             Also searches{' '}
             <span style={{ color: 'var(--fg-2)', fontWeight: 500 }}>40+ company portals</span>{' '}
@@ -538,8 +538,7 @@ export default function DiscoverPage() {
                   border: '1px solid var(--hair)',
                   display: 'grid',
                   placeItems: 'center',
-                  color: 'var(--cyan)',
-                  boxShadow: 'inset 0 0 40px rgba(34,211,238,0.06)',
+                  color: 'var(--fg-3)',
                 }}
               >
                 <Search size={24} />
@@ -557,7 +556,7 @@ export default function DiscoverPage() {
         {isRunning && (
           <div style={{ padding: '22px 26px', maxWidth: 900, margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <Loader2 size={14} className="animate-spin" style={{ color: 'var(--cyan)' }} />
+              <Loader2 size={14} className="animate-spin" style={{ color: 'var(--fg-3)' }} />
               <span style={{ fontSize: 13 }}>Scraping live job boards...</span>
             </div>
             <div
@@ -741,7 +740,7 @@ export default function DiscoverPage() {
                   Search complete. Jobs saved to your board.{' '}
                   <a
                     href="/board"
-                    style={{ color: 'var(--cyan)', textDecoration: 'none' }}
+                    style={{ color: 'var(--fg)', textDecoration: 'none' }}
                   >
                     View board →
                   </a>
