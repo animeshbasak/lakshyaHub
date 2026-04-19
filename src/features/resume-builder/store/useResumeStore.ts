@@ -62,8 +62,11 @@ interface ResumeStore extends ResumeData {
   
   addBullet: (jobId: string) => void;
   updateBullet: (jobId: string, bulletId: string, text: string) => void;
+  rewriteBullet: (jobId: string, bulletId: string, text: string) => void;
   removeBullet: (jobId: string, bulletId: string) => void;
   setBulletImproving: (jobId: string, bulletId: string, improving: boolean) => void;
+  revertAllBullets: () => void;
+  revertBullet: (jobId: string, bulletId: string) => void;
   
   addEducation: () => void;
   updateEducation: (id: string, field: keyof Omit<Education, 'id'>, value: string) => void;
@@ -154,6 +157,52 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
           bullets: j.bullets.map((b) => (b.id === bulletId ? { ...b, text } : b))
         };
       })
+    })),
+
+  rewriteBullet: (jobId, bulletId, text) =>
+    set((state) => ({
+      experience: state.experience.map((j) => {
+        if (j.id !== jobId) return j;
+        return {
+          ...j,
+          bullets: j.bullets.map((b) => {
+            if (b.id !== bulletId) return b;
+            return {
+              ...b,
+              text,
+              originalText: b.originalText ?? b.text,
+              isImproving: false,
+            };
+          }),
+        };
+      }),
+    })),
+
+  revertAllBullets: () =>
+    set((state) => ({
+      experience: state.experience.map((j) => ({
+        ...j,
+        bullets: j.bullets.map((b) =>
+          b.originalText !== undefined
+            ? { ...b, text: b.originalText, originalText: undefined }
+            : b
+        ),
+      })),
+    })),
+
+  revertBullet: (jobId, bulletId) =>
+    set((state) => ({
+      experience: state.experience.map((j) => {
+        if (j.id !== jobId) return j;
+        return {
+          ...j,
+          bullets: j.bullets.map((b) =>
+            b.id === bulletId && b.originalText !== undefined
+              ? { ...b, text: b.originalText, originalText: undefined }
+              : b
+          ),
+        };
+      }),
     })),
 
   removeBullet: (jobId, bulletId) =>

@@ -60,6 +60,7 @@ function selectResumeSlice(s: ReturnType<typeof useResumeStore.getState>) {
     updateBullet: s.updateBullet,
     rewriteBullet: s.rewriteBullet,
     revertAllBullets: s.revertAllBullets,
+    revertBullet: s.revertBullet,
     setBulletImproving: s.setBulletImproving,
   }
 }
@@ -601,9 +602,10 @@ function CompactSection({
 interface ChangesSectionProps {
   experience: ResumeData['experience']
   revertAllBullets: () => void
+  revertBullet: (jobId: string, bulletId: string) => void
 }
 
-function ChangesSection({ experience, revertAllBullets }: ChangesSectionProps) {
+function ChangesSection({ experience, revertAllBullets, revertBullet }: ChangesSectionProps) {
   const changes = experience.flatMap((job) =>
     job.bullets
       .filter((b) => typeof b.originalText === 'string' && b.originalText !== b.text)
@@ -687,23 +689,50 @@ function ChangesSection({ experience, revertAllBullets }: ChangesSectionProps) {
                   {stats.pct}%)
                 </span>
               </div>
-              <p className="text-[11px] leading-snug text-text-3 line-through opacity-70">
-                {c.before}
-              </p>
-              <p className="text-[12px] leading-snug text-text-1">
+              <div className="text-[11px] leading-snug" aria-label="Before">
+                <span className="mr-1 rounded px-1 py-[1px] text-[9px] font-mono uppercase tracking-wide text-text-muted bg-white/5">
+                  Before
+                </span>
+                {tokens.map((tok, idx) => {
+                  if (tok.kind === 'added') return null
+                  const cls =
+                    tok.kind === 'removed'
+                      ? 'bg-red-500/15 text-red-300 rounded px-0.5 line-through decoration-red-300/60'
+                      : 'text-text-3'
+                  return (
+                    <span key={`b-${idx}`} className={cls}>
+                      {tok.text}
+                    </span>
+                  )
+                })}
+              </div>
+              <div className="text-[12px] leading-snug" aria-label="After">
+                <span className="mr-1 rounded px-1 py-[1px] text-[9px] font-mono uppercase tracking-wide text-emerald-300 bg-emerald-500/15">
+                  After
+                </span>
                 {tokens.map((tok, idx) => {
                   if (tok.kind === 'removed') return null
                   const cls =
                     tok.kind === 'added'
                       ? 'bg-emerald-500/20 text-emerald-200 rounded px-0.5'
-                      : ''
+                      : 'text-text-1'
                   return (
-                    <span key={idx} className={cls}>
+                    <span key={`a-${idx}`} className={cls}>
                       {tok.text}
                     </span>
                   )
                 })}
-              </p>
+              </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => revertBullet(c.jobId, c.bulletId)}
+                  className="flex items-center gap-1 h-6 px-2 rounded-md border border-white/10 text-[10px] text-text-2 hover:bg-white/5 hover:text-white transition-colors"
+                  title="Revert this bullet to its original text"
+                >
+                  <Undo2 className="w-3 h-3" /> Revert
+                </button>
+              </div>
             </div>
           )
         })}
@@ -879,6 +908,7 @@ export function AIPanel() {
         <ChangesSection
           experience={store.experience}
           revertAllBullets={store.revertAllBullets}
+          revertBullet={store.revertBullet}
         />
       </SectionCard>
 
