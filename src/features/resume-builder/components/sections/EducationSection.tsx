@@ -10,7 +10,7 @@ export function EducationSection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <GraduationCap size={18} />
           </div>
           <div className="min-w-0">
@@ -24,7 +24,7 @@ export function EducationSection() {
           </p>
           <button
             onClick={addEducation}
-            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all active:scale-95 hover:bg-cyan-500/20 min-h-[44px]"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all active:scale-95 hover:bg-white/10 min-h-[44px]"
           >
             <Plus size={16} /> Add Education
           </button>
@@ -52,7 +52,7 @@ export function EducationSection() {
                 type="text"
                 value={edu.degree}
                 onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. B.Tech in Computer Science"
               />
             </div>
@@ -64,7 +64,7 @@ export function EducationSection() {
                 type="text"
                 value={edu.institution}
                 onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. IIT Bombay / NIT Surathkal"
               />
             </div>
@@ -76,7 +76,7 @@ export function EducationSection() {
                 type="text"
                 value={edu.period}
                 onChange={(e) => updateEducation(edu.id, 'period', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. 2014 – 2018"
               />
             </div>
@@ -88,7 +88,7 @@ export function EducationSection() {
                 type="text"
                 value={edu.grade}
                 onChange={(e) => updateEducation(edu.id, 'grade', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-cyan-400 placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-white placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. 8.5 CGPA"
               />
             </div>
@@ -106,7 +106,7 @@ export function EducationSection() {
             </p>
             <button
               onClick={addEducation}
-              className="flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all hover:bg-cyan-500/20 active:scale-95 min-h-[44px]"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all hover:bg-white/10 active:scale-95 min-h-[44px]"
             >
               <Plus size={16} /> Add your education
             </button>

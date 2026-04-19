@@ -15,7 +15,7 @@ export function ContactSection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <User size={18} />
           </div>
           <div className="min-w-0">
@@ -43,7 +43,7 @@ export function ContactSection() {
             name="name"
             value={header.name}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="e.g. Rahul Sharma"
           />
         </div>
@@ -55,7 +55,7 @@ export function ContactSection() {
             name="title"
             value={header.title}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="e.g. SDE II / Senior Software Engineer"
           />
         </div>
@@ -67,7 +67,7 @@ export function ContactSection() {
             name="email"
             value={header.email}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="rahul.sharma@gmail.com"
           />
         </div>
@@ -79,7 +79,7 @@ export function ContactSection() {
             name="phone"
             value={header.phone}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="+91 98765 43210"
           />
         </div>
@@ -91,7 +91,7 @@ export function ContactSection() {
             name="location"
             value={header.location}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="Bengaluru, KA"
           />
         </div>
@@ -103,7 +103,7 @@ export function ContactSection() {
             name="linkedin"
             value={header.linkedin}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="linkedin.com/in/username"
           />
         </div>
@@ -115,7 +115,7 @@ export function ContactSection() {
             name="portfolio"
             value={header.portfolio}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all break-words focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="johndoe.com"
           />
         </div>
@@ -127,7 +127,7 @@ export function ContactSection() {
             name="github"
             value={header.github || ''}
             onChange={handleInput}
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
             placeholder="github.com/username"
           />
         </div>

@@ -20,7 +20,7 @@ function ScoreCircle({ score }: { score: number }) {
     score >= 85
       ? { stroke: 'url(#ats-grad-excellent)', text: 'text-emerald-400' }
       : score >= 70
-      ? { stroke: 'url(#ats-grad-good)', text: 'text-cyan-400' }
+      ? { stroke: 'url(#ats-grad-good)', text: 'text-white' }
       : score >= 55
       ? { stroke: 'url(#ats-grad-fair)', text: 'text-amber-400' }
       : { stroke: 'url(#ats-grad-poor)', text: 'text-red-400' }
@@ -36,11 +36,11 @@ function ScoreCircle({ score }: { score: number }) {
       >
         <defs>
           <linearGradient id="ats-grad-excellent" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#22d3ee" />
-            <stop offset="100%" stopColor="#a855f7" />
+            <stop offset="0%" stopColor="var(--fg)" />
+            <stop offset="100%" stopColor="var(--fg-3)" />
           </linearGradient>
           <linearGradient id="ats-grad-good" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="0%" stopColor="var(--fg)" />
             <stop offset="100%" stopColor="#3b82f6" />
           </linearGradient>
           <linearGradient id="ats-grad-fair" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -105,7 +105,7 @@ function ScoreCircle({ score }: { score: number }) {
 
 function getTierLabel(score: number): { label: string; colorClass: string } {
   if (score >= 85) return { label: 'Excellent', colorClass: 'text-emerald-400' }
-  if (score >= 70) return { label: 'Good', colorClass: 'text-cyan-400' }
+  if (score >= 70) return { label: 'Good', colorClass: 'text-white' }
   if (score >= 55) return { label: 'Fair', colorClass: 'text-amber-400' }
   return { label: 'Needs Work', colorClass: 'text-red-400' }
 }
@@ -253,7 +253,7 @@ export function ATSScorePanel({ result, loading = false, parseConfidence }: ATSS
           {failing.length > 5 && (
             <button
               onClick={() => setShowAllFailing((v) => !v)}
-              className="mt-2 text-[11px] text-cyan-400 hover:text-cyan-300 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none rounded"
+              className="mt-2 text-[11px] text-white hover:text-white/80 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none rounded"
             >
               {showAllFailing
                 ? 'Show fewer'
@@ -268,7 +268,7 @@ export function ATSScorePanel({ result, loading = false, parseConfidence }: ATSS
         <div>
           <button
             onClick={() => setShowPassing((v) => !v)}
-            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-text-2 transition-colors w-full text-left mb-1 focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none rounded"
+            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-text-2 transition-colors w-full text-left mb-1 focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none rounded"
             aria-expanded={showPassing}
           >
             {showPassing ? (
@@ -292,7 +292,7 @@ export function ATSScorePanel({ result, loading = false, parseConfidence }: ATSS
       <div className="border-t border-white/[0.06] pt-3">
         <button
           onClick={() => setAtsInfoOpen((v) => !v)}
-          className="flex items-center gap-1.5 text-[11px] text-text-muted hover:text-text-2 font-medium transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none rounded"
+          className="flex items-center gap-1.5 text-[11px] text-text-muted hover:text-text-2 font-medium transition-colors w-full text-left focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none rounded"
           aria-expanded={atsInfoOpen}
         >
           <Info className="w-3.5 h-3.5 shrink-0" />

@@ -129,7 +129,7 @@ export function BulletRow({ jobId, jobContext, bullet }: BulletRowProps) {
       style={style}
       className={`group relative flex items-start gap-3 rounded-xl border p-3.5 transition-all duration-200 ${
         isDragging
-          ? 'z-50 border-cyan-500/50 bg-white/[0.04] shadow-lg'
+          ? 'z-50 border-white/30 bg-white/[0.04] shadow-lg'
           : 'border-white/[0.06] bg-[#111118] shadow-none'
       }`}
     >
@@ -159,7 +159,7 @@ export function BulletRow({ jobId, jobContext, bullet }: BulletRowProps) {
         />
 
         {feedbackMessage && (
-          <div className="rounded-xl border border-cyan-500/16 bg-cyan-500/5 px-3 py-2 text-[11px] font-medium text-[#f1f5f9]">
+          <div className="rounded-xl border border-white/40/16 bg-white/[0.03] px-3 py-2 text-[11px] font-medium text-[#f1f5f9]">
             {feedbackMessage}
           </div>
         )}
@@ -181,7 +181,7 @@ export function BulletRow({ jobId, jobContext, bullet }: BulletRowProps) {
             type="button"
             onClick={handleImprove}
             disabled={bullet.isImproving || !bullet.text.trim()}
-            className="flex items-center gap-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all min-h-[44px]"
+            className="flex items-center gap-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all min-h-[44px]"
           >
             {bullet.isImproving ? (
               <Loader2 size={12} className="animate-spin" />

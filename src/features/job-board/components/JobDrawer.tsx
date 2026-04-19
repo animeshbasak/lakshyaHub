@@ -37,11 +37,11 @@ const STATUS_STYLES: Record<
 > = {
   saved: {
     label: 'Saved',
-    badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    badge: 'bg-white/5 text-white border-white/10',
   },
   applied: {
     label: 'Applied',
-    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    badge: 'bg-white/5 text-white/90 border-white/10',
   },
   interview: {
     label: 'Interview',
@@ -74,7 +74,7 @@ function AiResultSection({
     <div className="mt-4 rounded-[14px] bg-white/[0.03] border border-white/[0.06] overflow-hidden">
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-white hover:bg-white/[0.02] transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-white hover:bg-white/[0.02] transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
       >
         <span>{title}</span>
         <div className="flex items-center gap-2">
@@ -262,7 +262,7 @@ export function JobDrawer({
               <button
                 onClick={onClose}
                 aria-label="Close drawer"
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-white hover:bg-white/5 transition-colors flex-shrink-0 focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-white hover:bg-white/5 transition-colors flex-shrink-0 focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -300,7 +300,7 @@ export function JobDrawer({
                         href={job.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+                        className="flex items-center gap-2 text-sm text-white hover:text-white/80 transition-colors"
                       >
                         <ExternalLink className="w-4 h-4 flex-shrink-0" />
                         View original listing
@@ -381,7 +381,7 @@ export function JobDrawer({
                   }}
                   placeholder="Add notes about this application…"
                   rows={3}
-                  className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all resize-none"
+                  className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all resize-none"
                 />
               </div>
             )}
@@ -393,7 +393,7 @@ export function JobDrawer({
                 <button
                   onClick={handleMarkApplied}
                   disabled={markingApplied || currentStatus === 'applied' || !applicationId}
-                  className="flex-1 min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+                  className="flex-1 min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-white to-white/60 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
                 >
                   {markingApplied ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -409,7 +409,7 @@ export function JobDrawer({
                   onClick={handleCoverLetter}
                   disabled={coverLetterLoading}
                   aria-label="Generate cover letter"
-                  className="min-h-[44px] px-4 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-2 hover:text-white hover:border-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none flex items-center gap-1.5"
+                  className="min-h-[44px] px-4 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-2 hover:text-white hover:border-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none flex items-center gap-1.5"
                 >
                   {coverLetterLoading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -422,7 +422,7 @@ export function JobDrawer({
                   onClick={handleInterviewPrep}
                   disabled={interviewPrepLoading}
                   aria-label="Generate interview prep questions"
-                  className="min-h-[44px] px-4 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-2 hover:text-white hover:border-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none flex items-center gap-1.5"
+                  className="min-h-[44px] px-4 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-2 hover:text-white hover:border-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none flex items-center gap-1.5"
                 >
                   {interviewPrepLoading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

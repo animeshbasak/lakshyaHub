@@ -133,7 +133,7 @@ function DroppableColumn({
         <button
           onClick={onAddClick}
           aria-label={`Add job to ${label}`}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none min-h-[44px] min-w-[44px]"
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none min-h-[44px] min-w-[44px]"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -143,7 +143,7 @@ function DroppableColumn({
       <div
         ref={setNodeRef}
         className={`flex-1 bg-[#111118]/50 rounded-[14px] min-h-[80vh] p-3 overflow-y-auto transition-colors ${
-          isOver ? 'ring-1 ring-cyan-500/40 bg-cyan-500/5' : ''
+          isOver ? 'ring-1 ring-white/20 bg-white/[0.03]' : ''
         }`}
       >
         <SortableContext
@@ -305,9 +305,9 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
             <button
               key={mode}
               onClick={() => setSortMode(mode)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none ${
                 sortMode === mode
-                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
+                  ? 'bg-white/8 text-white border border-white/20'
                   : 'bg-white/[0.03] text-text-muted border border-white/10 hover:text-white'
               }`}
             >
@@ -322,9 +322,9 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
             <button
               key={band}
               onClick={() => setScoreBand(band)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none ${
                 scoreBand === band
-                  ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
+                  ? 'bg-white/5 text-white/80 border border-white/20'
                   : 'bg-white/[0.03] text-text-muted border border-white/10 hover:text-white'
               }`}
             >
@@ -363,7 +363,7 @@ export function KanbanBoard({ initialData }: KanbanBoardProps) {
           }}
         >
           {activeApp && (
-            <div className="cursor-grabbing scale-[1.03] shadow-2xl rounded-xl border border-cyan-500/30">
+            <div className="cursor-grabbing scale-[1.03] shadow-2xl rounded-xl border border-white/20">
               <KanbanCard
                 job={activeApp.job}
                 application={activeApp.application}

@@ -69,7 +69,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-screen bg-bg text-text-muted font-mono">
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 mb-4 animate-spin shadow-lg shadow-cyan-500/20" />
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white to-white/60 mb-4 animate-spin shadow-lg shadow-black/30" />
       <span className="text-xs uppercase tracking-widest animate-pulse">Initialising Lakshya...</span>
     </div>
   )

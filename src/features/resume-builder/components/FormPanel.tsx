@@ -162,7 +162,7 @@ export function FormPanel() {
                 onClick={() => scrollToSection(key)}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] transition-all min-h-[44px] whitespace-nowrap ${
                   isActive
-                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'
+                    ? 'bg-white/5 text-white border border-white/20'
                     : 'text-[#94a3b8] border border-transparent hover:bg-white/[0.04] hover:text-[#f1f5f9]'
                 }`}
               >
@@ -206,7 +206,7 @@ export function FormPanel() {
                   className="flex w-full items-start justify-between gap-4 rounded-[14px] border border-white/[0.06] bg-[#111118] px-4 py-3.5 text-left transition-all hover:border-white/10 hover:bg-white/[0.03]"
                 >
                   <div className="flex min-w-0 items-start gap-4">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400/90">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-white/90">
                       <Icon size={18} />
                     </div>
                     <div className="min-w-0">

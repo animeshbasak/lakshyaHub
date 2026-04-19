@@ -71,11 +71,11 @@ export function StarterExperience({ onLoadExample, onBuildFromScratch, onUpload 
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-widest mb-6 border border-cyan-500/20">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest mb-6 border border-white/10">
           <Sparkles className="w-3 h-3" />
           Powered by AI
         </div>
-        <h1 className="text-5xl font-bold text-white mb-6">Create a resume that <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">actually works</span></h1>
+        <h1 className="text-5xl font-bold text-white mb-6">Create a resume that <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">actually works</span></h1>
         <p className="text-lg text-text-muted max-w-2xl mx-auto">
           Choose a starting point to begin building your industry-standard resume. 
           Use our AI to optimize bullets and match job descriptions.
@@ -99,7 +99,7 @@ export function StarterExperience({ onLoadExample, onBuildFromScratch, onUpload 
           icon={FileUp}
           title={uploadLabel}
           description="Upload your current PDF or DOCX and we'll parse it for you."
-          color="cyan"
+          color="bright"
           onClick={handleUploadClick}
           disabled={uploadStage !== 'idle' && uploadStage !== 'error'}
         />
@@ -107,7 +107,7 @@ export function StarterExperience({ onLoadExample, onBuildFromScratch, onUpload 
           icon={Sparkles}
           title="Load Example"
           description="Start with a pre-filled template to see how it works."
-          color="purple"
+          color="muted"
           onClick={() => onLoadExample()}
         />
         <StartingCard 
@@ -124,8 +124,8 @@ export function StarterExperience({ onLoadExample, onBuildFromScratch, onUpload 
 
 function StartingCard({ icon: Icon, title, description, color, onClick, disabled }: any) {
   const colors: any = {
-    cyan: "from-cyan-500/20 to-cyan-500/5 hover:border-cyan-500/30 text-cyan-400",
-    purple: "from-purple-500/20 to-purple-500/5 hover:border-purple-500/30 text-purple-400",
+    bright: "from-white/20 to-white/[0.03] hover:border-white/20 text-white",
+    muted: "from-white/10 to-white/[0.03] hover:border-white/20 text-white/90",
     slate: "from-white/10 to-white/5 hover:border-white/20 text-white"
   }
 

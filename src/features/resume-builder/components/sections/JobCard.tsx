@@ -106,7 +106,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
       style={style}
       className={`rounded-[14px] border transition-all duration-200 ${
         isDragging
-          ? 'z-50 scale-[1.01] border-cyan-500/50 bg-white/[0.04] shadow-lg'
+          ? 'z-50 scale-[1.01] border-white/30 bg-white/[0.04] shadow-lg'
           : 'border-white/[0.06] bg-[#111118] shadow-none'
       }`}
     >
@@ -147,7 +147,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
             </div>
             <div
               className={`mt-0.5 shrink-0 rounded-lg p-1.5 transition-colors ${
-                isExpanded ? 'bg-cyan-500/10 text-cyan-400' : 'text-[#94a3b8]'
+                isExpanded ? 'bg-white/5 text-white' : 'text-[#94a3b8]'
               }`}
             >
               {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -171,7 +171,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
                 type="text"
                 value={job.title}
                 onChange={(e) => updateJob(job.id, 'title', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. SDE II"
               />
             </div>
@@ -187,7 +187,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
                 type="text"
                 value={job.company}
                 onChange={(e) => updateJob(job.id, 'company', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. Google"
               />
             </div>
@@ -203,7 +203,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
                 type="text"
                 value={job.period}
                 onChange={(e) => updateJob(job.id, 'period', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. Jan 2021 - Present"
               />
             </div>
@@ -215,7 +215,7 @@ export function JobCard({ job, defaultExpanded }: JobCardProps) {
                 type="text"
                 value={job.scale}
                 onChange={(e) => updateJob(job.id, 'scale', e.target.value)}
-                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-cyan-400 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-white outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 placeholder="e.g. Managed 10 Lakh+ DAU infrastructure"
               />
             </div>

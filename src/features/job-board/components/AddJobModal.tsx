@@ -88,7 +88,7 @@ export function AddJobModal({ isOpen, onClose, onSuccess }: AddJobModalProps) {
   }
 
   const inputClass =
-    'w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]'
+    'w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all min-h-[44px]'
 
   return (
     <AnimatePresence>
@@ -130,7 +130,7 @@ export function AddJobModal({ isOpen, onClose, onSuccess }: AddJobModalProps) {
                 <button
                   onClick={handleClose}
                   aria-label="Close modal"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-white hover:bg-white/5 transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -228,7 +228,7 @@ export function AddJobModal({ isOpen, onClose, onSuccess }: AddJobModalProps) {
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Any notes about this role…"
                       rows={3}
-                      className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all resize-none"
+                      className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-text-muted focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all resize-none"
                     />
                   </div>
 
@@ -245,14 +245,14 @@ export function AddJobModal({ isOpen, onClose, onSuccess }: AddJobModalProps) {
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-muted hover:text-white hover:border-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+                    className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-medium border border-white/10 text-text-muted hover:text-white hover:border-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="min-h-[44px] flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+                    className="min-h-[44px] flex items-center gap-2 bg-gradient-to-r from-white to-white/60 text-white font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
                   >
                     {loading ? (
                       <>

@@ -83,7 +83,7 @@ function SectionHeader({
             height: 36,
             borderRadius: 10,
             background: 'var(--gradient-subtle)',
-            border: '1px solid var(--cyan-border)',
+            border: '1px solid var(--hair)',
           }}
         >
           <Icon size={16} className="grad-text" />
@@ -469,7 +469,7 @@ export default function ProfilePage() {
       {(saving || saveError) && (
         <div className="flex items-center gap-2 mb-4">
           {saving && (
-            <span className="badge cyan">
+            <span className="badge">
               <span className="dot" /> Saving…
             </span>
           )}
@@ -511,7 +511,7 @@ export default function ProfilePage() {
                 fontSize: 24,
                 fontWeight: 700,
                 border: '3px solid var(--elev-1)',
-                boxShadow: 'var(--shadow-glow-cyan)',
+                boxShadow: 'none',
               }}
               aria-hidden="true"
             >
@@ -543,7 +543,7 @@ export default function ProfilePage() {
                     <span style={{ fontSize: 17, fontWeight: 600, color: 'var(--fg)' }}>
                       {displayName}
                     </span>
-                    <span className="badge cyan">PRO</span>
+                    <span className="badge">PRO</span>
                   </div>
                   <div
                     className="flex items-center gap-1.5"
@@ -730,8 +730,8 @@ export default function ProfilePage() {
           />
 
           <div className="grid grid-cols-3 gap-3">
-            <StatTile label="Applications" value={stats.applications} tone="cyan" />
-            <StatTile label="Interviews" value={stats.interviews} tone="purple" />
+            <StatTile label="Applications" value={stats.applications} />
+            <StatTile label="Interviews" value={stats.interviews} />
             <StatTile label="Offers" value={stats.offers} tone="emerald" />
           </div>
         </motion.div>
@@ -800,16 +800,11 @@ function StatTile({
 }: {
   label: string
   value: number
-  tone: 'cyan' | 'purple' | 'emerald'
+  tone?: 'emerald'
 }) {
   const color =
-    tone === 'cyan' ? 'var(--cyan)' : tone === 'purple' ? 'var(--purple)' : 'var(--emerald)'
-  const bg =
-    tone === 'cyan'
-      ? 'var(--cyan-dim)'
-      : tone === 'purple'
-      ? 'var(--purple-dim)'
-      : 'var(--emerald-dim)'
+    tone === 'emerald' ? 'var(--emerald)' : 'var(--fg)'
+  const bg = tone === 'emerald' ? 'var(--emerald-dim)' : 'var(--bg-2)'
   return (
     <div
       className="flex flex-col items-center justify-center"

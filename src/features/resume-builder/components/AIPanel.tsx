@@ -88,16 +88,16 @@ function SectionCard({
     <div className="relative bg-[#111118] border border-white/[0.06] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors min-h-[44px] focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors min-h-[44px] focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none"
         aria-expanded={open}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-cyan-400 shrink-0" aria-hidden="true">
+          <span className="text-white shrink-0" aria-hidden="true">
             {icon}
           </span>
           <span className="text-sm font-semibold text-white truncate">{title}</span>
           {badge && (
-            <span className="shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <span className="shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5 text-white border border-white/10">
               {badge}
             </span>
           )}
@@ -208,7 +208,7 @@ function JdSection({ resumeData, initialJdId }: JdSectionProps) {
           placeholder={prefilling ? 'Loading job description…' : 'Paste the job description here…'}
           disabled={prefilling || loading}
           rows={6}
-          className="w-full bg-[#1a1a24] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#1a1a24] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Job description input"
         />
         {prefilling && (
@@ -230,7 +230,7 @@ function JdSection({ resumeData, initialJdId }: JdSectionProps) {
       <button
         onClick={handleAnalyze}
         disabled={loading || prefilling || !jdText.trim()}
-        className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+        className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-white to-white/60 text-white font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
       >
         {loading ? (
           <>
@@ -355,7 +355,7 @@ function BulletSection({
       {progress && (
         <div className="w-full bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full transition-all duration-300"
+            className="h-full bg-gradient-to-r from-white to-white/60 rounded-full transition-all duration-300"
             style={{
               width: `${(progress.done / progress.total) * 100}%`,
             }}
@@ -373,7 +373,7 @@ function BulletSection({
         <button
           onClick={handleImproveAll}
           disabled={totalBullets === 0}
-          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-white to-white/60 text-white font-bold px-4 py-2.5 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
         >
           {mode === 'compact' ? (
             <Minimize2 className="w-4 h-4" />
@@ -391,7 +391,7 @@ function BulletSection({
       ) : (
         <button
           onClick={handleStop}
-          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-4 py-2.5 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-4 py-2.5 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
         >
           <Loader2 className="w-4 h-4 animate-spin" />
           Improving… (click to stop)
@@ -737,7 +737,7 @@ function RefSection({ referenceText, setReferenceText }: RefSectionProps) {
         onChange={(e) => setReferenceText(e.target.value)}
         placeholder="Paste reference context here (optional)…"
         rows={5}
-        className="w-full bg-[#1a1a24] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none"
+        className="w-full bg-[#1a1a24] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-white/10 transition-all resize-none"
         aria-label="Reference text for AI bullet improvements"
       />
     </div>
