@@ -3,6 +3,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeData } from '@/types';
 import { parseBoldText } from '../utils/parseBoldText';
+import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
   page: {
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
 });
 
 export function WarmSerifTemplate({ data }: { data: ResumeData }) {
-  const { header, summary, experience, education, skills } = data;
+  const { header, summary, experience, education, skills, projects = [] } = data;
 
   return (
     <Document>
@@ -128,6 +129,49 @@ export function WarmSerifTemplate({ data }: { data: ResumeData }) {
                     </Text>
                   </View>
                 ))}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {renderProjectSection(projects, {
+          sectionTitle: styles.sectionTitle,
+          projectItem: { marginBottom: 10 },
+          projectHeader: styles.entryHeader,
+          projectTitle: styles.entryTitle,
+          projectPeriod: styles.entryDate,
+          projectMeta: styles.companyLine,
+          projectDescription: { fontSize: 9.5, color: '#451A03', lineHeight: 1.4, marginBottom: 4 },
+          bulletRow: styles.bulletRow,
+          bulletDot: styles.bulletDot,
+          bulletText: styles.bulletText,
+          bold: styles.bold,
+        }, 'Projects', { splitOngoingLearning: true })}
+
+        {/* SKILLS */}
+        {skills.length > 0 && (
+          <View>
+            <Text style={styles.sectionTitle}>Skills</Text>
+            {skills.map(skill => (
+              <View key={skill.id} style={{ flexDirection: 'row', marginBottom: 3 }}>
+                <Text style={{ fontSize: 9.5, fontFamily: 'Times-Bold', color: '#78350F', width: '25%' }}>{skill.category}</Text>
+                <Text style={{ fontSize: 9.5, color: '#451A03', width: '75%' }}>{skill.values}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* EDUCATION */}
+        {education.length > 0 && (
+          <View>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {education.map(edu => (
+              <View key={edu.id} style={{ marginBottom: 6 }}>
+                <View style={styles.entryHeader}>
+                  <Text style={styles.entryTitle}>{edu.degree}</Text>
+                  <Text style={styles.entryDate}>{edu.period}</Text>
+                </View>
+                <Text style={styles.companyLine}>{edu.institution}{edu.grade ? ` · ${edu.grade}` : ''}</Text>
               </View>
             ))}
           </View>

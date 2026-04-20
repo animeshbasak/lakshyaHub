@@ -3,6 +3,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeData } from '@/types';
 import { parseBoldText } from '../utils/parseBoldText';
+import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
   page: {
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
 });
 
 export function ModernBlueTemplate({ data }: { data: ResumeData }) {
-  const { header, summary, experience, education, skills } = data;
+  const { header, summary, experience, education, skills, projects = [] } = data;
 
   return (
     <Document>
@@ -166,6 +167,20 @@ export function ModernBlueTemplate({ data }: { data: ResumeData }) {
             ))}
           </View>
         )}
+
+        {renderProjectSection(projects, {
+          sectionTitle: styles.sectionHeader,
+          projectItem: { marginBottom: 10 },
+          projectHeader: styles.entryHeader,
+          projectTitle: styles.entryTitle,
+          projectPeriod: styles.entryDate,
+          projectMeta: styles.companyLine,
+          projectDescription: { fontSize: 9, color: '#334155', marginBottom: 4, lineHeight: 1.4 },
+          bulletRow: styles.bulletRow,
+          bulletDot: styles.bulletDot,
+          bulletText: styles.bulletText,
+          bold: styles.bold,
+        }, 'Projects', { splitOngoingLearning: true })}
 
         {/* EDUCATION */}
         {education.length > 0 && (

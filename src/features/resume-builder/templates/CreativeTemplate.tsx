@@ -3,6 +3,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeData } from '@/types';
 import { parseBoldText } from '../utils/parseBoldText';
+import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
   page: {
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
 });
 
 export function CreativeTemplate({ data }: { data: ResumeData }) {
-  const { header, summary, skills, experience, education, competencies } = data;
+  const { header, summary, skills, experience, education, competencies, projects = [] } = data;
 
   return (
     <Document>
@@ -300,6 +301,20 @@ export function CreativeTemplate({ data }: { data: ResumeData }) {
               ))}
             </View>
           )}
+
+          {renderProjectSection(projects, {
+            sectionTitle: { ...styles.mainHeader, marginTop: 20 },
+            projectItem: styles.jobBlock,
+            projectHeader: styles.jobTitleRow,
+            projectTitle: styles.jobTitle,
+            projectPeriod: styles.jobDate,
+            projectMeta: styles.jobCompany,
+            projectDescription: styles.summaryLine,
+            bulletRow: styles.bulletRow,
+            bulletDot: styles.bulletDot,
+            bulletText: styles.bulletText,
+            bold: styles.boldSpan,
+          }, 'Projects', { splitOngoingLearning: true })}
         </View>
 
       </Page>

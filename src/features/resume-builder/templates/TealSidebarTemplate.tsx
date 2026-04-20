@@ -3,6 +3,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeData } from '@/types';
 import { parseBoldText } from '../utils/parseBoldText';
+import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
   page: {
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
 });
 
 export function TealSidebarTemplate({ data }: { data: ResumeData }) {
-  const { header, summary, experience, education, skills, competencies } = data;
+  const { header, summary, experience, education, skills, competencies, projects = [] } = data;
 
   return (
     <Document>
@@ -192,6 +193,20 @@ export function TealSidebarTemplate({ data }: { data: ResumeData }) {
               ))}
             </View>
           )}
+
+          {renderProjectSection(projects, {
+            sectionTitle: styles.sectionTitle,
+            projectItem: styles.entry,
+            projectHeader: styles.entryHeader,
+            projectTitle: styles.entryTitle,
+            projectPeriod: styles.entryDate,
+            projectMeta: styles.company,
+            projectDescription: { fontSize: 9, color: '#4B5563', lineHeight: 1.4, marginBottom: 4 },
+            bulletRow: styles.bulletRow,
+            bulletDot: styles.bulletDot,
+            bulletText: styles.bulletText,
+            bold: styles.bold,
+          }, 'Projects', { splitOngoingLearning: true })}
         </View>
       </Page>
     </Document>
