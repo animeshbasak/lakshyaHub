@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   },
   // Keep pdfjs-dist out of the server bundle entirely — it only runs client-side
   serverExternalPackages: ['pdfjs-dist'],
+  // Next.js 16 default: Turbopack. Empty object silences webpack/turbopack coexistence warning.
+  turbopack: {},
 };
 
 export default nextConfig;

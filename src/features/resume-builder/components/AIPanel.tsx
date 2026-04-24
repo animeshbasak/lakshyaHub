@@ -19,7 +19,8 @@ import { useResumeStore } from '@/features/resume-builder/store/useResumeStore'
 import { useShallow } from 'zustand/shallow'
 import { ATSScorePanel } from '@/features/resume-builder/components/ATSScorePanel'
 import { JdMatchPanel } from '@/features/job-board/components/JdMatchPanel'
-import { calculateATSScore, type ATSResult } from '@/lib/atsEngine'
+// TODO(careerops): calculateATSScore replaced by A-G evaluator (Phase 1.6)
+import type { ATSResult } from '@/types'
 import { resumeToText } from '@/lib/utils/resumeToText'
 import type { JdMatch5dResult, ResumeData } from '@/types'
 import { createClient } from '@/lib/supabase/client'
@@ -808,14 +809,10 @@ export function AIPanel() {
       if (debounceRef.current) clearTimeout(debounceRef.current)
       setAtsLoading(true)
       debounceRef.current = setTimeout(() => {
-        try {
-          const result = calculateATSScore(data)
-          setAtsResult(result)
-        } catch {
-          setAtsResult(null)
-        } finally {
-          setAtsLoading(false)
-        }
+        // TODO(careerops): ATS scoring disabled — pending A-G evaluator integration (Phase 1.6)
+        void data
+        setAtsResult(null)
+        setAtsLoading(false)
       }, 800)
     },
     []

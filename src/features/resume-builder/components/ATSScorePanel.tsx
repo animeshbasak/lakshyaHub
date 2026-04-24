@@ -3,7 +3,7 @@
 
 import { useState, useReducer } from 'react'
 import { CheckCircle2, XCircle, ChevronDown, ChevronRight, Info } from 'lucide-react'
-import type { ATSResult } from '@/lib/atsEngine'
+import type { ATSResult } from '@/types'
 
 interface ATSScorePanelProps {
   result: ATSResult | null
@@ -114,8 +114,8 @@ function getTierLabel(score: number): { label: string; colorClass: string } {
 type CheckItem = {
   id: string
   label: string
-  tip: string
-  passed: boolean
+  tip?: string
+  passed?: boolean
   specificTip?: string
 }
 

@@ -212,6 +212,9 @@ export interface ATSCheck {
   pass: boolean
   weight: number
   category: 'keywords' | 'format' | 'content' | 'sections'
+  tip?: string
+  passed?: boolean
+  specificTip?: string
 }
 
 export interface ATSResult {
@@ -219,6 +222,11 @@ export interface ATSResult {
   checks: ATSCheck[]
   passCount: number
   failCount: number
+  error?: 'unparseable'
+  grade?: { label?: string; desc?: string }
+  failing?: ATSCheck[]
+  passing?: ATSCheck[]
+  pillarScores?: { keywords: number; position: number; baseline: number }
 }
 
 // ── JD Match 5D ───────────────────────────────────────────────
