@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const PROTECTED_PATHS = ['/dashboard', '/board', '/resume', '/discover', '/profile']
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // Refresh session — must call getUser() not getSession() for server proxy
+  // Refresh session — must call getUser() not getSession() for server middleware
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
