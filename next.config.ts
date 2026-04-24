@@ -20,6 +20,13 @@ const nextConfig: NextConfig = {
   // - pdfjs-dist: client-side only
   // - playwright-core + @sparticuz/chromium: conditional require('aws-sdk') in chromium breaks Turbopack bundling
   serverExternalPackages: ['pdfjs-dist', 'playwright-core', '@sparticuz/chromium'],
+  // Include career-ops prompt markdown files in the Vercel Lambda trace.
+  // promptLoader.ts reads them at runtime via fs.readFile; Turbopack does not
+  // auto-trace dynamic fs.readFile, so the files would otherwise be absent
+  // from the deployed bundle and the route would ENOENT on first call.
+  outputFileTracingIncludes: {
+    '/api/ai/evaluate': ['./src/prompts/**/*.md'],
+  },
 };
 
 export default nextConfig;
