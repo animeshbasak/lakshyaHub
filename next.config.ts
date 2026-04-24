@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
-  // Keep pdfjs-dist out of the server bundle entirely — it only runs client-side
-  serverExternalPackages: ['pdfjs-dist'],
+  // Keep pdfjs-dist, Playwright, and @sparticuz/chromium out of the server bundle
+  // - pdfjs-dist: client-side only
+  // - playwright-core + @sparticuz/chromium: conditional require('aws-sdk') in chromium breaks Turbopack bundling
+  serverExternalPackages: ['pdfjs-dist', 'playwright-core', '@sparticuz/chromium'],
   // Next.js 16 default: Turbopack. Empty object silences webpack/turbopack coexistence warning.
   turbopack: {},
 };
