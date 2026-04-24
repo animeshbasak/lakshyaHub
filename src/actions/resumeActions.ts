@@ -51,7 +51,15 @@ export async function saveResume(data: ResumeData) {
 
 export async function loadResume(id: string): Promise<ResumeData | null> {
   const supabase = await createClient()
-  const { data } = await supabase.from('resumes').select('data').eq('id', id).single()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  // IDOR guard: scope to owner (prevents any authenticated user from reading any resume by UUID)
+  const { data } = await supabase
+    .from('resumes')
+    .select('data')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
   return data?.data ?? null
 }
 
@@ -65,7 +73,14 @@ export async function listResumes() {
 
 export async function deleteResume(id: string) {
   const supabase = await createClient()
-  await supabase.from('resumes').delete().eq('id', id)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  // IDOR guard: scope to owner (prevents any authenticated user from deleting any resume by UUID)
+  await supabase
+    .from('resumes')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
 }
 
 export async function saveAndSyncProfile(data: ResumeData) {
