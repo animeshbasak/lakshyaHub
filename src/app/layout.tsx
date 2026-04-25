@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: 'Lakshya — Aim before you apply',
     template: '%s · Lakshya',
   },
-  description: 'AI-powered job evaluation, tailored CVs, and archetype-driven career search. Built on the career-ops methodology.',
+  description: 'A-G evaluation for tech job seekers — backend, frontend, mobile, devops, ML, AI, PM. Score any JD against your resume in 30 seconds.',
   keywords: ['AI job evaluator', 'ATS resume', 'archetype career', 'career-ops', 'job search'],
   robots: { index: true, follow: true },
   openGraph: {

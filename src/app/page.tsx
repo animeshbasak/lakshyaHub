@@ -17,18 +17,18 @@ import {
 
 export const metadata: Metadata = {
   title: 'Lakshya — Aim before you apply',
-  description: 'AI-powered job evaluation, tailored CVs, and archetype-driven career search built on the career-ops methodology (740+ real evaluations).',
+  description: 'Stop wasting hours on jobs you do not fit. Lakshya scores any tech JD against your resume in 30 seconds — A-G rubric, 14 archetypes (AI + general tech), legitimacy detection. Built on career-ops (740+ real evals).',
   alternates: { canonical: '/' },
   openGraph: {
     title: 'Lakshya — Aim before you apply',
-    description: 'Rebuild your job search on the career-ops methodology.',
+    description: 'Tech job evaluation that tells you whether a role is worth applying to — before you spend 2 hours on a cover letter.',
     url: '/',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Lakshya — Aim before you apply',
-    description: 'AI-powered job evaluation + tailored CVs.',
+    description: 'Tech job evaluation in 30 seconds. AI + general tech archetypes. Free 3 evals/mo.',
   },
 }
 
@@ -181,9 +181,11 @@ function Hero() {
         </h1>
 
         <p className="mt-6 text-[15px] md:text-base text-white/55 max-w-2xl leading-relaxed">
-          Lakshya unifies the three tools job seekers open in different
-          tabs — resume builder, application tracker, and job intelligence —
-          into a single keyboard-driven workspace with an auditable AI layer.
+          For tech job seekers who refuse to spray 50+ applications hoping
+          something sticks. Backend, frontend, mobile, devops, ML, AI, PM —
+          Lakshya scores any tech JD against your resume in 30 seconds. 14
+          archetypes covered. Built on the career-ops methodology (740+ real
+          evals; rubric is open-source and audit-able).
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
