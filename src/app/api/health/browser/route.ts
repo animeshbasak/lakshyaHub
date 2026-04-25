@@ -1,11 +1,20 @@
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import chromium from '@sparticuz/chromium'
 import { chromium as playwright } from 'playwright-core'
 
-export async function GET() {
+/**
+ * Auth-gated — each call spawns Chromium (~200 MB RAM × 60s). Unauthenticated
+ * access is a trivial DoS vector. Require HEALTH_SECRET header for any caller.
+ */
+export async function GET(req: NextRequest) {
+  const secret = process.env.HEALTH_SECRET
+  if (!secret || req.headers.get('x-health-secret') !== secret) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
   const browser = await playwright.launch({
     args: chromium.args,
     executablePath: await chromium.executablePath(),

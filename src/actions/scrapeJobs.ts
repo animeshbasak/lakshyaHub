@@ -10,7 +10,6 @@ import type { ScrapeConfig } from '@/lib/scrapers/types'
 import type { ResumeProfile } from '@/types'
 
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN
-console.log('[scrapeJobs] APIFY_API_TOKEN present:', !!APIFY_API_TOKEN)
 
 export async function scrapeJobs(config: ScrapeConfig) {
   if (!APIFY_API_TOKEN) {

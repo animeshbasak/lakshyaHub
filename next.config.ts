@@ -27,6 +27,23 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/ai/evaluate': ['./src/prompts/**/*.md'],
   },
+  // Baseline security headers (Security plan S6; audit Medium finding).
+  // CSP is deferred to middleware with nonce (Security plan S6.2) — not yet shipped.
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options',   value: 'nosniff' },
+          { key: 'X-Frame-Options',          value: 'DENY' },
+          { key: 'Referrer-Policy',          value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy',       value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
+          { key: 'Strict-Transport-Security',value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;

@@ -4,6 +4,9 @@ import type { ActorConfig } from '@/lib/scrapers/actorIds'
 
 const BASE = 'https://api.apify.com/v2'
 
+// Verbose logs contain user search queries (location, titles) — gate to dev
+const DEBUG = process.env.NODE_ENV !== 'production'
+
 export async function runActor(
   actor: ActorConfig,
   query: string,
@@ -14,9 +17,11 @@ export async function runActor(
   const urlSafeId = actor.id.replace('/', '~')
   const input = actor.buildInput(query, location, limit)
 
-  console.log(`[runActor] Starting: ${actor.id}`)
-  console.log(`[runActor] URL: POST ${BASE}/acts/${urlSafeId}/runs`)
-  console.log(`[runActor] Input:`, JSON.stringify(input))
+  if (DEBUG) {
+    console.log(`[runActor] Starting: ${actor.id}`)
+    console.log(`[runActor] URL: POST ${BASE}/acts/${urlSafeId}/runs`)
+    console.log(`[runActor] Input:`, JSON.stringify(input))
+  }
 
   // Start run
   let runId: string
@@ -27,19 +32,27 @@ export async function runActor(
       body: JSON.stringify(input),
     })
 
-    console.log(`[runActor] Start response status: ${res.status}`)
+    if (DEBUG) console.log(`[runActor] Start response status: ${res.status}`)
 
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}))
       console.error(`[runActor] Start failed:`, errBody)
+      const rawMsg = String(errBody?.error?.message ?? errBody?.message ?? '')
+      // Detect Apify "rent required" 403 — actor trial expired / paid-only actor
+      if (res.status === 403 && /rent/i.test(rawMsg)) {
+        return {
+          jobs: [],
+          error: `${actor.label} unavailable (requires paid actor)`
+        }
+      }
       return {
         jobs: [],
-        error: `${res.status}: ${errBody?.error?.message ?? errBody?.message ?? 'Actor not found or access denied'}`
+        error: `${res.status}: ${rawMsg || 'Actor not found or access denied'}`
       }
     }
     const data = await res.json()
     runId = data?.data?.id
-    console.log(`[runActor] Run started: ${runId}`)
+    DEBUG && console.log(`[runActor] Run started: ${runId}`)
 
     if (!runId) return { jobs: [], error: 'No run ID returned from Apify' }
   } catch (e) {
@@ -59,11 +72,11 @@ export async function runActor(
       }
       const data = await res.json()
       const status = data?.data?.status
-      console.log(`[runActor] Poll ${i + 1}/60: status=${status}`)
+      DEBUG && console.log(`[runActor] Poll ${i + 1}/60: status=${status}`)
 
       if (status === 'SUCCEEDED') {
         datasetId = data.data.defaultDatasetId
-        console.log(`[runActor] Succeeded. Dataset: ${datasetId}`)
+        DEBUG && console.log(`[runActor] Succeeded. Dataset: ${datasetId}`)
         break
       }
       if (['FAILED', 'ABORTED', 'TIMED-OUT'].includes(status)) {
@@ -85,11 +98,11 @@ export async function runActor(
       return { jobs: [], error: 'Failed to fetch results' }
     }
     const items: Record<string, unknown>[] = await res.json()
-    console.log(`[runActor] Raw items received: ${items.length}`)
+    DEBUG && console.log(`[runActor] Raw items received: ${items.length}`)
     const jobs = items
       .map(item => actor.normalizeJob(item))
       .filter(j => j.title.trim() && j.company.trim())
-    console.log(`[runActor] Valid jobs after filter: ${jobs.length}`)
+    DEBUG && console.log(`[runActor] Valid jobs after filter: ${jobs.length}`)
     return { jobs }
   } catch (e) {
     console.error(`[runActor] Dataset fetch error:`, e)
