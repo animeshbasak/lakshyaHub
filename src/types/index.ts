@@ -30,6 +30,10 @@ export interface Application {
   notes: string | null
   resume_version: string | null
   updated_at: string
+  // careerops cadence (migration 002)
+  follow_up_due?: string | null
+  follow_up_count?: number | null
+  cadence_flag?: 'ok' | 'urgent' | 'overdue' | 'cold' | null
 }
 
 export type ApplicationStatus =

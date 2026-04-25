@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Application, Job } from '@/types'
 import { FitBadge } from '@/components/ui/FitBadge'
+import { CadenceBadge } from './CadenceBadge'
 
 interface KanbanCardProps {
   job: Job
@@ -81,8 +82,9 @@ export function KanbanCard({ job, application, isDragging = false, onClick }: Ka
         <p className="text-xs text-text-muted truncate mb-2">{job.location}</p>
       )}
 
-      {/* Footer: FitBadge bottom-right */}
-      <div className="flex items-center justify-end mt-1">
+      {/* Footer: cadence badge left, FitBadge right */}
+      <div className="flex items-center justify-between gap-2 mt-1 min-h-[20px]">
+        <CadenceBadge flag={application.cadence_flag} followUpDue={application.follow_up_due} />
         <FitBadge score={job.fit_score} />
       </div>
     </div>
