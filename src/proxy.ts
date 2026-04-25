@@ -29,7 +29,7 @@ function buildCsp(nonce: string): string {
   ].join('; ')
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Per-request nonce for inline scripts (Next.js hydration etc.)
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
 
@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session — must call getUser() not getSession() for server middleware
+  // Refresh session — must call getUser() not getSession() for server proxy
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
