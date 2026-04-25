@@ -5,17 +5,23 @@ import { aiPmGuide } from './ai-pm'
 import { solutionsArchitectGuide } from './solutions-architect'
 import { forwardDeployedGuide } from './forward-deployed'
 import { transformationGuide } from './transformation'
+import { backendGuide } from './backend'
+import { engineeringManagerGuide } from './engineering-manager'
 import { ARCHETYPES, ARCHETYPE_FAMILY, type Archetype } from '@/lib/careerops/archetypes'
 
 export type { ArchetypeGuide } from './ai-platform'
 
 const GUIDES: Partial<Record<Archetype, ArchetypeGuide>> = {
+  // AI specialty (6/6)
   'ai-platform':         aiPlatformGuide,
   'agentic':             agenticGuide,
   'ai-pm':               aiPmGuide,
   'solutions-architect': solutionsArchitectGuide,
   'forward-deployed':    forwardDeployedGuide,
   'transformation':      transformationGuide,
+  // General tech (2/8)
+  'backend':             backendGuide,
+  'engineering-manager': engineeringManagerGuide,
 }
 
 export interface GuideStub {
