@@ -4,6 +4,7 @@ import { jobscanCompare } from './jobscan'
 import { huntrCompare } from './huntr'
 import { careerflowCompare } from './careerflow'
 import { simplifyCompare } from './simplify'
+import { loopcvCompare } from './loopcv'
 
 export type { CompetitorContent, CompetitorStub } from './types'
 
@@ -13,6 +14,7 @@ const REGISTRY: Record<string, CompetitorContent> = {
   huntr: huntrCompare,
   careerflow: careerflowCompare,
   simplify: simplifyCompare,
+  loopcv: loopcvCompare,
 }
 
 interface StubMeta {
