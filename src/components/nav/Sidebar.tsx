@@ -14,6 +14,8 @@ import {
   Zap,
   LogOut,
   Target,
+  PieChart,
+  BookOpen,
 } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { createClient } from '@/lib/supabase/client'
@@ -25,6 +27,8 @@ import { useTweaks } from './TweaksProvider'
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/evaluate', label: 'Evaluate', icon: Target, badge: 'NEW' },
+  { href: '/archetypes', label: 'Archetypes', icon: PieChart },
+  { href: '/stories', label: 'Stories', icon: BookOpen },
   { href: '/discover', label: 'Discover', icon: Search, badge: 'LIVE' },
   { href: '/board', label: 'Pipeline', icon: Kanban },
   { href: '/resume', label: 'Resume', icon: FileText },
