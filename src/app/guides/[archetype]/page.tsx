@@ -233,7 +233,7 @@ export default async function GuidePage({ params }: PageProps) {
             Want to know if a real {guide.archetype} role fits you?
           </h2>
           <p className="text-[13px] text-text-2 mb-4 max-w-md mx-auto">
-            Paste any AI Platform JD — get a 7-block A-G evaluation in 30 seconds. Free 3 evals/month.
+            Paste any {guide.archetype} JD — get a 7-block A-G evaluation in 30 seconds. Free 3 evals/month.
           </p>
           <Link
             href="/login?ref=guide-cta"

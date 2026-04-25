@@ -19,7 +19,7 @@ Both products are real, both have genuine users, and both have legitimate use ca
 
   rows: [
     { capability: 'Pre-application evaluation depth',     lakshya: '7-block A-G rubric (skills, archetype, legitimacy, etc.)',                competitor: 'Resume-to-JD keyword overlap match score (0-100)',                                  notes: 'Different problems. Teal scores fit; Lakshya scores whether the job is worth your time at all.' },
-    { capability: 'Archetype detection',                  lakshya: 'Yes — 6 archetypes (ai-platform, agentic, ai-pm, etc.)',                competitor: 'No',                                                                                notes: '' },
+    { capability: 'Archetype detection',                  lakshya: 'Yes — 14 archetypes (6 AI specialty + 8 general tech)',                  competitor: 'No',                                                                                notes: '' },
     { capability: 'Legitimacy / scam-job detection',      lakshya: 'Yes — high / caution / suspicious tier',                                competitor: 'No',                                                                                notes: 'Hiring managers re-list ghost jobs more than ever in 2026.' },
     { capability: 'Application tracking / Kanban',        lakshya: 'Yes — careerops state machine (Saved → Evaluated → Applied → Interview → Offer)', competitor: 'Yes — flagship feature with rich filtering',                                        notes: 'Teal\'s tracker has more polish; Lakshya\'s is functional.' },
     { capability: 'Chrome extension',                     lakshya: 'Not yet (Phase 7)',                                                     competitor: 'Yes — strong feature, save jobs from any portal',                                  notes: 'Teal wins clearly here today.' },
@@ -73,7 +73,7 @@ Both products are real, both have genuine users, and both have legitimate use ca
     },
     {
       q: 'Will Lakshya work for non-tech jobs?',
-      a: 'Today, no — the 6 archetypes are AI / tech / product roles. The rubric is generalizable but the prompts are tuned for our target market in 2026. Multi-vertical expansion is post-launch.',
+      a: 'Yes for tech roles — 14 archetypes today: 6 AI specialty (ai-platform, agentic, ai-pm, solutions-architect, forward-deployed, transformation) and 8 general tech (backend, frontend, fullstack, mobile, devops/SRE, data engineering, security, engineering-manager). Non-tech vertical expansion is post-launch.',
     },
     {
       q: 'How do I migrate from Teal to Lakshya?',

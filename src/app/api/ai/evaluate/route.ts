@@ -28,9 +28,13 @@ const BodySchema = z.object({
 })
 
 function sanitizeUntrusted(input: string): string {
+  // Strip prompt-loader section markers ('═══') and decorative en/em dashes
+  // sometimes used as fake section dividers. Earlier version had a buggy
+  // regex `/[ --]/g` (a U+0020 to U+002D range) that silently stripped
+  // !"#$%()*+,- from JD + CV — fixed 2026-04-25 after code review caught it.
   return input
     .replace(/═{3,}/g, '[redacted-boundary]')
-    .replace(/[ --]/g, '')
+    .replace(/[–—]{3,}/g, '[redacted-boundary]')  // 3+ en/em dashes only
 }
 
 class ProviderUnconfiguredError extends Error {
@@ -143,7 +147,7 @@ async function tryWithFallback(
 ): Promise<ProviderResult> {
   const chain = FALLBACK_CHAIN[primary]
   let lastError: Error | null = null
-  let providerUnconfiguredFor: ProviderUnconfiguredError | null = null
+  const unconfigured: ProviderUnconfiguredError[] = []
 
   for (let i = 0; i < chain.length; i++) {
     const name = chain[i]
@@ -158,7 +162,7 @@ async function tryWithFallback(
       } catch (err) {
         // Skip to next provider immediately if this one isn't configured
         if (err instanceof ProviderUnconfiguredError) {
-          providerUnconfiguredFor = err
+          unconfigured.push(err)
           break
         }
         lastError = err as Error
@@ -172,9 +176,20 @@ async function tryWithFallback(
     }
   }
 
-  // Every provider failed. If at least one was unconfigured AND we never had
-  // a real error, surface the unconfigured signal so UI can prompt for a key.
-  if (providerUnconfiguredFor && !lastError) throw providerUnconfiguredFor
+  // Every provider failed.
+  // If EVERY provider in the chain was unconfigured -> surface the unconfigured
+  // signal so UI can prompt the user to set at least one key.
+  // (Earlier version only surfaced this when lastError was null, which lost
+  // the signal when chain was [groq(unconfigured), gemini(503), claude(unconfigured)].)
+  if (unconfigured.length === chain.length) throw unconfigured[0]
+
+  // Mixed failure: some unconfigured + at least one runtime error. Bubble up
+  // the runtime error (more diagnostic) but include the unconfigured set in
+  // a custom property so the route handler can include it in the response.
+  if (lastError && unconfigured.length > 0) {
+    ;(lastError as Error & { unconfiguredProviders?: string[] }).unconfiguredProviders =
+      unconfigured.map((u) => u.provider)
+  }
   throw lastError ?? new Error('all providers failed')
 }
 
@@ -246,12 +261,20 @@ export async function POST(req: NextRequest) {
           envVar: err.envVar,
           hint: 'Set the missing key in .env.local (or Vercel env vars), then restart the dev server. Or pick a different provider.',
         },
-        { status: 503 }
+        { status: 424 }  // Failed Dependency — semantically correct for missing config
       )
     }
+    const errAny = err as Error & { unconfiguredProviders?: string[] }
     const msg = err instanceof Error ? err.message : 'evaluator failed'
     return NextResponse.json(
-      { error: msg, code: 'all_providers_failed', hint: 'All free providers were unavailable. Try again in a moment, or set ANTHROPIC_API_KEY for paid Claude fallback.' },
+      {
+        error: msg,
+        code: 'all_providers_failed',
+        unconfiguredProviders: errAny.unconfiguredProviders,
+        hint: errAny.unconfiguredProviders?.length
+          ? `Other providers were rate-limited; ${errAny.unconfiguredProviders.join(', ')} not configured. Set their keys for fuller fallback coverage.`
+          : 'All providers were unavailable. Try again in a moment, or set ANTHROPIC_API_KEY for paid Claude fallback.',
+      },
       { status: 502 }
     )
   }

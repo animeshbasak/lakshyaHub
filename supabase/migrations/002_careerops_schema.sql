@@ -17,7 +17,7 @@ create table if not exists public.evaluations (
   blocks_json jsonb not null default '{}',
   report_md text,
   prompt_version text not null default '1.0.0',
-  llm_provider text not null default 'claude',
+  llm_provider text not null default 'groq',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

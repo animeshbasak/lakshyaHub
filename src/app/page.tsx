@@ -369,8 +369,8 @@ function Pillars() {
             icon={Radar}
             eyebrow="03 · Match"
             title="JD fit, skill gaps, and ghost-job signals."
-            body="Paste a job description and see the five-dimension fit score, missing keywords, and risk indicators before you spend time applying."
-            href="/job-board"
+            body="Paste a job description and get a 7-block A-G evaluation — archetype detection, legitimacy tier, gap analysis — before you spend time applying."
+            href="/evaluate"
           />
         </div>
       </div>

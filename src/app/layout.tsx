@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: '%s · Lakshya',
   },
   description: 'A-G evaluation for tech job seekers — backend, frontend, mobile, devops, ML, AI, PM. Score any JD against your resume in 30 seconds.',
-  keywords: ['AI job evaluator', 'ATS resume', 'archetype career', 'career-ops', 'job search'],
+  keywords: ['tech job evaluator', 'job fit score', 'ATS resume', 'archetype career', 'career-ops', 'job search', 'backend job search', 'AI job evaluator'],
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website',

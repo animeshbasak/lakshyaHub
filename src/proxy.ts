@@ -19,7 +19,7 @@ function buildCsp(nonce: string): string {
     `style-src 'self' 'unsafe-inline'`,                              // Tailwind hydration injects inline
     `img-src 'self' data: blob: https:`,
     `font-src 'self' data:`,
-    `connect-src 'self' ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.stripe.com https://*.upstash.io https://o*.ingest.sentry.io https://*.ingest.sentry.io`,
+    `connect-src 'self' ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com https://*.upstash.io https://o*.ingest.sentry.io https://*.ingest.sentry.io`,
     `frame-src 'self' https://js.stripe.com https://hooks.stripe.com`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
