@@ -19,7 +19,7 @@ import { useResumeStore } from '@/features/resume-builder/store/useResumeStore'
 import { useShallow } from 'zustand/shallow'
 import { ATSScorePanel } from '@/features/resume-builder/components/ATSScorePanel'
 import { JdMatchPanel } from '@/features/job-board/components/JdMatchPanel'
-// TODO(careerops): calculateATSScore replaced by A-G evaluator (Phase 1.6)
+import { calculateATSScore } from '@/lib/atsEngine'
 import type { ATSResult } from '@/types'
 import { resumeToText } from '@/lib/utils/resumeToText'
 import type { JdMatch5dResult, ResumeData } from '@/types'
@@ -791,6 +791,8 @@ export function AIPanel() {
   const [atsResult, setAtsResult] = useState<ATSResult | null>(null)
   const [atsLoading, setAtsLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isMountedRef = useRef(true)
+  useEffect(() => () => { isMountedRef.current = false }, [])
 
   // Build a stable snapshot of the resume for ATS scoring
   const resumeData: ResumeData = {
@@ -816,9 +818,12 @@ export function AIPanel() {
       if (debounceRef.current) clearTimeout(debounceRef.current)
       setAtsLoading(true)
       debounceRef.current = setTimeout(() => {
-        // TODO(careerops): ATS scoring disabled — pending A-G evaluator integration (Phase 1.6)
-        void data
-        setAtsResult(null)
+        if (!isMountedRef.current) return
+        try {
+          setAtsResult(calculateATSScore(data))
+        } catch {
+          setAtsResult(null)
+        }
         setAtsLoading(false)
       }, 800)
     },

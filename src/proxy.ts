@@ -23,11 +23,20 @@ function buildCsp(nonce: string): string {
   return [
     `default-src 'self'`,
     scriptSrc,
+    // Workers (pdfjs-dist /pdf.worker.min.mjs, mammoth) need their own
+    // directive — script-src 'strict-dynamic' otherwise blocks workers loaded
+    // by URL because the loader script isn't nonce-trusted.
+    `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline'`,                              // Tailwind hydration injects inline
     `img-src 'self' data: blob: https:`,
     `font-src 'self' data:`,
-    `connect-src 'self' ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com https://*.upstash.io https://o*.ingest.sentry.io https://*.ingest.sentry.io`,
-    `frame-src 'self' https://js.stripe.com https://hooks.stripe.com`,
+    // PDF upload (resume import) reads blob: URLs via fetch; @react-pdf/renderer
+    // generates blob: URLs that embed font + image data. data: covers inline
+    // resources (fonts, small images) the same libs sometimes generate.
+    `connect-src 'self' blob: data: ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com https://*.upstash.io https://o*.ingest.sentry.io https://*.ingest.sentry.io`,
+    // PDF preview iframes (@react-pdf/renderer) and downloadable blob: previews
+    // need to be embeddable. Stripe Elements / hooks remain explicit.
+    `frame-src 'self' blob: data: https://js.stripe.com https://hooks.stripe.com`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

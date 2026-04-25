@@ -39,4 +39,22 @@ LEGITIMACY: caution
 ---END_SUMMARY---`
     expect(parseScoreSummary(output)?.company).toBe('Acme Inc')
   })
+
+  it('falls back to inline Spanish labels when no summary block is emitted', () => {
+    const output = `
+**Empresa:** Globant
+**Rol:** Senior Backend
+**Score:** 4.0/5
+**Arquetipo:** backend
+**Legitimidad:** Proceed with Caution
+`
+    const result = parseScoreSummary(output)
+    expect(result).toMatchObject({
+      company: 'Globant',
+      role: 'Senior Backend',
+      score: 4.0,
+      archetype: 'backend',
+      legitimacy: 'caution',
+    })
+  })
 })

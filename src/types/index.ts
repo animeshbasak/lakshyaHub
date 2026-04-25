@@ -210,28 +210,9 @@ export interface ScrapeLog {
 }
 
 // ── ATS ────────────────────────────────────────────────────────
-export interface ATSCheck {
-  id: string
-  label: string
-  pass: boolean
-  weight: number
-  category: 'keywords' | 'format' | 'content' | 'sections'
-  tip?: string
-  passed?: boolean
-  specificTip?: string
-}
-
-export interface ATSResult {
-  score: number
-  checks: ATSCheck[]
-  passCount: number
-  failCount: number
-  error?: 'unparseable'
-  grade?: { label?: string; desc?: string }
-  failing?: ATSCheck[]
-  passing?: ATSCheck[]
-  pillarScores?: { keywords: number; position: number; baseline: number }
-}
+// Source of truth lives in src/lib/atsEngine.ts. We re-export here so
+// existing callers that import from '@/types' don't need to change.
+export type { ATSCheck, ATSResult } from '@/lib/atsEngine'
 
 // ── JD Match 5D ───────────────────────────────────────────────
 export interface JdMatch5dResult {

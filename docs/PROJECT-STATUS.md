@@ -1,10 +1,80 @@
 # Lakshya — Project Status Dashboard
 
 > **Canonical source of truth for all pending work, priorities, review findings, and blockers.**
-> Last updated: 2026-04-25 evening
-> Branch under review: `feat/careerops-phase-0-1` (56 commits, 78/78 tests + 1 skipped + 11 todo, build clean, PR #1 open)
+> Last updated: 2026-04-26 ~01:45 IST
+> Branch: `feat/careerops-phase-0-1` (61 commits, **79/79 tests** + 1 skipped + 11 todo, build clean, PR #1 open)
 
 This file is the single place any agent or human should open first. It aggregates every plan, every pending task, every review finding, and every blocker that needs user input.
+
+---
+
+## 0. Today's Session — 2026-04-26 (live)
+
+### Shipped (committed)
+- `bec9c2d` — Fix 2 dev-mode bugs blocking profile setup + eval flow (column mismatch, 424 provider_unconfigured handling)
+- `1b05302` — Frontend archetype guide + Lakshya vs Huntr compare
+- `172c453` — Mobile + devops-sre guides + Careerflow + Simplify compare
+- `be4385d` — Fullstack + data-engineering + security guides + LoopCV compare → **content roadmap COMPLETE (14/14 guides, 6/6 compare pages)**
+- `7610b7a` — Refresh of this doc earlier today
+
+### Fixed but **NOT yet committed** (this session)
+| File | What |
+|---|---|
+| `src/proxy.ts` | CSP: `worker-src 'self' blob:`, `frame-src ... blob: data:`, `connect-src ... blob: data:` so pdfjs worker + react-pdf preview load |
+| `src/lib/careerops/promptLoader.ts` | Operating rules force English output + verbatim `## Block X — heading` format + JD-as-untrusted handling (career-ops prompts are Spanish; LLM was emitting Spanish + `## A)` headers) |
+| `src/app/(dashboard)/eval/[id]/BlockAccordion.tsx` | Flexible regex accepts 5 header forms; dedupe + sort A→G |
+| `src/lib/careerops/parseScoreSummary.ts` | Spanish/inline fallback (`**Empresa:**`, `**Score:** 4.0/5`) so legacy evals still render score + role |
+| `src/lib/atsEngine.ts` | Restored 574-line heuristic engine deleted in `3eaf8e2` (was deleted prematurely; A-G evaluator and ATS solve different problems and now coexist) |
+| `src/types/index.ts` | ATSCheck/ATSResult re-export from `atsEngine` (single source of truth) |
+| `src/features/resume-builder/components/AIPanel.tsx` | `setAtsResult(null)` stub → `setAtsResult(calculateATSScore(data))` |
+| `tests/lib/careerops/parseScoreSummary.test.ts` | New test locks in Spanish-fallback behavior |
+
+**Build**: `npm run build` clean, 51/51 SSG pages, all routes intact. **Tests**: 79 pass.
+
+### Open issues from today's testing
+- **Eval still rendered "Unknown role" / `/ 5`** on user's last test (after the prompt fixes). Two possibilities: (1) viewing a previously-saved eval row from before the fix → fallback parser will retro-fix on next render; (2) LLM still ignored operating rules → needs a fresh eval to confirm. **Next test step**: fresh `/evaluate` run with new JD.
+- ATS scorer untested in dev — needs a `/resume` reload to confirm panel populates
+- 4-file fix batch awaiting your approve before commit + push
+- 11 other modified files (resumeImport/, ai/router.adapters, ai/taskRunner, scrapers/index, layout, settings) are unrelated work streams — not part of this fix batch
+
+---
+
+---
+
+## 0.5. Direction Check — "Are we going in the right direction?"
+
+> Honest read against the CEO REDUCE prescription (2026-04-25). Not a status; a verdict.
+
+### What's working ✅
+- **Eval loop is the wedge** and it's the most-built thing in the repo. Correct call.
+- **Security fundamentals shipped before any auth'd traffic** — proxy.ts middleware, IDOR fixes, LLM input bounds, prompt-injection sanitize, RLS scaffold, audit_events. Doing this *now* (cheap) instead of post-incident (expensive) is the right call.
+- **Provider chain is now Groq-default, free** — eliminated the per-eval billing risk that would have killed unit economics during validation. Good move.
+- **Schema + auth bugs all closed** — every Eng BLOCK item is fixed (Tasks #13, #24, #25, #26).
+- **Reframe to "all tech job seekers, not just AI"** — 6 → 14 archetypes — fixed the unforced TAM mistake.
+- **INR pricing + unified marketing nav** — removed the two friction points the user named explicitly.
+
+### What's drifting ⚠️
+- **CEO said REDUCE; reality is EXPAND.** All 14 archetype guides + all 6 compare pages shipped today. CEO's prescription was: "Phase 0 + Phase 1 + UI-0 + UI-2.1 + UI-2.2 = minimum product. Everything else (scan, liveness, LaTeX, outreach, story bank, **SEO content, compare pages**) = dead weight until users return to eval a 2nd job." We did the dead-weight content anyway. Net effect: ~6–10h spent on SEO content that compounds at 6+ week horizon, while user count is still 0.
+- **Still no validated WTP.** CEO move #3 was "Manual Stripe Payment Link for first 10 Pro conversions" — has not happened. Pricing still set on intuition ($19/$49 → INR equivalents).
+- **Eval pipeline broke twice today** — Spanish output + 0-block parsing + ATS regression. The wedge surface is fragile because it stitches together LLM output from a Spanish prompt source we don't control. Needs golden-fixture tests against real LLM responses, not just unit tests on parsers.
+- **`/api/scan` + `/api/liveness` still unbuilt.** This was P2-deferred for good reason (cost math says Vercel Lambda is wrong execution model below 30k jobs/day). But the Phase 2 plan still exists in docs, which means future sessions will keep gravitating toward it. **Recommendation: explicitly mark Phase 2 "DEFERRED PENDING WTP VALIDATION" in docs to stop the gravity.**
+- **PR #1 has 61 commits open against main.** Original plan was to split into PR-A/B/C/D. That split never happened. Risk: when this PR finally merges, blast radius is enormous and rollback is impractical.
+
+### What's the minimum to declare "right direction" ✓
+The CEO kill-switch was: **60 days, 200+ signups, <5% return rate to eval second job.** None of the inputs to that test exist yet. Concrete next bar:
+
+1. **Commit + merge today's eval fix batch** (1h)
+2. **Run 10 evals through the live flow** (yourself or 1 friend) to lock parser confidence (2h)
+3. **Push the branch / merge PR #1** (decide split or single — pragmatically, single is fine if tests pass) (1h)
+4. **Manual Stripe Payment Link in landing CTA** (2h, no code)
+5. **Post the eval link in 1 community where AI/ML job-seekers gather** (HN Show, /r/cscareerquestions, X) (1h)
+
+That's a 7-hour push to first signal. Everything else (Phase 2, S5–S12, training/project evaluators, Chrome ext) is overhead until that signal arrives.
+
+### Verdict
+**Direction is right; cadence is drifting toward "build more" instead of "validate more."** The eval wedge works locally; the next 5 commits should be about getting it in front of strangers, not adding surfaces. If users return to eval a 2nd job, *then* invest in scan/liveness/content depth. If they don't, those investments would have been lost anyway.
+
+The good news: nothing shipped today is actively wrong. It's just early.
 
 ---
 
@@ -27,23 +97,25 @@ This file is the single place any agent or human should open first. It aggregate
 | Routes (authed) | `/dashboard`, `/board`, `/discover`, `/profile`, `/resume`, `/evaluate`, `/eval/[id]`, `/archetypes`, `/stories` |
 | Security | proxy.ts middleware (CSP-with-nonce, HSTS, X-Frame-Options, Permissions-Policy, COOP), 3 IDOR fixes (loadResume/deleteResume/evaluate cvId), LLM input validation (`.max(20000)` + prompt-injection sanitize), provider-fallback chain (Groq → Gemini → Claude), audit_events append-only schema, RLS test scaffold, threat model doc |
 | Marketing | brand sweep `Lakshya Hub` → `Lakshya`, MarketingHeader unified across `/`, `/pricing`, `/about`, INR pricing for India geo-detect, broader-tech audience reframe |
-| SEO | sitemap + robots, JSON-LD (Organization, WebSite, SoftwareApplication, Article on share + guides + compare, FAQPage, BreadcrumbList), dynamic OG via next/og, 9 archetype guides + 3 compare pages |
+| SEO | sitemap + robots, JSON-LD (Organization, WebSite, SoftwareApplication, Article on share + guides + compare, FAQPage, BreadcrumbList), dynamic OG via next/og, **14/14 archetype guides + 6/6 compare pages COMPLETE** (as of today) |
 | UI | Skeleton primitives, loading.tsx for /eval/[id] /archetypes /stories, ScoreHero (responsive 120px desktop / 80px mobile), BlockAccordion (A-G parser), ShareToggle with 3 anonymization tiers, CadenceBadge for Kanban, EmptyState + Evaluate CTA on /board /dashboard, branded icon/apple-icon/og |
 | Docs | careerops integration master plan, security plan (S0-S12), SEO plan, Phase 2 detail, UI evolution plan, S0 threat model, SETUP.md, PROJECT-STATUS.md (this file), 9 archetype guide content files, 3 compare page content files, secret-scan + env-audit scripts |
 | Infra | next.config.ts (turbopack alias, serverExternalPackages, outputFileTracingIncludes for prompts, security headers), CSP-with-nonce middleware, dynamic OG route on edge runtime |
 
 ### What's NOT shipped
 
+- **Eval pipeline fix batch** — 4 files modified this session, awaiting commit approval (see §0)
 - `/api/scan` + `/api/liveness` routes — blocked on QStash provisioning + Vercel Lambda mem 3008MB
 - Phase 2 cron endpoints (2.9, 2.10) — same blocker
-- 5 remaining archetype guides (fullstack, mobile, devops-sre, data-engineering, security)
-- 3 remaining compare pages (Careerflow, Simplify, LoopCV)
-- Stripe billing + automated webhook — Phase 4
+- ~~5 remaining archetype guides~~ — **COMPLETE 2026-04-26**
+- ~~3 remaining compare pages~~ — **COMPLETE 2026-04-26**
+- Stripe billing + automated webhook — Phase 4 (manual Payment Links recommended for first 10 conversions per CEO)
 - Playwright a11y runner (scaffold + 6 .todo cases live; needs @axe-core/playwright wiring)
 - Phase 3 CV LaTeX generator + ethical keyword injector
 - Phase 5 interview-prep generator + pattern analytics
 - Phase 6 training/project evaluators
 - Phase 7 Chrome extension + i18n + referral engine
+- **First paying user** — 0 sign-ups, 0 WTP evidence (CEO's killer concern)
 
 ---
 

@@ -13,15 +13,38 @@ interface Block {
   body: string
 }
 
-const BLOCK_RE = /(?:^|\n)#{0,3}\s*(?:Block\s+)?([A-G])(?:\s*[—\-:]\s*|\s+)([^\n]+)\n([\s\S]*?)(?=(?:\n#{0,3}\s*(?:Block\s+)?[A-G][—\-:\s])|---SCORE_SUMMARY---|$)/g
+/**
+ * Block header forms we accept (LLMs are inconsistent across providers and
+ * across English / Spanish prompt sources):
+ *
+ *   ## Block A — Heading text          (canonical, what the operating rules say)
+ *   ## Block A: Heading text
+ *   ## A) Heading text                  (career-ops Spanish prompts default)
+ *   ## A. Heading text
+ *   ## A — Heading text
+ *   # A) Heading                        (single-hash variant)
+ *
+ * The regex captures the letter (A-G) + a heading line + body up to the next
+ * block boundary or the score-summary marker.
+ */
+const BLOCK_RE =
+  /(?:^|\n)#{1,3}\s*(?:Block\s+)?([A-G])\s*(?:[—\-:.\)]|\s)\s*([^\n]+)\n([\s\S]*?)(?=(?:\n#{1,3}\s*(?:Block\s+)?[A-G]\s*(?:[—\-:.\)]|\s))|---SCORE_SUMMARY---|$)/g
 
 function parseBlocks(md: string): Block[] {
   if (!md) return []
   const blocks: Block[] = []
+  const seen = new Set<string>()
   let m: RegExpExecArray | null
+  // Re-execable global regex; reset lastIndex to allow re-call across renders
+  BLOCK_RE.lastIndex = 0
   while ((m = BLOCK_RE.exec(md)) !== null) {
-    blocks.push({ letter: m[1], heading: m[2].trim(), body: m[3].trim() })
+    const letter = m[1].toUpperCase()
+    if (seen.has(letter)) continue   // dedupe in case of false-positive matches
+    seen.add(letter)
+    blocks.push({ letter, heading: m[2].trim(), body: m[3].trim() })
   }
+  // Sort A → G in case extraction order was off
+  blocks.sort((a, b) => a.letter.localeCompare(b.letter))
   return blocks
 }
 

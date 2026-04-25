@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { ScoreHero } from './ScoreHero'
 import { BlockAccordion } from './BlockAccordion'
 import { ShareToggle } from './ShareToggle.client'
+import { EvalFeedback } from './EvalFeedback.client'
+import { UpgradeCta } from './UpgradeCta'
 import type { AnonLevel } from '@/actions/evaluationActions'
 
 interface PageProps {
@@ -63,6 +65,8 @@ export default async function EvalDetailPage({ params }: PageProps) {
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-12 space-y-8">
       <ScoreHero evaluation={evaluation} />
       <BlockAccordion reportMd={evaluation.report_md ?? ''} />
+      <UpgradeCta score={evaluation.score} />
+      <EvalFeedback evalId={evaluation.id} />
       <ShareToggle
         id={evaluation.id}
         initialIsPublic={evaluation.is_public ?? false}
