@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import { MarketingHeader } from '@/components/marketing/MarketingHeader'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -9,20 +9,10 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#07070b] text-white">
-      <header className="border-b border-white/5 px-4 py-4 md:px-8">
-        <div className="mx-auto max-w-3xl flex items-center justify-between">
-          <Link href="/" className="text-sm font-semibold tracking-tight text-white hover:text-white/80">
-            Lakshya
-          </Link>
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/pricing" className="text-text-2 hover:text-white">Pricing</Link>
-            <Link href="/login" className="text-text-2 hover:text-white">Sign in</Link>
-          </div>
-        </div>
-      </header>
+    <main className="min-h-screen bg-[#07070b] text-white flex flex-col">
+      <MarketingHeader active="about" />
 
-      <article className="mx-auto max-w-2xl px-4 py-12 md:px-6 md:py-20 prose-invert">
+      <article className="mx-auto max-w-2xl px-4 py-12 md:px-6 md:py-20 flex-1 prose-invert">
         <p className="text-xs uppercase tracking-widest text-text-2 mb-3">About</p>
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-6 leading-tight">
           We turned a proven CLI into a webapp.
