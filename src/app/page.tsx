@@ -1,5 +1,6 @@
-// src/app/page.tsx
-'use client'
+// src/app/page.tsx — RSC. No hooks, no event handlers; safe as a server component.
+// Per-page metadata below overrides layout defaults for SEO crawlers.
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -13,6 +14,23 @@ import {
   Terminal,
   Workflow,
 } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Lakshya — Aim before you apply',
+  description: 'AI-powered job evaluation, tailored CVs, and archetype-driven career search built on the career-ops methodology (740+ real evaluations).',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Lakshya — Aim before you apply',
+    description: 'Rebuild your job search on the career-ops methodology.',
+    url: '/',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lakshya — Aim before you apply',
+    description: 'AI-powered job evaluation + tailored CVs.',
+  },
+}
 
 export default function LandingPage() {
   return (
