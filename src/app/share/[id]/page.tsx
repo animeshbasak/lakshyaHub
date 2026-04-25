@@ -59,6 +59,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : 'A-G Evaluation · Lakshya'
   const desc = `Scored ${row.score?.toFixed(1) ?? '—'}/5 · Archetype: ${row.archetype ?? 'unknown'} · Legitimacy: ${row.legitimacy_tier ?? 'unknown'}`
 
+  // Dynamic OG card with score ring + archetype badge per /og?page=eval
+  const ogParams = new URLSearchParams({
+    page: 'eval',
+    score: String(row.score ?? 0),
+    archetype: row.archetype ?? '',
+    company: labeled.company ?? 'Anonymous company',
+  })
+  const ogUrl = `/og?${ogParams.toString()}`
+
   return {
     title,
     description: desc,
@@ -68,8 +77,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: desc,
       type: 'article',
       url: `/share/${id}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: title }],
     },
-    twitter: { card: 'summary_large_image', title, description: desc },
+    twitter: { card: 'summary_large_image', title, description: desc, images: [ogUrl] },
   }
 }
 
