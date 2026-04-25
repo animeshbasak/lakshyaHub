@@ -1,8 +1,8 @@
 # Lakshya — Project Status Dashboard
 
 > **Canonical source of truth for all pending work, priorities, review findings, and blockers.**
-> Last updated: 2026-04-25
-> Branch under review: `feat/careerops-phase-0-1` (22 commits, 66/66 tests passing, build clean)
+> Last updated: 2026-04-25 evening
+> Branch under review: `feat/careerops-phase-0-1` (56 commits, 78/78 tests + 1 skipped + 11 todo, build clean, PR #1 open)
 
 This file is the single place any agent or human should open first. It aggregates every plan, every pending task, every review finding, and every blocker that needs user input.
 
@@ -11,28 +11,39 @@ This file is the single place any agent or human should open first. It aggregate
 ## 1. Branch State
 
 - **Branch:** `feat/careerops-phase-0-1`
-- **Commits:** 22 since main
-- **Tests:** 66 passing (7 test suites)
-- **Build:** clean (`npm run build` succeeds with `turbopack: {}`)
-- **Not yet PR'd**
+- **Commits since main:** 56
+- **Tests:** 78 passing + 1 skipped + 11 todo (12 test suites)
+- **Build:** clean (`npm run build` succeeds with Turbopack + `serverExternalPackages` for chromium/playwright)
+- **PR open:** [#1](https://github.com/animeshbasak/lakshyaHub/pull/1)
 
-### What's shipped
+### What's shipped (full inventory)
 
-| Phase | Scope | Commits | Tests |
-|---|---|---|---|
-| 0 | Cleanup (vitest, deps, rm atsEngine, migration, prompts) | 5 | — |
-| 1 | Eval loop (canonicalStates, archetypes, liveness, loader, parser, evaluator + route) | 6 | 38 |
-| 2 libs | scanAtsApi, browserDriver, urlGuard, livenessDriver, liveness schema, browser health | 6 | 27 |
-| Plans | careerops-integration, security, SEO, phase-2, UI-evolution | 5 | — |
+| Phase | Scope |
+|---|---|
+| 0 cleanup | vitest, runtime deps, removed atsEngine, migration 002, copied 17 career-ops prompts |
+| 1 eval loop | canonicalStates · archetypes (14) · liveness classifier · prompt loader · parseScoreSummary · evaluator + `/api/ai/evaluate` route |
+| 2 libs | scanAtsApi (Greenhouse/Ashby/Lever) · browserDriver (chromium) · urlGuard (SSRF) · livenessDriver · `/api/health/browser` · liveness schema |
+| Routes (public) | `/`, `/pricing` (USD/INR toggle), `/about`, `/guides`, `/guides/[archetype]` (14 SSG, 9 with full content), `/compare`, `/compare/[competitor]` (6 SSG, 3 with full content), `/share/[id]`, `/og` (dynamic), `/sitemap.xml`, `/robots.txt`, `/icon`, `/apple-icon`, `/opengraph-image` |
+| Routes (authed) | `/dashboard`, `/board`, `/discover`, `/profile`, `/resume`, `/evaluate`, `/eval/[id]`, `/archetypes`, `/stories` |
+| Security | proxy.ts middleware (CSP-with-nonce, HSTS, X-Frame-Options, Permissions-Policy, COOP), 3 IDOR fixes (loadResume/deleteResume/evaluate cvId), LLM input validation (`.max(20000)` + prompt-injection sanitize), provider-fallback chain (Groq → Gemini → Claude), audit_events append-only schema, RLS test scaffold, threat model doc |
+| Marketing | brand sweep `Lakshya Hub` → `Lakshya`, MarketingHeader unified across `/`, `/pricing`, `/about`, INR pricing for India geo-detect, broader-tech audience reframe |
+| SEO | sitemap + robots, JSON-LD (Organization, WebSite, SoftwareApplication, Article on share + guides + compare, FAQPage, BreadcrumbList), dynamic OG via next/og, 9 archetype guides + 3 compare pages |
+| UI | Skeleton primitives, loading.tsx for /eval/[id] /archetypes /stories, ScoreHero (responsive 120px desktop / 80px mobile), BlockAccordion (A-G parser), ShareToggle with 3 anonymization tiers, CadenceBadge for Kanban, EmptyState + Evaluate CTA on /board /dashboard, branded icon/apple-icon/og |
+| Docs | careerops integration master plan, security plan (S0-S12), SEO plan, Phase 2 detail, UI evolution plan, S0 threat model, SETUP.md, PROJECT-STATUS.md (this file), 9 archetype guide content files, 3 compare page content files, secret-scan + env-audit scripts |
+| Infra | next.config.ts (turbopack alias, serverExternalPackages, outputFileTracingIncludes for prompts, security headers), CSP-with-nonce middleware, dynamic OG route on edge runtime |
 
 ### What's NOT shipped
 
-- `/api/scan` route (Task 2.5)
-- `/api/liveness` route (Task 2.7)
-- Phase 2 cron endpoints (2.9, 2.10)
-- `portals` table + seed migration (Task 2.4)
-- All UI surfaces for careerops (evaluate page, share page, archetypes, stories)
-- Any security/SEO plan execution
+- `/api/scan` + `/api/liveness` routes — blocked on QStash provisioning + Vercel Lambda mem 3008MB
+- Phase 2 cron endpoints (2.9, 2.10) — same blocker
+- 5 remaining archetype guides (fullstack, mobile, devops-sre, data-engineering, security)
+- 3 remaining compare pages (Careerflow, Simplify, LoopCV)
+- Stripe billing + automated webhook — Phase 4
+- Playwright a11y runner (scaffold + 6 .todo cases live; needs @axe-core/playwright wiring)
+- Phase 3 CV LaTeX generator + ethical keyword injector
+- Phase 5 interview-prep generator + pattern analytics
+- Phase 6 training/project evaluators
+- Phase 7 Chrome extension + i18n + referral engine
 
 ---
 
