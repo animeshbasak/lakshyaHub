@@ -180,12 +180,14 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
         await supabase.auth.updateUser({ data: { full_name: data.name.trim() } })
       }
 
-      // Upsert resume_profiles
+      // Upsert resume_profiles. Only columns present in 001_initial_schema.sql.
+      // years_experience is collected by the form but not persisted yet — would
+      // require migration 006 to add the column. For now this is OK because the
+      // careerops eval pipeline doesn't read years_experience.
       const { error: upsertError } = await supabase.from('resume_profiles').upsert({
         id: user.id,
         target_titles: [data.targetRole].filter(Boolean),
         skills: data.skills,
-        years_experience: data.yearsExperience || null,
         updated_at: new Date().toISOString(),
         source: 'manual',
       })

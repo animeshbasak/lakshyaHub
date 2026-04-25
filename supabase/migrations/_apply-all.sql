@@ -1,4 +1,4 @@
--- LAKSHYA — combined migrations 002-005 (auto-generated 2026-04-25).
+-- LAKSHYA — combined migrations 002-005 (auto-generated 2026-04-26).
 -- Paste this entire file into Supabase SQL editor and click Run.
 -- Idempotent: safe to re-run.
 
@@ -25,7 +25,7 @@ create table if not exists public.evaluations (
   blocks_json jsonb not null default '{}',
   report_md text,
   prompt_version text not null default '1.0.0',
-  llm_provider text not null default 'claude',
+  llm_provider text not null default 'groq',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
