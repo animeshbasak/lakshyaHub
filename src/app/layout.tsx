@@ -14,8 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lakshya Hub — Unified Career Command Center",
-  description: "Merge job tracking with AI-powered resume building. Land your dream job, systematically.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lakshya.app'),
+  title: {
+    default: 'Lakshya — Aim before you apply',
+    template: '%s · Lakshya',
+  },
+  description: 'AI-powered job evaluation, tailored CVs, and archetype-driven career search. Built on the career-ops methodology.',
+  keywords: ['AI job evaluator', 'ATS resume', 'archetype career', 'career-ops', 'job search'],
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    locale: 'en',
+    siteName: 'Lakshya',
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({

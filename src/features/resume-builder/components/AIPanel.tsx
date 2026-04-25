@@ -168,6 +168,13 @@ function JdSection({ resumeData, initialJdId }: JdSectionProps) {
 
   const handleAnalyze = async () => {
     if (!jdText.trim()) return
+    // /api/ai/jd-match-5d removed in Phase 0 (replaced by A-G evaluator).
+    // Re-enable when UI-2 adapter wires this panel to /api/ai/evaluate.
+    const JD_MATCH_LEGACY_ENABLED = false
+    if (!JD_MATCH_LEGACY_ENABLED) {
+      setError('JD Match is being rebuilt as the A-G evaluator. Use Evaluate from the sidebar instead.')
+      return
+    }
     setLoading(true)
     setError(null)
     try {

@@ -1,116 +1,498 @@
 // src/app/page.tsx
 'use client'
-import React from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Sparkles, ArrowRight, Briefcase, FileText, Zap, Shield, Target, Globe } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Briefcase,
+  Command,
+  FileText,
+  LineChart,
+  Radar,
+  Sparkles,
+  Terminal,
+  Workflow,
+} from 'lucide-react'
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg text-white overflow-x-hidden selection:bg-cyan-500/30">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 px-8 py-6 flex items-center justify-between backdrop-blur-md bg-bg/50 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-purple-500 shadow-lg shadow-cyan-500/20" />
-          <span className="text-xl font-bold tracking-tight">Lakshya<span className="text-cyan-400">Hub</span></span>
+    <div className="min-h-screen bg-[#07070b] text-white selection:bg-white/15">
+      <LandingNav />
+
+      <main>
+        <Hero />
+        <LogoStrip />
+        <Pillars />
+        <WorkflowStrip />
+        <FinalCta />
+      </main>
+
+      <footer className="border-t border-white/5 px-6 md:px-10 py-8 flex flex-col md:flex-row items-start md:items-center justify-between text-xs text-white/40 gap-4">
+        <div className="flex items-center gap-2.5">
+          <Logo small />
+          <span className="text-white/70">Lakshya</span>
+          <span>· Aim before you apply</span>
         </div>
-        <div className="flex items-center gap-8">
-          <Link href="/board" className="text-sm font-medium text-text-muted hover:text-white transition-colors">Features</Link>
-          <Link href="/resume" className="text-sm font-medium text-text-muted hover:text-white transition-colors">Resume</Link>
-          <Link href="/board" className="px-5 py-2.5 rounded-xl bg-white text-bg text-sm font-bold hover:scale-[1.05] active:scale-[0.95] transition-all">
-            Dashboard
+        <div className="flex gap-6">
+          <a href="https://github.com/animeshbasak" className="hover:text-white/80 transition-colors">
+            GitHub
+          </a>
+          <Link href="/profile" className="hover:text-white/80 transition-colors">
+            Account
           </Link>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="relative pt-40 pb-20 px-8 flex flex-col items-center text-center">
-        {/* Background Glows */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full pointer-events-none" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative z-10"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-widest mb-8 border border-cyan-500/20">
-            <Sparkles className="w-3 h-3" />
-            The Unified Career Command Center
-          </div>
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.05]">
-            Land your dream job. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Systematically.</span>
-          </h1>
-          <p className="text-xl text-text-muted max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            Merge recruitment tracking with high-conversion AI resume building. 
-            Automate the friction, focus on the interview.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link href="/board" className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold text-lg shadow-xl shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2">
-              Get Started for Free
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/resume" className="px-8 py-4 rounded-2xl bg-white/5 border border-white/5 text-white font-bold text-lg hover:bg-white/10 transition-all">
-              Build My Resume
-            </Link>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Feature Grid */}
-      <section className="py-20 px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <FeatureCard 
-            icon={Target}
-            title="Lakshya Board"
-            description="Drag-and-drop Kanban to track every application from applied to offer."
-          />
-          <FeatureCard 
-            icon={Sparkles}
-            title="AI Resume"
-            description="Optimize every bullet point with AI to beat ATS and impress recruiters."
-          />
-          <FeatureCard 
-            icon={Zap}
-            title="Job Matcher"
-            description="Analyze how well your resume fits a JD and close the gap instantly."
-          />
-          <FeatureCard 
-            icon={Shield}
-            title="Supabase SSR"
-            description="Secure, fast, and synced data across your devices automatically."
-          />
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-white/5 px-8 flex flex-col md:flex-row items-center justify-between text-text-muted text-sm gap-8">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded bg-white/10" />
-          <span className="font-bold text-white">LakshyaHub</span>
-        </div>
-        <p>© 2026 Lakshya Hub Project. MIT Licensed.</p>
-        <div className="flex gap-8">
-          <a href="#" className="hover:text-white transition-all">GitHub</a>
-          <a href="#" className="hover:text-white transition-all">Privacy</a>
-          <a href="#" className="hover:text-white transition-all">Terms</a>
+          <span>v0.9 · MIT</span>
         </div>
       </footer>
     </div>
   )
 }
 
-function FeatureCard({ icon: Icon, title, description }: any) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Nav
+// ─────────────────────────────────────────────────────────────────────────────
+
+function LandingNav() {
   return (
-    <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-cyan-500/20 hover:bg-white/[0.04] transition-all group">
-      <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-6 group-hover:scale-110 transition-transform">
-        <Icon className="w-6 h-6" />
+    <nav className="fixed top-0 inset-x-0 z-50 bg-[#07070b]/80 backdrop-blur-md border-b border-white/5">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <Logo />
+          <span className="text-[13px] font-semibold tracking-tight">
+            Lakshya<span className="text-white/50">Hub</span>
+          </span>
+        </Link>
+        <div className="hidden md:flex items-center gap-7">
+          <a href="#pillars" className="text-[13px] text-white/60 hover:text-white transition-colors">
+            Product
+          </a>
+          <a href="#workflow" className="text-[13px] text-white/60 hover:text-white transition-colors">
+            Workflow
+          </a>
+          <Link href="/resume" className="text-[13px] text-white/60 hover:text-white transition-colors">
+            Resume
+          </Link>
+          <Link href="/board" className="text-[13px] text-white/60 hover:text-white transition-colors">
+            Board
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="hidden md:inline-flex text-[13px] text-white/60 hover:text-white px-3 py-1.5 rounded-md transition-colors"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/board"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium bg-white text-[#07070b] px-3.5 py-1.5 rounded-md hover:bg-white/90 transition-colors"
+          >
+            Open app
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
-      <h3 className="text-lg font-bold text-white mb-3 tracking-tight">{title}</h3>
-      <p className="text-sm text-text-muted leading-relaxed">
-        {description}
+    </nav>
+  )
+}
+
+function Logo({ small = false }: { small?: boolean }) {
+  const size = small ? 18 : 22
+  return (
+    <div
+      className="rounded-[5px] border border-white/15 bg-white/[0.04] grid place-items-center"
+      style={{ width: size, height: size }}
+    >
+      <div className="w-1.5 h-1.5 rounded-[1px] bg-white/90" />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Hero() {
+  return (
+    <section className="relative pt-28 md:pt-36 pb-16 md:pb-24 px-6 md:px-10 border-b border-white/5">
+      {/* Grid backdrop */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage:
+            'radial-gradient(ellipse at 50% 0%, #000 30%, transparent 70%)',
+        }}
+      />
+
+      <div className="relative max-w-6xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md border border-white/10 bg-white/[0.02] text-[11px] text-white/60 mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
+          <span className="font-medium text-white/80">v0.9</span>
+          <span className="text-white/30">·</span>
+          <span>Resume parser, ATS engine, job pipeline</span>
+        </div>
+
+        <h1 className="text-[44px] md:text-[68px] leading-[1.02] tracking-[-0.02em] font-semibold max-w-4xl">
+          The operating system for
+          <br />
+          <span className="text-white/50">running your job search</span>
+          <span className="text-white"> like a project.</span>
+        </h1>
+
+        <p className="mt-6 text-[15px] md:text-base text-white/55 max-w-2xl leading-relaxed">
+          Lakshya unifies the three tools job seekers open in different
+          tabs — resume builder, application tracker, and job intelligence —
+          into a single keyboard-driven workspace with an auditable AI layer.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Link
+            href="/board"
+            className="inline-flex items-center gap-2 bg-white text-[#07070b] text-sm font-medium px-4 py-2.5 rounded-md hover:bg-white/90 transition-colors"
+          >
+            Open workspace
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/resume"
+            className="inline-flex items-center gap-2 border border-white/10 text-white/80 text-sm font-medium px-4 py-2.5 rounded-md hover:bg-white/5 hover:text-white transition-colors"
+          >
+            Import a resume
+          </Link>
+          <span className="inline-flex items-center gap-1.5 text-[12px] text-white/40 ml-1">
+            <Command className="w-3.5 h-3.5" />
+            <kbd className="px-1.5 py-0.5 rounded border border-white/10 bg-white/[0.03] text-[10px] font-mono text-white/70">
+              ⌘K
+            </kbd>
+            for actions
+          </span>
+        </div>
+
+        {/* Console-style product callout */}
+        <div className="mt-14 md:mt-20 max-w-5xl">
+          <div className="rounded-lg border border-white/10 bg-[#0b0b12] overflow-hidden">
+            <div className="flex items-center justify-between px-3.5 py-2 border-b border-white/5">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                </div>
+                <span className="ml-2 text-[11px] font-mono text-white/40">
+                  lakshya · board
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-white/30">
+                commit 3f9a · last sync 12s
+              </span>
+            </div>
+            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+              <ConsoleColumn
+                label="Applied"
+                metric="17"
+                rows={[
+                  'Staff Engineer · Ramp',
+                  'Frontend Lead · Linear',
+                  'Senior SWE · Vercel',
+                ]}
+              />
+              <ConsoleColumn
+                label="In review"
+                metric="5"
+                rows={[
+                  'Principal FE · Retool',
+                  'Sr Staff · Figma',
+                  'Platform Lead · Attio',
+                ]}
+                highlight
+              />
+              <ConsoleColumn
+                label="Offer"
+                metric="1"
+                rows={['Head of FE · Series-B fintech']}
+              />
+            </div>
+          </div>
+          <p className="mt-3 text-[11px] text-white/35 font-mono">
+            representative UI — real data lives in /board
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ConsoleColumn({
+  label,
+  metric,
+  rows,
+  highlight,
+}: {
+  label: string
+  metric: string
+  rows: string[]
+  highlight?: boolean
+}) {
+  return (
+    <div className="p-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] uppercase tracking-wider text-white/40 font-medium">
+          {label}
+        </span>
+        <span
+          className={`text-[11px] font-mono ${
+            highlight ? 'text-white' : 'text-white/50'
+          }`}
+        >
+          {metric}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {rows.map((r) => (
+          <div
+            key={r}
+            className="text-[12px] text-white/75 border border-white/5 bg-white/[0.015] rounded-md px-2.5 py-2 flex items-center justify-between"
+          >
+            <span className="truncate">{r}</span>
+            <ArrowUpRight className="w-3 h-3 text-white/25 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Logo strip (social proof / stack honesty)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function LogoStrip() {
+  const items = [
+    'Next.js 16',
+    'React 19',
+    'Supabase SSR',
+    'Anthropic',
+    'Gemini',
+    'Groq',
+    '@react-pdf',
+    'Zustand',
+  ]
+  return (
+    <section className="border-b border-white/5 py-6 px-6 md:px-10">
+      <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        <span className="text-[11px] uppercase tracking-wider text-white/30 mr-2">
+          Built on
+        </span>
+        {items.map((i) => (
+          <span key={i} className="text-[12px] text-white/45 font-mono">
+            {i}
+          </span>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pillars
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Pillars() {
+  return (
+    <section id="pillars" className="py-20 md:py-28 px-6 md:px-10 border-b border-white/5">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeader
+          eyebrow="Product"
+          title="Three connected surfaces. One source of truth."
+          caption="Every piece of data — the role, the JD, the tailored resume, the ATS score, the recruiter contact — lives in a single graph. No spreadsheet. No copy-paste."
+        />
+
+        <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 rounded-lg border border-white/5 overflow-hidden">
+          <PillarCard
+            icon={Workflow}
+            eyebrow="01 · Board"
+            title="Kanban tracker that compiles from search."
+            body="Jobs you save from the discovery engine drop straight into Applied → Interviewing → Offer. Keyboard-driven. No drag needed."
+            href="/board"
+          />
+          <PillarCard
+            icon={FileText}
+            eyebrow="02 · Resume"
+            title="Parser-first builder, not another form."
+            body="Upload a PDF or DOCX and the layout-aware parser recovers sections even from 2-column templates. ATS score and suggestions update live."
+            href="/resume"
+          />
+          <PillarCard
+            icon={Radar}
+            eyebrow="03 · Match"
+            title="JD fit, skill gaps, and ghost-job signals."
+            body="Paste a job description and see the five-dimension fit score, missing keywords, and risk indicators before you spend time applying."
+            href="/job-board"
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PillarCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  body,
+  href,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  eyebrow: string
+  title: string
+  body: string
+  href: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="group p-7 bg-[#07070b] hover:bg-white/[0.015] transition-colors relative"
+    >
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-white/40 font-mono mb-6">
+        <Icon className="w-3.5 h-3.5" />
+        {eyebrow}
+      </div>
+      <h3 className="text-[19px] leading-snug font-medium tracking-tight text-white mb-3">
+        {title}
+      </h3>
+      <p className="text-[13.5px] leading-relaxed text-white/50">{body}</p>
+      <ArrowUpRight className="w-4 h-4 text-white/20 group-hover:text-white/70 transition-colors absolute top-6 right-6" />
+    </Link>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Workflow strip
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WorkflowStrip() {
+  const steps = [
+    {
+      n: '01',
+      k: 'Import',
+      icon: FileText,
+      desc: 'Upload PDF / DOCX — parser recovers sections even from 2-col layouts.',
+    },
+    {
+      n: '02',
+      k: 'Target',
+      icon: Briefcase,
+      desc: 'Paste a JD. Get 5-dimension fit score, missing keywords, ghost-job risk.',
+    },
+    {
+      n: '03',
+      k: 'Rewrite',
+      icon: Sparkles,
+      desc: 'Bullet rewrite, compact, and skim — every AI change is shown as a diff.',
+    },
+    {
+      n: '04',
+      k: 'Track',
+      icon: LineChart,
+      desc: 'Applications flow into the board. No spreadsheet hand-off.',
+    },
+  ]
+
+  return (
+    <section id="workflow" className="py-20 md:py-28 px-6 md:px-10 border-b border-white/5">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeader
+          eyebrow="Workflow"
+          title="One pass, end-to-end."
+          caption="Import → target → rewrite → track. No tool switching. Everything auditable."
+        />
+        <div className="mt-14 grid grid-cols-1 md:grid-cols-4 gap-4">
+          {steps.map((s) => {
+            const Icon = s.icon
+            return (
+              <div
+                key={s.n}
+                className="rounded-lg border border-white/10 bg-white/[0.015] p-5"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <span className="font-mono text-[10px] text-white/35">
+                    {s.n}
+                  </span>
+                  <Icon className="w-3.5 h-3.5 text-white/45" />
+                </div>
+                <h4 className="text-[14px] font-medium text-white mb-1.5">
+                  {s.k}
+                </h4>
+                <p className="text-[12.5px] leading-relaxed text-white/50">
+                  {s.desc}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Final CTA
+// ─────────────────────────────────────────────────────────────────────────────
+
+function FinalCta() {
+  return (
+    <section className="py-20 md:py-28 px-6 md:px-10">
+      <div className="max-w-4xl mx-auto text-center">
+        <Terminal className="w-5 h-5 text-white/40 mx-auto mb-6" />
+        <h2 className="text-[34px] md:text-[46px] leading-[1.05] tracking-[-0.02em] font-semibold text-white max-w-3xl mx-auto">
+          Run your next role like you'd run a launch.
+        </h2>
+        <p className="mt-5 text-[15px] text-white/55 max-w-xl mx-auto">
+          No dashboards full of vanity widgets. Just the workflow, the parser,
+          the ATS engine, and a shortcut for every surface.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/board"
+            className="inline-flex items-center gap-2 bg-white text-[#07070b] text-sm font-medium px-4 py-2.5 rounded-md hover:bg-white/90 transition-colors"
+          >
+            Open workspace
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/resume"
+            className="inline-flex items-center gap-2 border border-white/10 text-white/80 text-sm font-medium px-4 py-2.5 rounded-md hover:bg-white/5 hover:text-white transition-colors"
+          >
+            Import resume
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function SectionHeader({
+  eyebrow,
+  title,
+  caption,
+}: {
+  eyebrow: string
+  title: string
+  caption: string
+}) {
+  return (
+    <div className="max-w-3xl">
+      <div className="text-[10px] uppercase tracking-wider text-white/40 font-mono mb-4">
+        {eyebrow}
+      </div>
+      <h2 className="text-[30px] md:text-[38px] leading-[1.1] tracking-[-0.02em] font-semibold text-white">
+        {title}
+      </h2>
+      <p className="mt-4 text-[14.5px] text-white/55 leading-relaxed">
+        {caption}
       </p>
     </div>
   )

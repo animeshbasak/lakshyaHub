@@ -136,7 +136,7 @@ interface RemoteOKJob {
 export async function searchRemoteOK(query: string, limit: number): Promise<RawJob[]> {
   try {
     const res = await fetch('https://remoteok.com/api', {
-      headers: { 'User-Agent': 'lakshya-hub/1.0 (job search app)' },
+      headers: { 'User-Agent': 'lakshya/1.0 (job search app)' },
       signal: withTimeout(FETCH_TIMEOUT_MS),
     })
     if (!res.ok) return []

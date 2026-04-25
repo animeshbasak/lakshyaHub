@@ -70,7 +70,15 @@ export function JdMatchPanel({ jobId, fitBreakdown, jobDescription }: JdMatchPan
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // /api/ai/jd-match-5d was deleted in Phase 0 (replaced by A-G evaluator at /api/ai/evaluate).
+  // Toggle re-enables once the new evaluator UI adapter ships in UI-2.1 / UI-2.2.
+  const JD_MATCH_LEGACY_ENABLED = false
+
   const handleRunAnalysis = async () => {
+    if (!JD_MATCH_LEGACY_ENABLED) {
+      setError('JD Match is being rebuilt as the A-G evaluator. Use Evaluate from the sidebar instead.')
+      return
+    }
     setLoading(true)
     setError(null)
     try {

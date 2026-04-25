@@ -408,7 +408,7 @@ export function CmdKProvider({ children }: { children: React.ReactNode }) {
               <span style={{ flex: 1 }} />
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                 <BrandMark size={14} />
-                <span>Lakshya Hub</span>
+                <span>Lakshya</span>
               </span>
             </div>
           </div>
