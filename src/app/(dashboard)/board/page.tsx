@@ -1,6 +1,6 @@
 // src/app/(dashboard)/board/page.tsx
 import Link from 'next/link'
-import { Compass, ArrowRight } from 'lucide-react'
+import { Compass, ArrowRight, Target } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { KanbanBoard } from '@/features/job-board/components/KanbanBoard'
 import type { Application, Job } from '@/types'
@@ -130,20 +130,36 @@ export default async function BoardPage() {
               </div>
               <h2 className="h3" style={{ marginBottom: 8 }}>Your pipeline is empty</h2>
               <p style={{ fontSize: 13, color: 'var(--fg-3)', marginBottom: 22, lineHeight: 1.55 }}>
-                Find roles on Discover and save the ones worth pursuing. They&rsquo;ll land here, ready to move through Saved → Applied → Interview → Offer.
+                Two ways to start: paste any JD into <strong>Evaluate</strong> for a 30-second
+                A-G score before you commit time, or browse <strong>Discover</strong> for
+                live listings to save into the pipeline.
               </p>
-              <Link
-                href="/discover"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-colors"
-                style={{
-                  background: 'var(--fg)',
-                  color: 'var(--bg-1)',
-                  border: '1px solid var(--fg)',
-                }}
-              >
-                Find your first job
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Link
+                  href="/evaluate"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-colors min-h-[40px]"
+                  style={{
+                    background: 'var(--fg)',
+                    color: 'var(--bg-1)',
+                    border: '1px solid var(--fg)',
+                  }}
+                >
+                  <Target className="w-4 h-4" />
+                  Evaluate a JD
+                </Link>
+                <Link
+                  href="/discover"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-colors min-h-[40px]"
+                  style={{
+                    background: 'transparent',
+                    color: 'var(--fg)',
+                    border: '1px solid var(--hair)',
+                  }}
+                >
+                  Browse jobs
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           </div>
         ) : (

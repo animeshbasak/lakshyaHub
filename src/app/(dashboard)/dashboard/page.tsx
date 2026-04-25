@@ -252,10 +252,14 @@ export default async function DashboardPage() {
               }}
             >
               <Briefcase size={28} style={{ color: 'var(--fg-4)' }} />
-              <p className="text-3" style={{ fontSize: 13, margin: 0 }}>
+              <p className="text-3" style={{ fontSize: 13, margin: 0, textAlign: 'center', lineHeight: 1.55 }}>
                 No applications yet.{' '}
+                <Link href="/evaluate" style={{ color: 'var(--fg)', fontWeight: 500 }}>
+                  Evaluate a JD →
+                </Link>
+                {' or '}
                 <Link href="/discover" style={{ color: 'var(--fg)' }}>
-                  Run your first search →
+                  browse jobs
                 </Link>
               </p>
             </div>
