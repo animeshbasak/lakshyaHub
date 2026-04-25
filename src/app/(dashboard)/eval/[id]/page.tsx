@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ScoreHero } from './ScoreHero'
 import { BlockAccordion } from './BlockAccordion'
+import { ShareToggle } from './ShareToggle.client'
+import type { AnonLevel } from '@/actions/evaluationActions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -27,6 +29,8 @@ interface EvaluationRow {
   created_at: string | null
   llm_provider: string | null
   prompt_version: string | null
+  is_public: boolean | null
+  anon_level: AnonLevel | null
 }
 
 export default async function EvalDetailPage({ params }: PageProps) {
@@ -39,7 +43,7 @@ export default async function EvalDetailPage({ params }: PageProps) {
   // RLS already restricts to user_id = auth.uid(); this is defense-in-depth.
   const { data, error } = await supabase
     .from('evaluations')
-    .select('id, user_id, jd_url, jd_text, company, role, archetype, score, legitimacy_tier, report_md, created_at, llm_provider, prompt_version')
+    .select('id, user_id, jd_url, jd_text, company, role, archetype, score, legitimacy_tier, report_md, created_at, llm_provider, prompt_version, is_public, anon_level')
     .eq('id', id)
     .eq('user_id', user.id)
     .maybeSingle()
@@ -51,6 +55,11 @@ export default async function EvalDetailPage({ params }: PageProps) {
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-12 space-y-8">
       <ScoreHero evaluation={evaluation} />
       <BlockAccordion reportMd={evaluation.report_md ?? ''} />
+      <ShareToggle
+        id={evaluation.id}
+        initialIsPublic={evaluation.is_public ?? false}
+        initialAnonLevel={evaluation.anon_level ?? 'full_anon'}
+      />
 
       <footer className="text-[11px] text-text-2 flex flex-wrap gap-4 pt-6 border-t border-white/5">
         <span>Provider: {evaluation.llm_provider ?? 'claude'}</span>
