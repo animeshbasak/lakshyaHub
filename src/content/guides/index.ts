@@ -1,11 +1,15 @@
 import type { ArchetypeGuide } from './ai-platform'
 import { aiPlatformGuide } from './ai-platform'
+import { agenticGuide } from './agentic'
+import { aiPmGuide } from './ai-pm'
 import { ARCHETYPES, type Archetype } from '@/lib/careerops/archetypes'
 
 export type { ArchetypeGuide } from './ai-platform'
 
 const GUIDES: Partial<Record<Archetype, ArchetypeGuide>> = {
   'ai-platform': aiPlatformGuide,
+  'agentic':     agenticGuide,
+  'ai-pm':       aiPmGuide,
 }
 
 export interface GuideStub {
