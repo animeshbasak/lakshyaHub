@@ -8,6 +8,8 @@ import { transformationGuide } from './transformation'
 import { backendGuide } from './backend'
 import { engineeringManagerGuide } from './engineering-manager'
 import { frontendGuide } from './frontend'
+import { mobileGuide } from './mobile'
+import { devopsSreGuide } from './devops-sre'
 import { ARCHETYPES, ARCHETYPE_FAMILY, type Archetype } from '@/lib/careerops/archetypes'
 
 export type { ArchetypeGuide } from './ai-platform'
@@ -20,10 +22,12 @@ const GUIDES: Partial<Record<Archetype, ArchetypeGuide>> = {
   'solutions-architect': solutionsArchitectGuide,
   'forward-deployed':    forwardDeployedGuide,
   'transformation':      transformationGuide,
-  // General tech (3/8 — backend, EM, frontend)
+  // General tech (5/8 — backend, EM, frontend, mobile, devops-sre)
   'backend':             backendGuide,
   'engineering-manager': engineeringManagerGuide,
   'frontend':            frontendGuide,
+  'mobile':              mobileGuide,
+  'devops-sre':          devopsSreGuide,
 }
 
 export interface GuideStub {

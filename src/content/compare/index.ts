@@ -2,6 +2,8 @@ import type { CompetitorContent, CompetitorStub } from './types'
 import { tealCompare } from './teal'
 import { jobscanCompare } from './jobscan'
 import { huntrCompare } from './huntr'
+import { careerflowCompare } from './careerflow'
+import { simplifyCompare } from './simplify'
 
 export type { CompetitorContent, CompetitorStub } from './types'
 
@@ -9,6 +11,8 @@ const REGISTRY: Record<string, CompetitorContent> = {
   teal: tealCompare,
   jobscan: jobscanCompare,
   huntr: huntrCompare,
+  careerflow: careerflowCompare,
+  simplify: simplifyCompare,
 }
 
 interface StubMeta {
