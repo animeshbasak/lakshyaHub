@@ -7,18 +7,28 @@ import { Loader2, ArrowRight } from 'lucide-react'
 const MIN_CHARS = 50
 const MAX_CHARS = 20_000
 
-type Provider = 'claude' | 'gemini'
+type Provider = 'groq' | 'gemini' | 'claude'
 
 interface EvalResponse {
   evaluation?: { id: string }
-  error?: unknown
+  error?: string | unknown
+  code?: string
+  provider?: string
+  envVar?: string
+  hint?: string
 }
+
+const PROVIDER_OPTIONS: { value: Provider; label: string; sub: string }[] = [
+  { value: 'groq',   label: 'Groq',   sub: 'Free · fastest · Llama 3.3 70B' },
+  { value: 'gemini', label: 'Gemini', sub: 'Free tier · Gemini 2.5 Flash' },
+  { value: 'claude', label: 'Claude', sub: 'BYOK · highest quality (paid)' },
+]
 
 export function EvaluatePanel() {
   const router = useRouter()
   const [jdText, setJdText] = useState('')
   const [jdUrl, setJdUrl] = useState('')
-  const [provider, setProvider] = useState<Provider>('claude')
+  const [provider, setProvider] = useState<Provider>('groq')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,6 +48,13 @@ export function EvaluatePanel() {
       })
       const data = (await res.json()) as EvalResponse
       if (!res.ok || !data.evaluation?.id) {
+        // Friendlier error for the missing-API-key case
+        if (data.code === 'provider_unconfigured' && data.envVar) {
+          throw new Error(
+            `${data.provider ?? 'Provider'} is not configured. Set ${data.envVar} in .env.local. ` +
+            `${data.hint ?? ''} Or pick a different provider above.`
+          )
+        }
         const msg =
           typeof data.error === 'string' ? data.error :
           data.error ? JSON.stringify(data.error) :
@@ -93,23 +110,32 @@ export function EvaluatePanel() {
         </div>
       </div>
 
-      <div>
-        <span className="block text-xs uppercase tracking-widest text-text-2 mb-2">Model</span>
-        <div className="inline-flex rounded-lg border border-white/10 p-0.5 bg-white/[0.02]">
-          {(['claude', 'gemini'] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setProvider(p)}
-              className={`px-3 py-1.5 text-xs rounded-md transition-colors min-h-[36px] ${
-                provider === p ? 'bg-white text-[#07070b] font-medium' : 'text-white/70 hover:text-white'
+      <fieldset>
+        <legend className="block text-xs uppercase tracking-widest text-text-2 mb-2">Model</legend>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {PROVIDER_OPTIONS.map((p) => (
+            <label
+              key={p.value}
+              className={`flex flex-col items-start gap-0.5 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors min-h-[60px] ${
+                provider === p.value
+                  ? 'border-[color:var(--accent)]/40 bg-[color:var(--accent)]/[0.05]'
+                  : 'border-white/10 bg-white/[0.02] hover:border-white/20'
               }`}
             >
-              {p === 'claude' ? 'Claude (recommended)' : 'Gemini (fast, free tier)'}
-            </button>
+              <input
+                type="radio"
+                name="provider"
+                value={p.value}
+                checked={provider === p.value}
+                onChange={() => setProvider(p.value)}
+                className="sr-only"
+              />
+              <span className="text-xs font-semibold text-white">{p.label}</span>
+              <span className="text-[10px] text-text-2 leading-tight">{p.sub}</span>
+            </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {error && (
         <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2.5 text-xs text-red-300">
