@@ -116,13 +116,29 @@ export function mapParsedResumeToBuilder(result: ResumeParseResult): BuilderImpo
         text: bullet,
       })),
     })),
-    education: result.parsed.education.map((item, index) => ({
-      id: `import_education_${index}`,
-      degree: [item.degree, item.field].filter(Boolean).join(' - '),
-      institution: item.institution,
-      period: [item.startDate, item.endDate].filter(Boolean).join(' - '),
-      grade: item.score,
-    })),
+    education: (() => {
+      const seen = new Set<string>();
+      return result.parsed.education
+        .map((item, index) => ({
+          id: `import_education_${index}`,
+          degree: [item.degree, item.field].filter(Boolean).join(' - '),
+          institution: item.institution,
+          period: [item.startDate, item.endDate].filter(Boolean).join(' - '),
+          grade: item.score,
+        }))
+        .sort((a, b) => {
+          // Prefer entries with more data (period + grade) over sparse ones
+          const scoreA = (a.period ? 2 : 0) + (a.grade ? 1 : 0);
+          const scoreB = (b.period ? 2 : 0) + (b.grade ? 1 : 0);
+          return scoreB - scoreA;
+        })
+        .filter((edu) => {
+          const key = `${edu.degree.toLowerCase().trim()}|${edu.institution.toLowerCase().trim()}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+    })(),
     projects,
     skills,
     competencies,

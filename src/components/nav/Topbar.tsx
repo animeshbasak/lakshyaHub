@@ -1,13 +1,14 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bell, ChevronRight, Command, Home, Search, Kanban, FileText, Palette } from 'lucide-react'
+import { Bell, ChevronRight, Command, Home, Search, Kanban, FileText, Palette, Target } from 'lucide-react'
 import { useCmdK } from './CmdKProvider'
 import { useTweaks } from './TweaksProvider'
 import { BrandMark } from './BrandMark'
 
 const ROUTE_META: Record<string, { title: string; crumb: string }> = {
   '/dashboard': { title: 'Home', crumb: 'Overview' },
+  '/evaluate': { title: 'Evaluate', crumb: 'JD eval' },
   '/discover': { title: 'Discover', crumb: 'Find jobs' },
   '/board': { title: 'Pipeline', crumb: 'Applications' },
   '/resume': { title: 'Resume', crumb: 'Builder' },
@@ -16,6 +17,7 @@ const ROUTE_META: Record<string, { title: string; crumb: string }> = {
 
 const TOPBAR_NAV = [
   { href: '/dashboard', label: 'Home', Icon: Home },
+  { href: '/evaluate', label: 'Evaluate', Icon: Target },
   { href: '/discover', label: 'Discover', Icon: Search },
   { href: '/board', label: 'Pipeline', Icon: Kanban },
   { href: '/resume', label: 'Resume', Icon: FileText },

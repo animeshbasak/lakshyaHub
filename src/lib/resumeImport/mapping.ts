@@ -253,6 +253,9 @@ function parseCompanyLocationLine(text: string) {
 function looksLikeFakeRole(role: string) {
   if (!role.trim()) return true;
   if (role.endsWith('.')) return true;
+  // Only flag as fake when ALL of: no role keyword, short (≤3 tokens), and ALL lowercase.
+  // Mixed-case names like "Lakshya Resume (insaneResumake)" are project headers, not fake roles —
+  // they are handled separately by looksLikeProjectEntry.
   if (!hasRoleKeyword(role) && role.split(/\s+/).length <= 3 && role === role.toLowerCase()) return true;
   return false;
 }
@@ -313,6 +316,9 @@ function looksLikeTechnologyStackLine(line: string) {
   if (/^[•\-–—›»·*]\s+/.test(line) || DATE_RANGE_REGEX.test(line)) {
     return false;
   }
+  // Prose sentences are not tech stack lines — project descriptions often contain
+  // tech keywords and commas but are >100 chars of continuous prose
+  if (line.length > 100) return false;
 
   const separators = (line.match(/[·,]/g) ?? []).length;
   const techWords = (line.match(/\b(react|typescript|node|next\.?js|supabase|groq|gemini|claude|llm|api|rest|maps|react native|puppeteer|meta|langchain|langgraph)\b/gi) ?? []).length;
@@ -1012,7 +1018,7 @@ function repairLaterSections(parsed: ParsedResumeSchema, candidates: string[]) {
   if (recoveredSkills.length > 0) {
     parsed.skills.core = uniqueList([...parsed.skills.core, ...recoveredSkills]);
     parsed.skills.raw = uniqueList([...parsed.skills.raw, ...recoveredSkills]);
-    upsertSkillGroup(parsed.skills.grouped, 'Recovered Skills', recoveredSkills);
+    upsertSkillGroup(parsed.skills.grouped, 'General', recoveredSkills);
     repairTrace.push({
       action: 'recover_skills',
       text: recoveredSkills.join(' | '),
@@ -1055,6 +1061,40 @@ function repairLaterSections(parsed: ParsedResumeSchema, candidates: string[]) {
   return { repairTrace };
 }
 
+// Detect experience entries that structurally look like project entries:
+//   - no company line
+//   - no full "Mon YYYY - Mon YYYY" style date range
+//     (a bare "2025 - Present" or single year is allowed)
+//   - bullets or role text contain a `·` separated tech stack line, OR
+//   - role has no recognized job-role keyword (e.g. "Lakshya Resume (insaneResumake)")
+function looksLikeProjectEntry(entry: ParsedResumeExperienceItem): boolean {
+  if (entry.company) return false;
+  const dateRange = `${entry.startDate ?? ''} ${entry.endDate ?? ''}`.trim();
+  const hasMonthRange = /(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)/i.test(dateRange);
+  if (hasMonthRange) return false;
+  const hasStackLine = entry.bullets.some(
+    (bullet) => bullet.includes('·') && bullet.split('·').length >= 3,
+  );
+  const roleLooksLikeProject = /\s+[-·]\s+/.test(entry.role);
+  // Also reroute when the role has no job-role keyword — it's a product/project name
+  const roleHasNoJobKeyword = !hasRoleKeyword(entry.role);
+  return hasStackLine || roleLooksLikeProject || roleHasNoJobKeyword;
+}
+
+function projectFromExperienceEntry(entry: ParsedResumeExperienceItem): ParsedResumeProjectItem {
+  const [namePart, ...descParts] = entry.role.split(/\s+[-·]\s+/);
+  const stackLine = entry.bullets.find((b) => b.includes('·') && b.split('·').length >= 3) ?? '';
+  const technologies = stackLine ? splitSkillsLine(stackLine) : [];
+  const bullets = entry.bullets.filter((b) => b !== stackLine);
+  return {
+    name: cleanHeaderValue(namePart || entry.role),
+    description: cleanHeaderValue(descParts.join(' - ')),
+    technologies: uniqueList(technologies),
+    link: '',
+    bullets,
+  };
+}
+
 export function mapSectionsToParsedResumeDetailed(sections: ResumeSectionBlock[]): MapSectionsDetailedResult {
   const parsed = createEmptyParsedResume();
   const typedLines: TypedResumeLine[] = [];
@@ -1082,7 +1122,19 @@ export function mapSectionsToParsedResumeDetailed(sections: ResumeSectionBlock[]
         break;
       case 'experience': {
         const result = parseExperienceBlock(block);
-        parsed.experience = result.entries;
+        const realExperience: ParsedResumeExperienceItem[] = [];
+        const reroutedProjects: ParsedResumeProjectItem[] = [];
+        for (const entry of result.entries) {
+          if (looksLikeProjectEntry(entry)) {
+            reroutedProjects.push(projectFromExperienceEntry(entry));
+          } else {
+            realExperience.push(entry);
+          }
+        }
+        parsed.experience = realExperience;
+        if (reroutedProjects.length > 0) {
+          parsed.projects = [...parsed.projects, ...reroutedProjects];
+        }
         parsed.unclassified.push(...result.unclassified);
         experienceTrace.push(...result.trace);
         break;

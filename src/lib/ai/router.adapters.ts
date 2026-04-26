@@ -13,7 +13,15 @@ function buildSystemPrompt(request: AiRequest) {
     return request.metadata.systemPrompt;
   }
 
-  if (request.task === 'resume_parse' || request.task === 'section_map' || request.task === 'jd_match') {
+  if (
+    request.task === 'resume_parse' ||
+    request.task === 'section_map' ||
+    request.task === 'jd_match' ||
+    request.task === 'jd_match_5d' ||
+    request.task === 'resume_import_parse' ||
+    request.task === 'job_structure' ||
+    request.task === 'interview_prep'
+  ) {
     return 'Return strict JSON only. Do not wrap output in markdown.';
   }
 
@@ -21,17 +29,40 @@ function buildSystemPrompt(request: AiRequest) {
 }
 
 function maybeParseJson(value: string) {
-  const trimmed = value.replace(/```json/g, '').replace(/```/g, '').trim();
+  const trimmed = value.replace(/```json/gi, '').replace(/```/g, '').trim();
 
   try {
     return JSON.parse(trimmed);
   } catch {
+    // Fallback: some models prefix/suffix the JSON with prose. Try to extract
+    // the first balanced JSON object/array we can find.
+    const firstBrace = trimmed.search(/[{[]/);
+    if (firstBrace >= 0) {
+      for (let end = trimmed.length; end > firstBrace; end -= 1) {
+        const candidate = trimmed.slice(firstBrace, end);
+        const last = candidate[candidate.length - 1];
+        if (last !== '}' && last !== ']') continue;
+        try {
+          return JSON.parse(candidate);
+        } catch {
+          /* keep trying */
+        }
+      }
+    }
     return trimmed;
   }
 }
 
 function isStructuredTask(request: AiRequest) {
-  return request.task === 'resume_parse' || request.task === 'section_map' || request.task === 'jd_match';
+  return (
+    request.task === 'resume_parse' ||
+    request.task === 'section_map' ||
+    request.task === 'jd_match' ||
+    request.task === 'jd_match_5d' ||
+    request.task === 'resume_import_parse' ||
+    request.task === 'job_structure' ||
+    request.task === 'interview_prep'
+  );
 }
 
 async function postJson<T>(url: string, init: RequestInit) {

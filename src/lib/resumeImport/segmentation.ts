@@ -12,10 +12,26 @@ import type {
 const SECTION_ALIASES: Array<{ kind: ParsedSectionKind; keys: string[] }> = [
   { kind: 'summary', keys: ['summary', 'professionalsummary', 'profile', 'objective'] },
   { kind: 'experience', keys: ['experience', 'workexperience', 'professionalexperience', 'employmenthistory'] },
-  { kind: 'education', keys: ['education', 'academicbackground'] },
+  { kind: 'education', keys: ['education', 'academicbackground', 'educationlearning', 'educationcontinuouslearning'] },
   { kind: 'skills', keys: ['skills', 'technicalskills', 'coreskills', 'tooling', 'corecompetencies'] },
   { kind: 'sideProjects', keys: ['sideprojects', 'aiprojectsandsidebuilds', 'aiprojectssidebuilds', 'sidebuilds'] },
-  { kind: 'projects', keys: ['projects', 'selectedprojects'] },
+  {
+    kind: 'projects',
+    keys: [
+      'projects',
+      'selectedprojects',
+      'personalprojects',
+      'aiproducts',
+      'products',
+      'aiproductsopensourcebuilds',
+      'aiproductsandopensourcebuilds',
+      'opensourcebuilds',
+      'opensourceprojects',
+      'productsandbuilds',
+      'projectshighlights',
+      'keyprojects',
+    ],
+  },
   { kind: 'ongoingLearning', keys: ['ongoinglearning'] },
   { kind: 'certifications', keys: ['certifications', 'licenses', 'licensesandcertifications'] },
   { kind: 'achievements', keys: ['achievements', 'awards', 'accomplishments'] },
@@ -31,6 +47,22 @@ function findSectionKindFromKey(key: string): ParsedSectionKind | null {
     }
   }
 
+  // Substring fallback for compound headings like
+  // "EDUCATION & CONTINUOUS LEARNING" -> educationcontinuouslearning.
+  // Order matters: EDUCATION must be checked BEFORE SKILL so that headings
+  // containing both words are not captured by the generic skills matcher.
+  if (key.includes('education')) return 'education';
+  if (key.includes('sideproject') || key.includes('sidebuild')) return 'sideProjects';
+  if (key.includes('project')) return 'projects';
+  if (key.includes('opensource') || key.includes('aiproduct') || key.includes('product')) return 'projects';
+  if (key.includes('certification') || key.includes('license')) return 'certifications';
+  if (key.includes('achievement') || key.includes('award')) return 'achievements';
+  if (key.includes('experience') || key.includes('employment')) return 'experience';
+  if (key.includes('summary') || key.includes('profile') || key.includes('objective')) return 'summary';
+  if (key.includes('skill') || key.includes('competenc') || key.includes('tooling')) return 'skills';
+  if (key.includes('language')) return 'languages';
+  if (key.includes('contact')) return 'contact';
+
   return null;
 }
 
@@ -44,12 +76,38 @@ function looksHeadingLike(line: ExtractedResumeLine) {
   return shortEnough && tokenCount <= 6 && upperish && noDate && noEmail && noUrl;
 }
 
+/**
+ * Project/role entry-title detector.
+ * Matches lines like:
+ *   "FRIDAY - Local-First Personal AI Agent"
+ *   "SuperAgent - Claude Code Skill Routing System"
+ *   "Airtel · Senior Software Engineer"
+ * These are per-entry titles, not section headers, but we mark them as
+ * heading-like so segmentation tracing captures the boundary and the LLM
+ * input preserves them on their own line.
+ */
+export function looksLikeEntryTitle(line: ExtractedResumeLine): boolean {
+  const text = line.text.trim();
+  if (text.length < 4 || text.length > 120) return false;
+  if (/^[•\-–—›»·*]\s+/.test(text)) return false; // bullet
+  if (/@/.test(text) || /\bhttps?:\/\//i.test(text)) return false;
+  // <TitleOrCAPS> <sep> <TitleCase phrase>
+  const re = /^[A-Z][A-Za-z0-9+#.'&/-]*(?:\s+[A-Za-z0-9+#.'&/-]+){0,3}\s+[-·]\s+[A-Z][A-Za-z0-9+#.'&/ -]{2,}$/;
+  return re.test(text);
+}
+
 export function detectSectionHeader(line: ExtractedResumeLine): NormalizedHeading | null {
   const normalizedText = normalizeHeadingText(line.text);
   const collapsedKey = collapseHeadingKey(line.text);
-  const detectedKind = findSectionKindFromKey(collapsedKey);
+  const isHeadingShape = looksHeadingLike(line);
+  // Only allow substring-based alias detection when the line looks like a
+  // heading. Otherwise the generic "contains skill" / "contains education"
+  // rules would match any prose sentence using those words.
+  const detectedKind = isHeadingShape
+    ? findSectionKindFromKey(collapsedKey)
+    : (SECTION_ALIASES.find((alias) => alias.keys.includes(collapsedKey))?.kind ?? null);
 
-  if (!detectedKind && !looksHeadingLike(line)) {
+  if (!detectedKind && !isHeadingShape && !looksLikeEntryTitle(line)) {
     return null;
   }
 
@@ -133,13 +191,44 @@ export function segmentExtractedBlocks(extractedBlocks: ExtractedResumeBlock[]) 
     sections.push(current);
   }
 
+  const cleaned = sections
+    .map((section) => ({
+      ...section,
+      lines: section.lines.filter(Boolean),
+    }))
+    .filter((section) => section.lines.length > 0 || section.kind === 'contact');
+
+  // Merge adjacent sections of the same kind with roughly identical headings.
+  // Skip merging for entry-list sections (experience/projects/sideProjects)
+  // where duplicate headings can legitimately separate distinct entry clusters.
+  const MERGE_SKIP: ReadonlySet<ParsedSectionKind> = new Set([
+    'experience',
+    'projects',
+    'sideProjects',
+  ] as ParsedSectionKind[]);
+  const merged: ResumeSectionBlock[] = [];
+  for (const section of cleaned) {
+    const prev = merged[merged.length - 1];
+    const sameHeading =
+      prev &&
+      prev.kind === section.kind &&
+      !MERGE_SKIP.has(section.kind) &&
+      collapseHeadingKey(prev.heading) === collapseHeadingKey(section.heading);
+    if (sameHeading) {
+      prev.lines.push(...section.lines);
+      prev.typedLines.push(...section.typedLines);
+      for (const idx of section.sourceBlockIndexes) {
+        if (!prev.sourceBlockIndexes.includes(idx)) {
+          prev.sourceBlockIndexes.push(idx);
+        }
+      }
+      continue;
+    }
+    merged.push(section);
+  }
+
   return {
-    sections: sections
-      .map((section) => ({
-        ...section,
-        lines: section.lines.filter(Boolean),
-      }))
-      .filter((section) => section.lines.length > 0 || section.kind === 'contact'),
+    sections: merged,
     normalizedHeadings,
     sectionTrace,
   };

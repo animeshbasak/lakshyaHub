@@ -53,6 +53,14 @@ export async function scrapeJobsWithFallback(
         const { jobs, error } = await runActor(actor, config.query, config.location, perSourceLimit, token)
 
         if (error) {
+          // Gracefully skip paid-only actors (e.g. Glassdoor "rent required" 403)
+          // surface a clean warning instead of a scary stack-like error
+          const isPaidOnly = /requires paid actor/i.test(error)
+          if (isPaidOnly) {
+            log('warn', `${actor.label} skipped — requires paid actor`)
+            collectedErrors.push(error)
+            continue
+          }
           log('warn', `✗ ${actor.label} failed: ${error}`)
           collectedErrors.push(`${actor.label}: ${error}`)
           continue  // try next actor for this source

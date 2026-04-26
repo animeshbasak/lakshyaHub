@@ -154,7 +154,13 @@ Return a JSON object with this exact structure (omit any field you cannot determ
 Rules:
 - Return ONLY valid JSON, no markdown fences.
 - For experience bullets, each bullet is a separate string in the array.
-- Dates should be in "Mon YYYY" format or "YYYY" if only year available.`;
+- Dates should be in "Mon YYYY" format or "YYYY" if only year available.
+- VERBATIM POLICY: Copy bullets, metrics, numbers, percentages, dates, and company names EXACTLY as they appear in the source. Do NOT paraphrase, summarize, translate, or "clean up" wording. Preserve punctuation inside bullets.
+- COMPLETENESS: Extract EVERY experience entry, every bullet, every project — even if headings look unusual (e.g. "Professional Journey", "Engagements", "What I've Built"). Missing bullets is a failure; duplicating bullets is also a failure.
+- Section headings may be multi-column or out of order due to PDF layout. Group by employer/role regardless of positional noise.
+- GLUED HEADERS: Input text may have headers glued inline directly after sentence-ending punctuation (e.g., "...cron-scheduled at 7 PM IST. SuperAgent - Claude Code Skill Routing System"). Treat a Capitalized phrase followed by ' - ' or ' · ' then another phrase — optionally followed within ~120 chars by a year range ("2023 - 2025") or "Present" — as a NEW entry boundary (role or project). Do NOT drop entries just because blank lines are missing. Also treat known uppercase section names ("EXPERIENCE", "EDUCATION", "PROJECTS", "TECHNICAL SKILLS", "CONTINUOUS LEARNING", etc.) appearing mid-sentence as section boundaries.
+- For each experience entry, if you are not confident in the role/company pairing, still include the entry but leave the lower-confidence field empty rather than guessing.
+- Confidence: append a top-level "_confidence" field { "basics": 0..1, "experience": 0..1, "education": 0..1, "skills": 0..1 } reflecting your self-assessed certainty per section.`;
   return await aiRouter.execute({
     task: 'resume_import_parse',
     input: { prompt },
