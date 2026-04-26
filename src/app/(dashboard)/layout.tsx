@@ -2,16 +2,19 @@ import { AuthGate } from '@/components/layout/AuthGate'
 import { Sidebar } from '@/components/nav/Sidebar'
 import { Topbar } from '@/components/nav/Topbar'
 import { CmdKProvider } from '@/components/nav/CmdKProvider'
+import { TweaksProvider } from '@/components/nav/TweaksProvider'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGate>
+      <TweaksProvider>
       <CmdKProvider>
         <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
           <Sidebar />
           <div
+            data-nav-shell="content"
             style={{
-              marginLeft: 'var(--rail-w)',
+              marginLeft: 'var(--nav-shell-ml)',
               minHeight: '100vh',
               display: 'flex',
               flexDirection: 'column',
@@ -22,6 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </CmdKProvider>
+      </TweaksProvider>
     </AuthGate>
   )
 }
