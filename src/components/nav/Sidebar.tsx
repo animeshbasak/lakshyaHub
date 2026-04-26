@@ -16,6 +16,7 @@ import {
   Target,
   PieChart,
   BookOpen,
+  TrendingUp,
 } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { createClient } from '@/lib/supabase/client'
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { href: '/stories', label: 'Stories', icon: BookOpen },
   { href: '/discover', label: 'Discover', icon: Search, badge: 'LIVE' },
   { href: '/board', label: 'Pipeline', icon: Kanban },
+  { href: '/insights', label: 'Insights', icon: TrendingUp, badge: 'NEW' },
   { href: '/resume', label: 'Resume', icon: FileText },
 ]
 

@@ -25,6 +25,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { ScrapeLog, Job } from '@/types'
 import type { UserSource } from '@/lib/scrapers/types'
 import { FitBadge } from '@/components/ui/FitBadge'
+import { AtsScanCard } from './AtsScanCard'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -384,8 +385,12 @@ export default function DiscoverPage() {
             Discover jobs
           </h1>
           <p className="text-3" style={{ fontSize: 12, margin: 0 }}>
-            Live scrape · AI-scored against your resume
+            Free ATS scan · or live scrape · AI-scored against your resume
           </p>
+        </div>
+
+        <div style={{ marginBottom: 18 }}>
+          <AtsScanCard />
         </div>
 
         <div className="eyebrow" style={{ marginBottom: 8 }}>Role / Title</div>
