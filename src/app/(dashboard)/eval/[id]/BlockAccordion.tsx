@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { MarkdownLite } from './MarkdownLite'
 
 interface Props {
   reportMd: string
@@ -84,9 +85,7 @@ export function BlockAccordion({ reportMd }: Props) {
             </button>
             {open && (
               <div className="px-4 md:px-5 pb-5 pt-1">
-                <pre className="whitespace-pre-wrap text-[13px] text-white/85 leading-relaxed font-sans">
-                  {b.body}
-                </pre>
+                <MarkdownLite source={b.body} />
               </div>
             )}
           </div>
