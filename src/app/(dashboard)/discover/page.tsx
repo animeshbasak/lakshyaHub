@@ -26,6 +26,7 @@ import type { ScrapeLog, Job } from '@/types'
 import type { UserSource } from '@/lib/scrapers/types'
 import { FitBadge } from '@/components/ui/FitBadge'
 import { AtsScanCard } from './AtsScanCard'
+import { UnifiedSearchPanel } from './UnifiedSearchPanel.client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -385,13 +386,22 @@ export default function DiscoverPage() {
             Discover jobs
           </h1>
           <p className="text-3" style={{ fontSize: 12, margin: 0 }}>
-            Free ATS scan · or live scrape · AI-scored against your resume
+            One search box · 6 free sources in parallel · Apify scrapers below as fallback
           </p>
         </div>
 
         <div style={{ marginBottom: 18 }}>
-          <AtsScanCard />
+          <UnifiedSearchPanel />
         </div>
+
+        <details style={{ marginBottom: 18 }} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+          <summary className="text-xs text-text-2 cursor-pointer select-none hover:text-white">
+            Direct ATS scan (legacy — bulk pull from ~35 curated companies)
+          </summary>
+          <div className="mt-3">
+            <AtsScanCard />
+          </div>
+        </details>
 
         <div className="eyebrow" style={{ marginBottom: 8 }}>Role / Title</div>
         <div style={{ position: 'relative', marginBottom: 14 }}>
