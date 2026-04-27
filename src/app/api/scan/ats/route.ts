@@ -32,12 +32,30 @@ function matchesTitleFilter(title: string, positives: string[]): boolean {
   return positives.some(p => t.includes(p.toLowerCase()))
 }
 
+// In-memory per-user rate limit (1 scan per 30 seconds). Survives within a
+// single Lambda warm-pool; users on different regions get independent buckets.
+// Good enough as a guardrail — Upstash Redis can replace this for global
+// enforcement when usage warrants. See docs/PROJECT-STATUS §0.5.
+const RATE_LIMIT_MS = 30_000
+const lastRunByUser = new Map<string, number>()
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ ok: false, error: 'unauthenticated' }, { status: 401 })
   }
+
+  const last = lastRunByUser.get(user.id) ?? 0
+  const since = Date.now() - last
+  if (since < RATE_LIMIT_MS) {
+    const retryAfter = Math.ceil((RATE_LIMIT_MS - since) / 1000)
+    return NextResponse.json(
+      { ok: false, error: 'rate_limited', retryAfter },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+    )
+  }
+  lastRunByUser.set(user.id, Date.now())
 
   const json = await req.json().catch(() => ({}))
   const parsed = Body.safeParse(json)
@@ -129,6 +147,8 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY,
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
+    // Audit insert is best-effort; a transient persistence failure must not
+    // poison the user-facing scan response.
     await admin.from('audit_events').insert({
       user_id: user.id,
       action: 'ats_scan_run',
@@ -141,7 +161,7 @@ export async function POST(req: NextRequest) {
         errors_count: errors.length,
         duration_ms: Date.now() - start,
       },
-    })
+    }).then(() => {}, () => {})
   }
 
   return NextResponse.json({

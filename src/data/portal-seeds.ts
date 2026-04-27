@@ -37,12 +37,12 @@ export const PORTAL_SEEDS: PortalSeed[] = [
   { slug: 'huggingface',     portal: 'lever',      company: 'Hugging Face',  country: 'GLOBAL', hint: 'ai-native' },
   { slug: 'perplexity',      portal: 'ashby',      company: 'Perplexity',    country: 'GLOBAL', hint: 'ai-native' },
   { slug: 'cohere',          portal: 'ashby',      company: 'Cohere',        country: 'GLOBAL', hint: 'ai-native' },
-  { slug: 'inflection',      portal: 'ashby',      company: 'Inflection AI', country: 'GLOBAL', hint: 'ai-native' },
+  { slug: 'inflectionai',    portal: 'greenhouse', company: 'Inflection AI', country: 'GLOBAL', hint: 'ai-native' },
   { slug: 'character',       portal: 'lever',      company: 'Character.AI',  country: 'GLOBAL', hint: 'ai-native' },
 
   // ── Devtools / infra (global) ───────────────────────────────
   { slug: 'vercel',          portal: 'greenhouse', company: 'Vercel',        country: 'GLOBAL', hint: 'devtools' },
-  { slug: 'sentry',          portal: 'lever',      company: 'Sentry',        country: 'GLOBAL', hint: 'devtools' },
+  { slug: 'sentry',          portal: 'ashby',      company: 'Sentry',        country: 'GLOBAL', hint: 'devtools' },
   { slug: 'datadog',         portal: 'greenhouse', company: 'Datadog',       country: 'GLOBAL', hint: 'devtools' },
   { slug: 'cloudflare',      portal: 'greenhouse', company: 'Cloudflare',    country: 'GLOBAL', hint: 'devtools' },
   { slug: 'github',          portal: 'greenhouse', company: 'GitHub',        country: 'GLOBAL', hint: 'devtools' },
@@ -73,7 +73,7 @@ export const PORTAL_SEEDS: PortalSeed[] = [
   { slug: 'crednxt',          portal: 'lever',     company: 'CRED',          country: 'IN',     hint: 'fintech' },
   { slug: 'zerodha',          portal: 'lever',     company: 'Zerodha',       country: 'IN',     hint: 'fintech' },
   { slug: 'browserstack',     portal: 'lever',     company: 'BrowserStack',  country: 'IN',     hint: 'devtools' },
-  { slug: 'postman',          portal: 'lever',     company: 'Postman',       country: 'IN',     hint: 'devtools' },
+  { slug: 'postman',          portal: 'greenhouse', company: 'Postman',      country: 'IN',     hint: 'devtools' },
   { slug: 'hasura',           portal: 'lever',     company: 'Hasura',        country: 'IN',     hint: 'devtools' },
   { slug: 'meesho',           portal: 'lever',     company: 'Meesho',        country: 'IN',     hint: 'consumer' },
 ]
