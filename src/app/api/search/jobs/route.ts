@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { aggregate } from '@/lib/jobsearch/aggregator'
+import { applyFitScores, buildResumeTokens, type ResumeSignal } from '@/lib/jobsearch/fitHeuristic'
 
 const Body = z.object({
   query: z.string().min(2).max(200),
@@ -42,7 +43,21 @@ export async function POST(req: NextRequest) {
   }
 
   const start = Date.now()
-  const result = await aggregate(parsed.data)
+
+  // Pre-fetch resume signal in parallel with the multi-source fan-out so
+  // the scoring step has zero added wall-time.
+  const [profileRes, result] = await Promise.all([
+    supabase
+      .from('resume_profiles')
+      .select('full_resume_text, target_titles, skills')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(r => r.data as ResumeSignal | null),
+    aggregate(parsed.data),
+  ])
+
+  const resumeTokens = buildResumeTokens(profileRes)
+  const scoredJobs = applyFitScores(result.jobs, resumeTokens)
 
   // Audit trail (fire-and-forget). Doesn't write the results — too much
   // payload — just summary stats.
@@ -79,7 +94,8 @@ export async function POST(req: NextRequest) {
         error: r.error ?? null,
       })),
     },
-    jobs: result.jobs.slice(0, 100),
+    jobs: scoredJobs.slice(0, 100),
+    hasResumeSignal: resumeTokens.size > 0,
     elapsedMs: Date.now() - start,
   })
 }

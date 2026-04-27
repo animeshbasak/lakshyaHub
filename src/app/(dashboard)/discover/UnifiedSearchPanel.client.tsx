@@ -18,6 +18,8 @@ interface JobResult {
   source: string
   salary: string | null
   tags: string[]
+  /** Heuristic fit-score 0-100, pre-computed server-side. null when no resume. */
+  fitScore?: number | null
 }
 
 interface AdapterStat {
@@ -262,7 +264,9 @@ function ResultRow({ job }: { job: JobResult }) {
 
   // Per-row state — each result is independently expandable, scorable, savable.
   // Lifting any of this to parent would make 100-row searches sluggish.
-  const [expanded, setExpanded] = useState(false)
+  // Description starts EXPANDED — user explicitly asked for the full JD,
+  // not the 2-line clamp. They can collapse if the list gets crowded.
+  const [expanded, setExpanded] = useState(true)
   const [savedJobId, setSavedJobId] = useState<string | null>(null)
   const [savedAlready, setSavedAlready] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -361,7 +365,12 @@ function ResultRow({ job }: { job: JobResult }) {
               {job.title}
               <ExternalLink className="w-3 h-3 opacity-60" aria-hidden="true" />
             </a>
-            {fit && <FitBadge score={fit.score} />}
+            {/* Pre-computed heuristic fit-score (server-side). Shows by default. */}
+            {fit ? (
+              <FitBadge score={fit.score} />
+            ) : (
+              typeof job.fitScore === 'number' && <FitBadge score={job.fitScore} variant="heuristic" />
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-text-2">
             {job.company && (
@@ -508,7 +517,7 @@ function RowButton({ onClick, disabled, icon, label, tone = 'default' }: RowButt
   )
 }
 
-function FitBadge({ score }: { score: number }) {
+function FitBadge({ score, variant = 'llm' }: { score: number; variant?: 'llm' | 'heuristic' }) {
   const tone = score >= 80
     ? 'border-emerald-500/30 bg-emerald-500/[0.08] text-emerald-300'
     : score >= 60
@@ -516,13 +525,17 @@ function FitBadge({ score }: { score: number }) {
       : score >= 40
         ? 'border-amber-500/30 bg-amber-500/[0.08] text-amber-300'
         : 'border-red-500/30 bg-red-500/[0.08] text-red-300'
+  const tooltip = variant === 'heuristic'
+    ? 'Quick fit score (0–100) — keyword overlap. Click "Fit score" for the LLM-based deeper read.'
+    : 'LLM-based fit score, 0–100'
   return (
     <span
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] tabular-nums font-semibold ${tone}`}
-      title="LLM-based fit score, 0–100"
+      title={tooltip}
     >
       <TrendingUp className="w-3 h-3" aria-hidden="true" />
       {score}
+      {variant === 'heuristic' && <span className="opacity-60 font-normal">~</span>}
     </span>
   )
 }
