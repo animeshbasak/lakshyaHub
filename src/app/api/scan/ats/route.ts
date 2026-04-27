@@ -89,8 +89,15 @@ export async function POST(req: NextRequest) {
   // Each portal becomes its own Lambda execution, so a slow portal doesn't
   // block the whole scan and individual failures get QStash's built-in
   // retry policy. Caller gets an immediate ack with the message IDs.
-  if (isQStashConfigured()) {
-    const baseUrl = req.nextUrl.origin   // e.g. https://lakshya.app or http://localhost:3000
+  //
+  // Local-dev guard: QStash's hosted servers can't reach localhost — if we
+  // try to enqueue with a localhost URL, every job fails with a connection
+  // error. Detect and fall through to the inline path. Use a tunnel
+  // (ngrok / cloudflared) if you want to test the QStash path locally.
+  const baseUrl = req.nextUrl.origin
+  const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(baseUrl)
+
+  if (isQStashConfigured() && !isLocalhost) {
     const utcDay = new Date().toISOString().slice(0, 10)
 
     const summary = await publishBatch(

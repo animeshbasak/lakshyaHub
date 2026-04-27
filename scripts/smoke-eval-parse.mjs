@@ -151,3 +151,11 @@ console.log(lenient)
 
 console.log('\n=== Step 5: report tail (last 800 chars to inspect summary block) ===')
 console.log(report.slice(-800))
+
+console.log('\n=== Step 6: dump full report to /tmp/eval-smoke-full.md ===')
+fs.writeFileSync('/tmp/eval-smoke-full.md', report)
+console.log('saved.')
+
+console.log('\n=== Step 7: block headers detected ===')
+const headers = report.split('\n').filter(l => l.match(/^#{1,3}\s*(Block\s+[A-G]|[A-G][\s.):—-])/i))
+for (const h of headers) console.log('  ' + h)

@@ -6,6 +6,8 @@ import { BlockAccordion } from './BlockAccordion'
 import { ShareToggle } from './ShareToggle.client'
 import { EvalFeedback } from './EvalFeedback.client'
 import { UpgradeCta } from './UpgradeCta'
+import { RelatedStories } from './RelatedStories'
+import { EvalActions } from './EvalActions.client'
 import type { AnonLevel } from '@/actions/evaluationActions'
 
 interface PageProps {
@@ -64,7 +66,16 @@ export default async function EvalDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-12 space-y-8">
       <ScoreHero evaluation={evaluation} />
+      <EvalActions
+        evalId={evaluation.id}
+        jdText={evaluation.jd_text}
+        jdUrl={evaluation.jd_url}
+        reportMd={evaluation.report_md}
+        currentProvider={evaluation.llm_provider}
+        candidateName={evaluation.role}
+      />
       <BlockAccordion reportMd={evaluation.report_md ?? ''} />
+      <RelatedStories evaluation={{ archetype: evaluation.archetype, report_md: evaluation.report_md }} />
       <UpgradeCta score={evaluation.score} />
       <EvalFeedback evalId={evaluation.id} />
       <ShareToggle

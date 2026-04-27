@@ -54,7 +54,35 @@ export async function composePrompt(ctx: PromptContext): Promise<string> {
     readSystemPrompt(ctx.mode),
   ])
 
+  // PRE-PRIME: language directive at the very top, BEFORE the Spanish-source
+  // system prompts. LLMs anchor to early instructions more reliably than to
+  // late ones, so we don't rely solely on the OPERATING RULES override at the
+  // end. Both blocks together = belt + suspenders.
+  const LANGUAGE_PRIMER = `LANGUAGE DIRECTIVE (read this BEFORE anything else):
+
+You will receive a system context, evaluation mode, user profile, candidate
+CV, and job description. SOME of those are in Spanish — IGNORE the language
+they're written in. Your output MUST be in English. Every block heading,
+every body paragraph, every table cell, every score summary field — English.
+
+If you find yourself writing "Resumen del Rol" or any Spanish, STOP and
+re-do that section in English. The user reads English; Spanish output is
+treated as a defect and discarded.
+
+Block headings MUST be these English titles, verbatim:
+  ## Block A — Role Summary
+  ## Block B — CV Match
+  ## Block C — Seniority & Strategy
+  ## Block D — Compensation & Demand
+  ## Block E — Personalization Plan
+  ## Block F — Interview Plan
+  ## Block G — Legitimacy
+
+Now read the rest of the prompt. The full operating rules appear at the end
+and override anything that conflicts.`
+
   const sections: string[] = [
+    SECTION('LANGUAGE DIRECTIVE (read first)', LANGUAGE_PRIMER),
     SECTION('SYSTEM CONTEXT (_shared.md)', shared),
     SECTION(`EVALUATION MODE (${ctx.mode}.md)`, modePrompt),
     SECTION('USER PROFILE', ctx.userProfile),
@@ -79,14 +107,21 @@ rules before writing a single word of output.
    output MUST be in English. The end user reads English. This rule overrides
    any language instruction in the prompts above.
 
-2. STRUCTURE: render exactly 7 blocks labeled A through G. Use this header
-   format VERBATIM so the UI parser can detect block boundaries:
+2. STRUCTURE: render exactly 7 blocks labeled A through G with the SAME 7
+   English titles every time, no translation, no synonyms. Verbatim:
 
-     ## Block A — <heading in English>
-     ## Block B — <heading in English>
-     ... through Block G
+     ## Block A — Role Summary
+     ## Block B — CV Match
+     ## Block C — Seniority & Strategy
+     ## Block D — Compensation & Demand
+     ## Block E — Personalization Plan
+     ## Block F — Interview Plan
+     ## Block G — Legitimacy
 
-   Do not use ## A) or ## A. or ## 1) — only "## Block X — heading".
+   Do not write "Resumen del Rol" / "Match con CV" / "Nivel y Estrategia" /
+   "Comp y Demanda" / "Plan de Personalización" / "Plan de Entrevistas" /
+   "Posting Legitimacy" — those are Spanish or near-Spanish and are wrong.
+   Do not use ## A) or ## A. or ## 1) — only "## Block X — Title".
 
 3. END EVERY RESPONSE with this MACHINE-PARSEABLE SUMMARY block, after the 7
    blocks, on its own lines, with the exact markers shown — never paraphrase,

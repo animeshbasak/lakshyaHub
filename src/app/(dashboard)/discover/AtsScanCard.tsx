@@ -4,12 +4,16 @@ import { useState } from 'react'
 import { Sparkles, Loader2, ExternalLink, AlertTriangle } from 'lucide-react'
 
 interface ScanSummary {
-  portalsAttempted: number
-  jobsReturned: number
-  jobsAfterTitleFilter: number
-  newJobs: number
-  errors: number
-  durationMs: number
+  // Inline mode
+  portalsAttempted?: number
+  jobsReturned?: number
+  jobsAfterTitleFilter?: number
+  newJobs?: number
+  errors?: number
+  durationMs?: number
+  // QStash mode
+  portalsEnqueued?: number
+  portalsFailed?: number
 }
 
 interface ScanJobOut {
@@ -22,6 +26,7 @@ interface ScanJobOut {
 interface ScanResponse {
   ok: boolean
   error?: string
+  mode?: 'qstash'   // omitted on inline mode
   summary?: ScanSummary
   jobs?: ScanJobOut[]
 }
@@ -35,7 +40,7 @@ export function AtsScanCard() {
   const [state, setState] = useState<
     | { kind: 'idle' }
     | { kind: 'running' }
-    | { kind: 'done'; summary: ScanSummary; jobs: ScanJobOut[] }
+    | { kind: 'done'; summary: ScanSummary; jobs: ScanJobOut[]; mode?: 'qstash' }
     | { kind: 'error'; message: string }
   >({ kind: 'idle' })
 
@@ -52,7 +57,7 @@ export function AtsScanCard() {
         setState({ kind: 'error', message: data.error ?? `HTTP ${res.status}` })
         return
       }
-      setState({ kind: 'done', summary: data.summary!, jobs: data.jobs ?? [] })
+      setState({ kind: 'done', summary: data.summary!, jobs: data.jobs ?? [], mode: data.mode })
     } catch (e) {
       setState({ kind: 'error', message: e instanceof Error ? e.message : 'Network error' })
     }
@@ -103,8 +108,18 @@ export function AtsScanCard() {
 
       {state.kind === 'done' && (
         <div className="mt-4 space-y-3">
-          <SummaryStrip s={state.summary} />
-          {state.jobs.length === 0 ? (
+          <SummaryStrip s={state.summary} mode={state.mode} />
+          {state.mode === 'qstash' ? (
+            <p className="text-sm text-text-2">
+              {state.summary.portalsEnqueued ?? 0} portals queued · running in the background.
+              Open <span className="text-white">/board</span> in ~30s to see new jobs as they trickle in.
+              {(state.summary.portalsFailed ?? 0) > 0 && (
+                <span className="block text-amber-400 mt-1">
+                  {state.summary.portalsFailed} failed to enqueue (check Upstash QStash logs).
+                </span>
+              )}
+            </p>
+          ) : state.jobs.length === 0 ? (
             <p className="text-sm text-text-2">
               No new jobs matched your title filter. Tighten it on /profile or try the broader country option.
             </p>
@@ -146,14 +161,24 @@ export function AtsScanCard() {
   )
 }
 
-function SummaryStrip({ s }: { s: ScanSummary }) {
-  const items = [
-    { label: 'Portals',    value: s.portalsAttempted },
-    { label: 'Returned',   value: s.jobsReturned },
-    { label: 'Match',      value: s.jobsAfterTitleFilter },
-    { label: 'New',        value: s.newJobs },
-    { label: 'Time',       value: `${(s.durationMs / 1000).toFixed(1)}s` },
-  ]
+function SummaryStrip({ s, mode }: { s: ScanSummary; mode?: 'qstash' }) {
+  // QStash mode returns "Enqueued/Failed" instead of "Returned/Match/New"
+  // because results are async and not in this response.
+  const items = mode === 'qstash'
+    ? [
+        { label: 'Portals',  value: s.portalsAttempted ?? 0 },
+        { label: 'Enqueued', value: s.portalsEnqueued ?? 0 },
+        { label: 'Failed',   value: s.portalsFailed ?? 0 },
+        { label: 'Mode',     value: 'queue' },
+        { label: 'Time',     value: `${((s.durationMs ?? 0) / 1000).toFixed(1)}s` },
+      ]
+    : [
+        { label: 'Portals',  value: s.portalsAttempted ?? 0 },
+        { label: 'Returned', value: s.jobsReturned ?? 0 },
+        { label: 'Match',    value: s.jobsAfterTitleFilter ?? 0 },
+        { label: 'New',      value: s.newJobs ?? 0 },
+        { label: 'Time',     value: `${((s.durationMs ?? 0) / 1000).toFixed(1)}s` },
+      ]
   return (
     <div className="grid grid-cols-5 gap-2">
       {items.map(it => (
