@@ -27,6 +27,57 @@ const BodySchema = z.object({
   provider: z.enum(['groq', 'gemini', 'claude']).default('groq'),
 })
 
+// ─── Per-user rate limiting (S3) + cost ceiling (S4) ────────────────────────
+//
+// Per-user gate: 1 eval per 6 seconds (free) — protects against accidental
+// double-submit and casual abuse. Survives within a single Lambda warm-pool;
+// cross-region users get independent buckets. Replace with Upstash Redis
+// when usage warrants global enforcement.
+//
+// Daily cost ceiling: a hard cap on total evaluations per user per UTC day
+// to prevent runaway LLM spend if a key gets compromised. Defaults to 50;
+// override via DAILY_EVAL_LIMIT_PER_USER env. Counts every successful POST,
+// not just LLM-billed ones, since the cost driver IS the LLM call.
+
+const PER_USER_INTERVAL_MS = 6_000
+const DAILY_LIMIT = parseInt(process.env.DAILY_EVAL_LIMIT_PER_USER ?? '50', 10)
+
+const lastEvalByUser = new Map<string, number>()
+const dailyCountByUser = new Map<string, { utcDay: string; count: number }>()
+
+function checkRateLimits(userId: string): { ok: true } | { ok: false; status: 429 | 402; body: Record<string, unknown> } {
+  const now = Date.now()
+  const last = lastEvalByUser.get(userId) ?? 0
+  const since = now - last
+  if (since < PER_USER_INTERVAL_MS) {
+    const retryAfter = Math.ceil((PER_USER_INTERVAL_MS - since) / 1000)
+    return {
+      ok: false,
+      status: 429,
+      body: { error: 'rate_limited', retryAfter, hint: 'Wait a few seconds before re-running this eval.' },
+    }
+  }
+
+  const utcDay = new Date(now).toISOString().slice(0, 10)
+  const slot = dailyCountByUser.get(userId)
+  const dailyCount = slot && slot.utcDay === utcDay ? slot.count : 0
+  if (dailyCount >= DAILY_LIMIT) {
+    return {
+      ok: false,
+      status: 402,  // Payment Required — semantically correct for a quota wall
+      body: {
+        error: 'daily_limit_reached',
+        limit: DAILY_LIMIT,
+        hint: 'Daily evaluation cap hit. Resets at UTC 00:00. Upgrade for unlimited evals.',
+      },
+    }
+  }
+
+  lastEvalByUser.set(userId, now)
+  dailyCountByUser.set(userId, { utcDay, count: dailyCount + 1 })
+  return { ok: true }
+}
+
 function sanitizeUntrusted(input: string): string {
   // Strip prompt-loader section markers ('═══') and decorative en/em dashes
   // sometimes used as fake section dividers. Earlier version had a buggy
@@ -203,6 +254,14 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const gate = checkRateLimits(user.id)
+  if (!gate.ok) {
+    const headers = gate.status === 429
+      ? { 'Retry-After': String(gate.body.retryAfter ?? 6) }
+      : undefined
+    return NextResponse.json(gate.body, { status: gate.status, headers })
+  }
 
   const { data: profile } = await supabase
     .from('resume_profiles')

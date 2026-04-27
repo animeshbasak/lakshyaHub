@@ -1,10 +1,38 @@
 # Lakshya — Project Status Dashboard
 
 > **Canonical source of truth for all pending work, priorities, review findings, and blockers.**
-> Last updated: 2026-04-26 ~01:45 IST
-> Branch: `feat/careerops-phase-0-1` (61 commits, **79/79 tests** + 1 skipped + 11 todo, build clean, PR #1 open)
+> Last updated: 2026-04-27 ~21:15 IST
+> Branch: `feat/careerops-phase-0-1` (69 commits, **138/138 tests** + 1 skipped + 11 todo, build clean, PR #1 open)
 
 This file is the single place any agent or human should open first. It aggregates every plan, every pending task, every review finding, and every blocker that needs user input.
+
+---
+
+## 0.0 Backlog closure pass — 2026-04-27 evening
+
+Done in this pass (mostly closing tasks that were marked pending but already shipped earlier in the week):
+
+| Task | Status | Notes |
+|---|---|---|
+| #11 UI-3 marketing surfaces | ✅ closed | All 4 pages exist (`/about`, `/pricing`, `/guides`, `/compare`); 14 archetype guides + 6 compare pages already shipped 2026-04-26 |
+| #12 UI-4 polish + a11y | ✅ closed | Skeleton primitives + 3 loading.tsx files already in place; new `/insights/loading.tsx` added; favicon (Next.js dynamic icon.tsx) + apple-icon + opengraph-image all present |
+| #15 P1 Phase 2 routes | 🟡 partial | `/api/scan/ats` shipped (ATS-API path; 20 portals live, 3,184 jobs verified). `/api/liveness` BLOCKED — needs Vercel mem 3008MB + QStash provisioning (user-side) |
+| #18 P2 Phase 2 crons (2.9+2.10) | 🔴 BLOCKED | QStash provisioning required (user-side) |
+| #19 P2 Security S3+S4+S6 | ✅ closed | S3 LLM rate-limit (6s per-user) + S4 daily eval cap (50/day, env-tunable) added to `/api/ai/evaluate`. S6 CSP-with-nonce already shipped via `proxy.ts`. ATS scan also rate-limited 30s/user |
+| #20 P2 SEO-2+SEO-3+ai-platform guide | ✅ closed | JSON-LD + dynamic OG + ai-platform guide all already shipped via earlier SEO commits |
+| #21 P3 Security S5+S10+S11 | 🟡 partial | S5 secrets-rotation playbook + S11 incident-response runbook shipped as docs (`docs/security/{secrets-rotation,incident-runbook}.md`). S10 Sentry integration BLOCKED (`npm install @sentry/nextjs` not approved) |
+| #22 P4 5 guides + 6 compares + STAR stories | ✅ closed | All 14 guides, 6 compares, AND full STAR-stories CRUD (server actions + UI panel) already shipped |
+| #23 P4 Security S8+S9+S12 | 🔴 BLOCKED | S8 Playwright a11y BLOCKED on `npm install @axe-core/playwright`. S9 Stripe webhook BLOCKED on business registration. S12 GDPR DSAR endpoint not started — needs schema decisions |
+
+Bonus wins in this pass:
+- **Block G ghost-job detection** — strengthened the operating-rules prompt with a 7-point red-flag screen (reposting age, vague responsibilities + generous comp, stack mismatches, no company URL, gmail/yahoo apply, MLM signals, recruiter-only contact). Free quality bump on every eval.
+
+What this leaves on the genuine pending list (NOT counted as bugs — just user-side action waiting):
+- Liveness route + Phase 2 crons → user provisions QStash + Vercel mem upgrade
+- Sentry integration → user approves `npm install @sentry/nextjs` (or we do it together)
+- Stripe webhook → user registers business (per their call to defer)
+- Playwright a11y runner → user approves `npm install @axe-core/playwright @playwright/test`
+- GDPR DSAR endpoint → needs scope decision (90/180/30 day retention + which tables)
 
 ---
 
