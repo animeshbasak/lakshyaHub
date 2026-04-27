@@ -142,6 +142,9 @@ export function UnifiedSearchPanel() {
         </p>
       </form>
 
+      {/* Loading state — prominent skeleton + spinner so it's clear search is running. */}
+      {state.kind === 'searching' && <SearchingState />}
+
       {/* Result states */}
       {state.kind === 'rate_limited' && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/[0.06] text-amber-300 px-4 py-3 text-sm inline-flex items-center gap-2">
@@ -172,6 +175,41 @@ export function UnifiedSearchPanel() {
         </>
       )}
     </section>
+  )
+}
+
+function SearchingState() {
+  const sources = ['Remotive', 'RemoteOK', 'HN Hiring', 'WWR', 'Naukri', 'Direct ATS']
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <Loader2 className="w-5 h-5 animate-spin text-[color:var(--accent)]" aria-hidden="true" />
+        <div>
+          <p className="text-sm font-medium text-white">Searching 6 sources in parallel…</p>
+          <p className="text-[11px] text-text-2 mt-0.5">Typically 2–10 seconds. Naukri (India) is slowest.</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-4" aria-hidden="true">
+        {sources.map((s, i) => (
+          <span
+            key={s}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-white/10 bg-white/[0.03] text-[10px] text-text-2"
+            style={{ animation: `pulse 1.6s ${i * 0.15}s ease-in-out infinite` }}
+          >
+            {s}
+          </span>
+        ))}
+      </div>
+      {/* Skeleton rows so result-area height stays roughly stable. */}
+      <div className="space-y-2" aria-busy="true" aria-label="Searching">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="rounded-lg border border-white/10 bg-white/[0.02] p-3 animate-pulse">
+            <div className="h-3.5 w-2/3 bg-white/10 rounded mb-2" />
+            <div className="h-2.5 w-1/3 bg-white/[0.07] rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
