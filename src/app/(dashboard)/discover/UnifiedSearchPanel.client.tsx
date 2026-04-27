@@ -1,7 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, Loader2, ExternalLink, MapPin, Building2, Calendar, Sparkles, AlertTriangle } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  Search, Loader2, ExternalLink, MapPin, Building2, Calendar, Sparkles, AlertTriangle,
+  Bookmark, BookmarkCheck, Wand2, ChevronDown, ChevronUp, Target, TrendingUp,
+} from 'lucide-react'
+import { saveSearchResult } from '@/actions/searchActions'
 
 interface JobResult {
   url: string
@@ -245,21 +250,119 @@ function SourceStrip({ adapters, totalDeduped, elapsedMs }: { adapters: AdapterS
   )
 }
 
+interface FitScore {
+  score: number
+  gaps: string[]
+  strengths: string[]
+}
+
 function ResultRow({ job }: { job: JobResult }) {
+  const router = useRouter()
   const sourceLabel = SOURCE_LABELS[job.source] ?? job.source
+
+  // Per-row state — each result is independently expandable, scorable, savable.
+  // Lifting any of this to parent would make 100-row searches sluggish.
+  const [expanded, setExpanded] = useState(false)
+  const [savedJobId, setSavedJobId] = useState<string | null>(null)
+  const [savedAlready, setSavedAlready] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [fit, setFit] = useState<FitScore | null>(null)
+  const [scoring, setScoring] = useState(false)
+  const [scoreError, setScoreError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
+
+  function save() {
+    setSaveError(null)
+    startTransition(async () => {
+      const r = await saveSearchResult({
+        url: job.url,
+        title: job.title,
+        company: job.company || null,
+        location: job.location,
+        description: job.description,
+        source: job.source,
+        salary: job.salary,
+      })
+      if (!r.ok) {
+        setSaveError(r.error ?? 'failed')
+        return
+      }
+      setSavedJobId(r.jobId ?? null)
+      setSavedAlready(r.alreadySaved ?? false)
+    })
+  }
+
+  async function scoreFit() {
+    setScoreError(null)
+    setScoring(true)
+    try {
+      const res = await fetch('/api/search/jobs/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: job.title,
+          company: job.company,
+          description: job.description ?? `${job.title} at ${job.company || '—'}`,
+        }),
+      })
+      const data = await res.json()
+      if (!data.ok) {
+        setScoreError(data.error === 'no_resume' ? 'Complete your profile first' : data.hint ?? data.error ?? `HTTP ${res.status}`)
+        return
+      }
+      setFit({ score: data.score, gaps: data.gaps ?? [], strengths: data.strengths ?? [] })
+    } catch (e) {
+      setScoreError(e instanceof Error ? e.message : 'Network error')
+    } finally {
+      setScoring(false)
+    }
+  }
+
+  async function tailor() {
+    // Save the job first if not already, then route to /resume?jd_id=<id>.
+    // The resume builder's existing JdSection auto-fetches the JD by id.
+    setSaveError(null)
+    let id = savedJobId
+    if (!id) {
+      startTransition(async () => {
+        const r = await saveSearchResult({
+          url: job.url,
+          title: job.title,
+          company: job.company || null,
+          location: job.location,
+          description: job.description,
+          source: job.source,
+          salary: job.salary,
+        })
+        if (!r.ok) {
+          setSaveError(r.error ?? 'failed')
+          return
+        }
+        setSavedJobId(r.jobId ?? null)
+        setSavedAlready(r.alreadySaved ?? false)
+        if (r.jobId) router.push(`/resume?jd_id=${r.jobId}`)
+      })
+      return
+    }
+    router.push(`/resume?jd_id=${id}`)
+  }
+
   return (
     <li className="px-4 py-3 hover:bg-white/[0.02]">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noreferrer noopener nofollow"
-            className="text-sm font-medium text-white hover:text-[color:var(--accent)] inline-flex items-center gap-1.5"
-          >
-            {job.title}
-            <ExternalLink className="w-3 h-3 opacity-60" aria-hidden="true" />
-          </a>
+          <div className="flex flex-wrap items-start gap-2">
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noreferrer noopener nofollow"
+              className="text-sm font-medium text-white hover:text-[color:var(--accent)] inline-flex items-center gap-1.5"
+            >
+              {job.title}
+              <ExternalLink className="w-3 h-3 opacity-60" aria-hidden="true" />
+            </a>
+            {fit && <FitBadge score={fit.score} />}
+          </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-[11px] text-text-2">
             {job.company && (
               <span className="inline-flex items-center gap-1">
@@ -283,11 +386,80 @@ function ResultRow({ job }: { job: JobResult }) {
               <span className="text-emerald-400">{job.salary}</span>
             )}
           </div>
-          {job.description && (
+          {job.description && !expanded && (
             <p className="mt-1.5 text-[12px] text-text-2 leading-relaxed line-clamp-2">
               {job.description}
             </p>
           )}
+
+          {/* Expanded full description */}
+          {expanded && job.description && (
+            <div className="mt-2 rounded-lg border border-white/10 bg-black/30 p-3">
+              <p className="text-[12px] text-white/85 leading-relaxed whitespace-pre-wrap">
+                {job.description}
+              </p>
+            </div>
+          )}
+          {expanded && !job.description && (
+            <p className="mt-2 text-[12px] text-text-2 italic">
+              No description in the search payload —{' '}
+              <a href={job.url} target="_blank" rel="noreferrer noopener" className="underline">
+                open the original posting
+              </a>{' '}
+              to read the full JD.
+            </p>
+          )}
+
+          {/* Fit-score breakdown */}
+          {fit && (
+            <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] p-3 space-y-1.5">
+              {fit.strengths.length > 0 && (
+                <p className="text-[11px]">
+                  <span className="text-emerald-400 font-semibold">Strengths:</span>{' '}
+                  <span className="text-text-2">{fit.strengths.join(' · ')}</span>
+                </p>
+              )}
+              {fit.gaps.length > 0 && (
+                <p className="text-[11px]">
+                  <span className="text-amber-400 font-semibold">Gaps:</span>{' '}
+                  <span className="text-text-2">{fit.gaps.join(' · ')}</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Action bar */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            <RowButton
+              onClick={save}
+              disabled={pending}
+              icon={savedJobId ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
+              label={savedJobId ? (savedAlready ? 'Already on board' : 'Saved') : 'Save'}
+              tone={savedJobId ? 'success' : 'default'}
+            />
+            <RowButton
+              onClick={() => setExpanded(x => !x)}
+              icon={expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              label={expanded ? 'Hide JD' : 'Show JD'}
+            />
+            <RowButton
+              onClick={scoreFit}
+              disabled={scoring}
+              icon={scoring ? <Loader2 className="w-3 h-3 animate-spin" /> : <Target className="w-3 h-3" />}
+              label={fit ? `Re-score (${fit.score})` : 'Fit score'}
+            />
+            <RowButton
+              onClick={tailor}
+              disabled={pending}
+              icon={pending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+              label="Tailor"
+            />
+            {(saveError || scoreError) && (
+              <span className="text-[11px] text-red-400 ml-1">
+                {saveError ?? scoreError}
+              </span>
+            )}
+          </div>
         </div>
         <span
           className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/10 text-[10px] text-text-2"
@@ -309,4 +481,48 @@ function formatPostedAt(iso: string): string {
   if (days < 30) return `${days}d ago`
   const months = Math.floor(days / 30)
   return months === 1 ? '1mo ago' : `${months}mo ago`
+}
+
+interface RowButtonProps {
+  onClick: () => void
+  disabled?: boolean
+  icon: React.ReactNode
+  label: string
+  tone?: 'default' | 'success'
+}
+
+function RowButton({ onClick, disabled, icon, label, tone = 'default' }: RowButtonProps) {
+  const cls = tone === 'success'
+    ? 'border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300 hover:border-emerald-500/40'
+    : 'border-white/10 bg-white/[0.03] text-text-2 hover:text-white hover:border-white/20'
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`min-h-[32px] px-2 inline-flex items-center gap-1 rounded-md border text-[11px] disabled:opacity-50 disabled:cursor-not-allowed ${cls}`}
+    >
+      {icon}
+      {label}
+    </button>
+  )
+}
+
+function FitBadge({ score }: { score: number }) {
+  const tone = score >= 80
+    ? 'border-emerald-500/30 bg-emerald-500/[0.08] text-emerald-300'
+    : score >= 60
+      ? 'border-blue-500/30 bg-blue-500/[0.08] text-blue-300'
+      : score >= 40
+        ? 'border-amber-500/30 bg-amber-500/[0.08] text-amber-300'
+        : 'border-red-500/30 bg-red-500/[0.08] text-red-300'
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] tabular-nums font-semibold ${tone}`}
+      title="LLM-based fit score, 0–100"
+    >
+      <TrendingUp className="w-3 h-3" aria-hidden="true" />
+      {score}
+    </span>
+  )
 }
