@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Compass, ArrowRight, Target } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { KanbanBoard } from '@/features/job-board/components/KanbanBoard'
+import { EmailDigestButton } from './EmailDigestButton.client'
 import type { Application, Job } from '@/types'
 
 export default async function BoardPage() {
@@ -106,6 +107,15 @@ export default async function BoardPage() {
             <StatPill label="Rejected" value={rejectedCount} tone="red" />
           </div>
         </div>
+
+        {/* Email digest action — sends a single summary of due+upcoming
+            follow-ups to the authenticated user's inbox. Inert until
+            RESEND_API_KEY is configured (button shows "Email not configured"). */}
+        {totalCount > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <EmailDigestButton />
+          </div>
+        )}
       </div>
 
       {/* Board Content */}
