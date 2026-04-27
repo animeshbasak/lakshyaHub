@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { fetchPortalJobs } from '@/lib/careerops/scanAtsApi'
 import { PORTAL_SEEDS, type PortalSeed } from '@/data/portal-seeds'
+import { isQStashConfigured, publishBatch } from '@/lib/qstash/client'
 
 const Body = z.object({
   // optional title-keyword filter; defaults to user's resume_profile.target_titles
@@ -84,7 +85,53 @@ export async function POST(req: NextRequest) {
 
   const start = Date.now()
 
-  // Fetch all portals in parallel — each call has its own 10s AbortController.
+  // ── Path A: QStash configured → enqueue per-portal jobs and return ──
+  // Each portal becomes its own Lambda execution, so a slow portal doesn't
+  // block the whole scan and individual failures get QStash's built-in
+  // retry policy. Caller gets an immediate ack with the message IDs.
+  if (isQStashConfigured()) {
+    const baseUrl = req.nextUrl.origin   // e.g. https://lakshya.app or http://localhost:3000
+    const utcDay = new Date().toISOString().slice(0, 10)
+
+    const summary = await publishBatch(
+      seeds.map(s => ({
+        url: `${baseUrl}/api/qstash/scan-portal`,
+        body: {
+          userId: user.id,
+          portal: s.portal,
+          slug: s.slug,
+          company: s.company,
+          titles,
+        },
+        // Idempotency: same user × portal × day → only one enqueue / 24h.
+        // Prevents double-fan-out if the user spams the button (rate-limit
+        // gate above already throttles, this is defense in depth).
+        idempotencyKey: `scan:${user.id}:${s.portal}:${s.slug}:${utcDay}`,
+        retries: 2,
+        timeoutSeconds: 30,
+      }))
+    )
+
+    return NextResponse.json({
+      ok: true,
+      mode: 'qstash',
+      summary: {
+        portalsAttempted: seeds.length,
+        portalsEnqueued: summary.enqueued,
+        portalsFailed: summary.failed,
+        durationMs: Date.now() - start,
+      },
+      enqueueErrors: summary.errors,
+      // Jobs are inserted asynchronously by the receiver — UI should poll
+      // /api/scan/recent or the jobs table to see results trickle in.
+      jobs: [],
+    })
+  }
+
+  // ── Path B: QStash not configured → inline (existing behavior) ──
+  // Same in-Lambda fan-out we shipped originally. Kept as fallback so the
+  // route still works in dev environments without QStash credentials and on
+  // small deployments that don't need the queue.
   const fetched = await Promise.allSettled(
     seeds.map(s => fetchPortalJobs({ portal: s.portal, slug: s.slug, company: s.company }))
   )
