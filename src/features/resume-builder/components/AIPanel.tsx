@@ -13,12 +13,14 @@ import {
   Minimize2,
   Undo2,
   GitCompare,
+  Wand2,
 } from 'lucide-react'
 import { diffTokens, diffStats } from '@/lib/utils/textDiff'
 import { useResumeStore } from '@/features/resume-builder/store/useResumeStore'
 import { useShallow } from 'zustand/shallow'
 import { ATSScorePanel } from '@/features/resume-builder/components/ATSScorePanel'
 import { JdMatchPanel } from '@/features/job-board/components/JdMatchPanel'
+import { TailorToJdSection } from '@/features/resume-builder/components/TailorToJdSection'
 import { calculateATSScore } from '@/lib/atsEngine'
 import type { ATSResult } from '@/types'
 import { resumeToText } from '@/lib/utils/resumeToText'
@@ -863,6 +865,19 @@ export function AIPanel() {
         defaultOpen={!!jdId}
       >
         <JdSection resumeData={resumeData} initialJdId={jdId} />
+      </SectionCard>
+
+      {/* Tailor-to-JD section — paste JD, batch-rewrite every bullet for ATS fit */}
+      <SectionCard
+        title="Tailor to JD"
+        icon={<Wand2 className="w-4 h-4" />}
+        defaultOpen={false}
+      >
+        <TailorToJdSection
+          experience={store.experience}
+          rewriteBullet={store.rewriteBullet}
+          setBulletImproving={store.setBulletImproving}
+        />
       </SectionCard>
 
       {/* ATS Score section */}

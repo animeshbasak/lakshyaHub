@@ -10,6 +10,7 @@ import { PreviewPanel } from '@/features/resume-builder/components/PreviewPanel'
 import { StarterExperience } from '@/features/resume-builder/components/StarterExperience'
 import { TemplatePicker } from '@/features/resume-builder/components/TemplatePicker'
 import { PDFDownloadButton } from '@/features/resume-builder/components/PDFDownloadButton'
+import { LatexDownloadButton } from '@/features/resume-builder/components/LatexDownloadButton'
 import { saveAndSyncProfile } from '@/actions/resumeActions'
 import { toast } from 'sonner'
 import { AIPanel } from '@/features/resume-builder/components/AIPanel'
@@ -358,6 +359,26 @@ function ResumePageContent() {
               resumeOrigin: store.resumeOrigin,
             }}
             className="btn sm"
+          />
+
+          {/* LaTeX export — for academic / Overleaf workflows */}
+          <LatexDownloadButton
+            data={{
+              id: store.id,
+              name: store.name,
+              template: store.template,
+              header: store.header,
+              summary: store.summary,
+              skills: store.skills,
+              experience: store.experience,
+              education: store.education,
+              projects: store.projects,
+              competencies: store.competencies,
+              referenceText: store.referenceText,
+              isRefPanelCollapsed: store.isRefPanelCollapsed,
+              importReview: store.importReview,
+              resumeOrigin: store.resumeOrigin,
+            }}
           />
 
           {/* Save button */}
