@@ -403,6 +403,20 @@ export default function DiscoverPage() {
           </div>
         </details>
 
+        {/* Premium Apify-based scrapers — collapsed by default. The unified
+            search above already covers Remotive / RemoteOK / HN / WWR / Naukri /
+            ATS portals (all free). This block is only useful when the user has
+            an Apify token configured + wants LinkedIn/Indeed/Glassdoor coverage. */}
+        <details className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 mb-4">
+          <summary className="text-xs text-text-2 cursor-pointer select-none hover:text-white">
+            Premium scrapers — LinkedIn / Naukri / Indeed / Glassdoor (needs Apify token)
+          </summary>
+          <p className="text-[11px] text-text-2 mt-2 leading-relaxed">
+            These hit paid Apify actors. Most users don&apos;t need this — the unified search above
+            already covers India + remote + global via free public APIs.
+          </p>
+          <div className="mt-3">
+
         <div className="eyebrow" style={{ marginBottom: 8 }}>Role / Title</div>
         <div style={{ position: 'relative', marginBottom: 14 }}>
           <Search
@@ -535,6 +549,9 @@ export default function DiscoverPage() {
             via Greenhouse & Lever
           </span>
         </div>
+
+          </div>
+        </details>
       </div>
 
       {/* ─── Right column: results / logs ───────────────────────────── */}
