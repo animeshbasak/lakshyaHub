@@ -11,6 +11,16 @@ import { aggregate } from '../src/lib/jobsearch/aggregator.ts'
 const queries = ['Lead Frontend Engineer', 'AI Platform Engineer', 'Senior Data Engineer']
 const regions = ['IN', 'REMOTE', 'GLOBAL']
 
+// Loads ADZUNA_APP_ID + ADZUNA_APP_KEY from .env.local for the smoke run.
+import fs from 'node:fs'
+try {
+  const env = fs.readFileSync('.env.local', 'utf8')
+  for (const line of env.split('\n')) {
+    const m = line.match(/^([A-Z0-9_]+)\s*=\s*(.+?)\s*$/)
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+  }
+} catch { /* missing .env.local is fine */ }
+
 console.log('query × region                                portals  raw  uniq  ms')
 console.log('────────────────────────────────────────────  ───────  ───  ────  ────')
 

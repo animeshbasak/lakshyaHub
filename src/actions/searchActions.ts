@@ -96,6 +96,23 @@ export async function saveSearchResult(input: SearchResultInput): Promise<SaveRe
   return { ok: true, jobId: jobRow.id, applicationId: appRow.id, alreadySaved: false }
 }
 
+/**
+ * Canonicalize URL before hashing so the same posting from different
+ * referral paths (?utm_source=remotive, ?ref=hn, …) and trailing slashes
+ * collapse to one dedup key. Mirrors the canonicalize() helper in
+ * src/lib/jobsearch/aggregator.ts so save+search-dedupe stay in sync.
+ */
+function canonicalize(url: string): string {
+  try {
+    const u = new URL(url)
+    u.search = ''
+    u.hash = ''
+    return `${u.host}${u.pathname.replace(/\/$/, '')}`
+  } catch {
+    return url
+  }
+}
+
 function hashFor(userId: string, url: string): string {
-  return createHash('sha256').update(`${userId}|${url}`).digest('hex').slice(0, 32)
+  return createHash('sha256').update(`${userId}|${canonicalize(url)}`).digest('hex').slice(0, 32)
 }

@@ -10,6 +10,7 @@ import { hnAlgoliaAdapter } from './adapters/hn-algolia'
 import { weworkremotelyAdapter } from './adapters/weworkremotely'
 import { naukriSitemapAdapter } from './adapters/naukri-sitemap'
 import { atsPortalsAdapter } from './adapters/ats-portals'
+import { adzunaAdapter } from './adapters/adzuna'
 import { withTimeout, rankByRecency } from './util'
 
 const ADAPTERS: JobSearchAdapter[] = [
@@ -19,6 +20,9 @@ const ADAPTERS: JobSearchAdapter[] = [
   weworkremotelyAdapter,
   naukriSitemapAdapter,
   atsPortalsAdapter,
+  // Activates only when ADZUNA_APP_ID + ADZUNA_APP_KEY are set; otherwise
+  // the aggregator skips it via isAvailable().
+  adzunaAdapter,
 ]
 
 export interface AggregateOutput {

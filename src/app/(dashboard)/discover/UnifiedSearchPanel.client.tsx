@@ -57,6 +57,7 @@ const SOURCE_LABELS: Record<string, string> = {
   'weworkremotely': 'WWR',
   'naukri': 'Naukri',
   'ats-portals': 'Direct ATS',
+  'adzuna': 'Adzuna',
 }
 
 /**
@@ -148,7 +149,7 @@ export function UnifiedSearchPanel() {
         </div>
 
         <p className="mt-3 text-[11px] text-text-2 leading-relaxed">
-          Searches 6 sources in parallel: Remotive, RemoteOK, HN Who&apos;s Hiring, WeWorkRemotely, Naukri (India), and direct ATS boards (Greenhouse / Ashby / Lever). Free, no rate limits at our usage.
+          Searches up to 7 sources in parallel: Remotive, RemoteOK, HN Who&apos;s Hiring, WeWorkRemotely, Naukri (India), direct ATS boards (Greenhouse / Ashby / Lever), and Adzuna (when configured). Free, no rate limits at our usage.
         </p>
       </form>
 
@@ -196,7 +197,7 @@ export function UnifiedSearchPanel() {
 }
 
 function SearchingState() {
-  const sources = ['Remotive', 'RemoteOK', 'HN Hiring', 'WWR', 'Naukri', 'Direct ATS']
+  const sources = ['Remotive', 'RemoteOK', 'HN Hiring', 'WWR', 'Naukri', 'Direct ATS', 'Adzuna']
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
       <div className="flex items-center gap-3 mb-4">
@@ -387,7 +388,13 @@ function ResultRow({ job }: { job: JobResult }) {
         }
         setSavedJobId(r.jobId ?? null)
         setSavedAlready(r.alreadySaved ?? false)
-        if (r.jobId) router.push(`/resume?jd_id=${r.jobId}`)
+        if (r.jobId) {
+          router.push(`/resume?jd_id=${r.jobId}`)
+        } else {
+          // Save reported ok but didn't return a jobId — degrade to a clear
+          // error rather than silently doing nothing.
+          setSaveError('Save succeeded but no job id returned — try again')
+        }
       })
       return
     }

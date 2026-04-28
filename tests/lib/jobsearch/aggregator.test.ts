@@ -8,6 +8,7 @@ vi.mock('@/lib/jobsearch/adapters/hn-algolia',     () => ({ hnAlgoliaAdapter:   
 vi.mock('@/lib/jobsearch/adapters/weworkremotely', () => ({ weworkremotelyAdapter:  mkAdapter('weworkremotely', ['REMOTE', 'GLOBAL', 'IN']) }))
 vi.mock('@/lib/jobsearch/adapters/naukri-sitemap', () => ({ naukriSitemapAdapter:   mkAdapter('naukri', ['IN']) }))
 vi.mock('@/lib/jobsearch/adapters/ats-portals',    () => ({ atsPortalsAdapter:      mkAdapter('ats-portals', ['IN', 'GLOBAL', 'REMOTE']) }))
+vi.mock('@/lib/jobsearch/adapters/adzuna',         () => ({ adzunaAdapter:           mkAdapter('adzuna', ['IN', 'GLOBAL', 'REMOTE'], () => true) }))
 
 import { aggregate } from '@/lib/jobsearch/aggregator'
 import { remotiveAdapter } from '@/lib/jobsearch/adapters/remotive'
@@ -21,11 +22,12 @@ import type { JobSearchAdapter, JobSearchResult, JobRegion } from '@/lib/jobsear
 
 afterEach(() => { vi.clearAllMocks() })
 
-function mkAdapter(name: string, regions: JobRegion[]): JobSearchAdapter {
+function mkAdapter(name: string, regions: JobRegion[], isAvailable?: () => boolean): JobSearchAdapter {
   return {
     name,
     regions,
     timeoutMs: 1000,
+    isAvailable,
     search: vi.fn(async () => []) as JobSearchAdapter['search'],
   }
 }
@@ -51,7 +53,7 @@ describe('aggregate', () => {
     const names = r.byAdapter.map(b => b.adapter)
     expect(names).toContain('naukri')
     expect(names).toContain('ats-portals')
-    expect(names.length).toBe(6)
+    expect(names.length).toBe(7)
   })
 
   it('skips adapters that do NOT include the region', async () => {
