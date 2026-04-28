@@ -64,9 +64,12 @@ const SOURCE_LABELS: Record<string, string> = {
  * Replaces the previous two-card layout (ATS-card + Apify-form). Apify
  * scrapers move to a secondary collapsed section below.
  */
+type SortMode = 'fit' | 'recent'
+
 export function UnifiedSearchPanel() {
   const [query, setQuery] = useState('')
   const [region, setRegion] = useState<Region>('GLOBAL')
+  const [sort, setSort] = useState<SortMode>('fit')
   const [state, setState] = useState<
     | { kind: 'idle' }
     | { kind: 'searching' }
@@ -169,14 +172,21 @@ export function UnifiedSearchPanel() {
 
       {state.kind === 'done' && (
         <>
-          <SourceStrip adapters={state.summary?.adapters ?? []} totalDeduped={state.summary?.totalDeduped ?? 0} elapsedMs={state.summary?.durationMs ?? 0} />
+          <SourceStrip
+            adapters={state.summary?.adapters ?? []}
+            totalDeduped={state.summary?.totalDeduped ?? 0}
+            elapsedMs={state.summary?.durationMs ?? 0}
+            hasResumeSignal={state.jobs.some(j => typeof j.fitScore === 'number')}
+            sort={sort}
+            onSortChange={setSort}
+          />
           {state.jobs.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6 text-center text-sm text-text-2">
               No matches across {state.summary?.adapters.length ?? 0} sources. Try a broader title or different region filter.
             </div>
           ) : (
             <ul className="divide-y divide-white/5 rounded-xl border border-white/10 bg-white/[0.02]">
-              {state.jobs.map(j => <ResultRow key={j.url} job={j} />)}
+              {sortJobs(state.jobs, sort).map(j => <ResultRow key={j.url} job={j} />)}
             </ul>
           )}
         </>
@@ -220,14 +230,47 @@ function SearchingState() {
   )
 }
 
-function SourceStrip({ adapters, totalDeduped, elapsedMs }: { adapters: AdapterStat[]; totalDeduped: number; elapsedMs: number }) {
+interface SourceStripProps {
+  adapters: AdapterStat[]
+  totalDeduped: number
+  elapsedMs: number
+  hasResumeSignal: boolean
+  sort: SortMode
+  onSortChange: (s: SortMode) => void
+}
+
+function SourceStrip({ adapters, totalDeduped, elapsedMs, hasResumeSignal, sort, onSortChange }: SourceStripProps) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
         <p className="text-xs text-text-2">
           <span className="font-bold text-white tabular-nums">{totalDeduped}</span> unique jobs ·
           <span className="ml-1 tabular-nums">{(elapsedMs / 1000).toFixed(1)}s</span>
+          {!hasResumeSignal && (
+            <span className="ml-2 text-amber-400" title="Complete /profile to enable fit-score sorting.">
+              · no resume signal
+            </span>
+          )}
         </p>
+        {/* Sort toggle — only meaningful when we have a resume to score against. */}
+        {hasResumeSignal && (
+          <div className="inline-flex rounded-md border border-white/10 bg-black/30 p-0.5" role="radiogroup" aria-label="Sort">
+            {(['fit', 'recent'] as const).map(s => (
+              <button
+                key={s}
+                type="button"
+                role="radio"
+                aria-checked={sort === s}
+                onClick={() => onSortChange(s)}
+                className={`min-h-[24px] px-2 text-[10px] uppercase tracking-wider font-medium rounded ${
+                  sort === s ? 'bg-white text-black' : 'text-text-2 hover:text-white'
+                }`}
+              >
+                {s === 'fit' ? 'Best fit' : 'Newest'}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {adapters.map(a => {
@@ -455,7 +498,10 @@ function ResultRow({ job }: { job: JobResult }) {
               onClick={scoreFit}
               disabled={scoring}
               icon={scoring ? <Loader2 className="w-3 h-3 animate-spin" /> : <Target className="w-3 h-3" />}
-              label={fit ? `Re-score (${fit.score})` : 'Fit score'}
+              // Two scoring layers: the heuristic fitScore is precomputed
+              // server-side; this button kicks the LLM analysis (gaps + strengths).
+              // Re-label so the user can tell them apart on the same row.
+              label={fit ? `AI re-score (${fit.score})` : typeof job.fitScore === 'number' ? 'AI analysis' : 'Fit score'}
             />
             <RowButton
               onClick={tailor}
@@ -479,6 +525,20 @@ function ResultRow({ job }: { job: JobResult }) {
       </div>
     </li>
   )
+}
+
+/**
+ * Client-side re-sort. The route already returns jobs sorted by fitScore
+ * desc (then recency), so 'fit' mode is a no-op pass-through. 'recent'
+ * mode resorts by postedAt desc; null timestamps sink.
+ */
+function sortJobs(jobs: JobResult[], mode: SortMode): JobResult[] {
+  if (mode === 'fit') return jobs
+  return [...jobs].sort((a, b) => {
+    const ta = a.postedAt ? Date.parse(a.postedAt) : 0
+    const tb = b.postedAt ? Date.parse(b.postedAt) : 0
+    return tb - ta
+  })
 }
 
 function formatPostedAt(iso: string): string {
