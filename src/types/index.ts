@@ -123,7 +123,8 @@ export type TemplateType =
   | 'dark-header'
   | 'india-tech'
   | 'classic'
-  | 'creative';
+  | 'creative'
+  | 'latex-article';
 
 export type ResumeOrigin = 'blank' | 'demo' | 'imported' | 'saved';
 

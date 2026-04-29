@@ -14,6 +14,7 @@ import { DarkHeaderTemplate } from './DarkHeaderTemplate';
 import { IndiaTechTemplate } from './IndiaTechTemplate';
 import { ClassicTemplate } from './ClassicTemplate';
 import { CreativeTemplate } from './CreativeTemplate';
+import { LatexArticleTemplate } from './LatexArticleTemplate';
 
 export const TEMPLATE_COMPONENTS: Record<string, React.ComponentType<{ data: ResumeData }>> = {
   'harvard': HarvardTemplate,
@@ -30,6 +31,7 @@ export const TEMPLATE_COMPONENTS: Record<string, React.ComponentType<{ data: Res
   // Not yet in TemplateType — port complete, add to types/index.ts when ready
   'classic': ClassicTemplate,
   'creative': CreativeTemplate,
+  'latex-article': LatexArticleTemplate,
 };
 
 export const TEMPLATE_NAMES: Record<string, string> = {
@@ -46,6 +48,7 @@ export const TEMPLATE_NAMES: Record<string, string> = {
   'india-tech': 'India Tech',
   'classic': 'Classic',
   'creative': 'Creative',
+  'latex-article': 'LaTeX Article',
 };
 
 export const TEMPLATE_LIST = Object.keys(TEMPLATE_NAMES) as TemplateType[];
