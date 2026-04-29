@@ -12,6 +12,13 @@ interface SearchResultInput {
   description: string | null
   source: string
   salary?: string | null
+  /**
+   * Heuristic fit-score (0-100) computed in /api/search/jobs by
+   * src/lib/jobsearch/fitHeuristic.ts. Persisted to jobs.fit_score so /board
+   * cards show the same number the user saw on /discover. null/undefined =
+   * we have no resume signal yet, so leave fit_score at its default 0.
+   */
+  fitScore?: number | null
 }
 
 interface SaveResult {
@@ -46,19 +53,38 @@ export async function saveSearchResult(input: SearchResultInput): Promise<SaveRe
   const dedupHash = hashFor(user.id, input.url)
 
   // Upsert job by (user_id, dedup_hash). select() returns the row regardless.
+  // We omit fit_score from the upsert when fitScore is undefined so a re-save
+  // doesn't overwrite a higher score from a later eval (e.g. /api/rescore).
+  type JobUpsert = {
+    user_id: string
+    source: string
+    title: string
+    company: string | null
+    location: string | null
+    description: string | null
+    url: string
+    salary_range: string | null
+    dedup_hash: string
+    fit_score?: number
+  }
+  const upsertPayload: JobUpsert = {
+    user_id: user.id,
+    source: input.source,
+    title: input.title,
+    company: input.company ?? null,
+    location: input.location ?? null,
+    description: input.description ?? null,
+    url: input.url,
+    salary_range: input.salary ?? null,
+    dedup_hash: dedupHash,
+  }
+  if (typeof input.fitScore === 'number' && input.fitScore >= 0) {
+    upsertPayload.fit_score = Math.round(input.fitScore)
+  }
+
   const { data: jobRow, error: jobErr } = await supabase
     .from('jobs')
-    .upsert({
-      user_id: user.id,
-      source: input.source,
-      title: input.title,
-      company: input.company ?? null,
-      location: input.location ?? null,
-      description: input.description ?? null,
-      url: input.url,
-      salary_range: input.salary ?? null,
-      dedup_hash: dedupHash,
-    }, { onConflict: 'user_id,dedup_hash' })
+    .upsert(upsertPayload, { onConflict: 'user_id,dedup_hash' })
     .select('id')
     .single()
 

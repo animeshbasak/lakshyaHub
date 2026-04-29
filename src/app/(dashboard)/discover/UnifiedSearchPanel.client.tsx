@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search, Loader2, ExternalLink, MapPin, Building2, Calendar, Sparkles, AlertTriangle,
-  Bookmark, BookmarkCheck, Wand2, ChevronDown, ChevronUp, Target, TrendingUp,
+  Bookmark, BookmarkCheck, Wand2, ChevronDown, ChevronUp, Target, TrendingUp, X,
 } from 'lucide-react'
 import { saveSearchResult } from '@/actions/searchActions'
 
@@ -67,10 +67,56 @@ const SOURCE_LABELS: Record<string, string> = {
  */
 type SortMode = 'fit' | 'recent'
 
+/**
+ * sessionStorage key for the last search. Survives within a tab session
+ * (so navigating to /board and back restores results) but resets on tab
+ * close — short retention is intentional, the result list goes stale fast.
+ */
+const STORAGE_KEY = 'lakshya:discover:lastSearch:v1'
+
+interface PersistedSearch {
+  query: string
+  region: Region
+  sort: SortMode
+  jobs: JobResult[]
+  summary: SearchResponse['summary'] | undefined
+  /** ISO timestamp so we can render "results from X minutes ago". */
+  savedAt: string
+}
+
+function loadPersisted(): PersistedSearch | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as PersistedSearch
+    if (!parsed.query || !Array.isArray(parsed.jobs)) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function savePersisted(p: PersistedSearch): void {
+  if (typeof window === 'undefined') return
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(p))
+  } catch {
+    // sessionStorage can throw on quota / private mode — silent ignore.
+    // Worst case the user re-runs their search.
+  }
+}
+
+function clearPersisted(): void {
+  if (typeof window === 'undefined') return
+  try { sessionStorage.removeItem(STORAGE_KEY) } catch { /* noop */ }
+}
+
 export function UnifiedSearchPanel() {
   const [query, setQuery] = useState('')
   const [region, setRegion] = useState<Region>('GLOBAL')
   const [sort, setSort] = useState<SortMode>('fit')
+  const [restoredAt, setRestoredAt] = useState<string | null>(null)
   const [state, setState] = useState<
     | { kind: 'idle' }
     | { kind: 'searching' }
@@ -78,6 +124,24 @@ export function UnifiedSearchPanel() {
     | { kind: 'rate_limited'; retryAfter: number }
     | { kind: 'error'; message: string }
   >({ kind: 'idle' })
+
+  // Restore the last search on mount. Runs once; later searches overwrite.
+  useEffect(() => {
+    const restored = loadPersisted()
+    if (!restored) return
+    setQuery(restored.query)
+    setRegion(restored.region)
+    setSort(restored.sort)
+    setState({ kind: 'done', jobs: restored.jobs, summary: restored.summary })
+    setRestoredAt(restored.savedAt)
+  }, [])
+
+  function clearSearch() {
+    clearPersisted()
+    setQuery('')
+    setRestoredAt(null)
+    setState({ kind: 'idle' })
+  }
 
   async function runSearch(e?: React.FormEvent) {
     e?.preventDefault()
@@ -98,7 +162,11 @@ export function UnifiedSearchPanel() {
         setState({ kind: 'error', message: data.error ?? `HTTP ${res.status}` })
         return
       }
-      setState({ kind: 'done', jobs: data.jobs ?? [], summary: data.summary })
+      const jobs = data.jobs ?? []
+      const savedAt = new Date().toISOString()
+      setState({ kind: 'done', jobs, summary: data.summary })
+      setRestoredAt(null)   // fresh search — clear the "restored from cache" hint
+      savePersisted({ query: query.trim(), region, sort, jobs, summary: data.summary, savedAt })
     } catch (err) {
       setState({ kind: 'error', message: err instanceof Error ? err.message : 'Network error' })
     }
@@ -173,6 +241,22 @@ export function UnifiedSearchPanel() {
 
       {state.kind === 'done' && (
         <>
+          {restoredAt && (
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 flex items-center justify-between flex-wrap gap-2">
+              <p className="text-[11px] text-text-2">
+                Showing cached results from {formatPostedAt(restoredAt) || 'just now'} ·
+                <span className="ml-1">click Search to refresh.</span>
+              </p>
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="min-h-[28px] px-2 inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] text-[10px] text-text-2 hover:text-white hover:border-white/20"
+              >
+                <X className="w-3 h-3" aria-hidden="true" />
+                Clear
+              </button>
+            </div>
+          )}
           <SourceStrip
             adapters={state.summary?.adapters ?? []}
             totalDeduped={state.summary?.totalDeduped ?? 0}
@@ -330,6 +414,9 @@ function ResultRow({ job }: { job: JobResult }) {
         description: job.description,
         source: job.source,
         salary: job.salary,
+        // Persist the heuristic score we showed on the badge so /board's
+        // FitBadge reads the same number — no more drift.
+        fitScore: job.fitScore ?? null,
       })
       if (!r.ok) {
         setSaveError(r.error ?? 'failed')
@@ -381,6 +468,7 @@ function ResultRow({ job }: { job: JobResult }) {
           description: job.description,
           source: job.source,
           salary: job.salary,
+          fitScore: job.fitScore ?? null,
         })
         if (!r.ok) {
           setSaveError(r.error ?? 'failed')
