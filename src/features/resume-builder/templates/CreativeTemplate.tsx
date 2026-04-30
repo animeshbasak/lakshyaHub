@@ -6,20 +6,26 @@ import { parseBoldText } from '../utils/parseBoldText';
 import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
+  // Two-column layout. Sidebar uses position:absolute + fixed so it
+  // repeats on every page when the main column overflows (Bug D fix).
+  // Without `fixed`, page 2+ loses the dark sidebar entirely.
   page: {
     size: 'A4',
-    flexDirection: 'row',
     fontFamily: 'Helvetica',
     backgroundColor: '#FFFFFF',
   },
   sidebar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
     width: '35%',
     backgroundColor: '#1E293B',
     padding: 30,
     color: '#F8FAFC',
-    height: '100%',
   },
   main: {
+    marginLeft: '35%',
     width: '65%',
     padding: 36,
     paddingTop: 48,
@@ -178,7 +184,8 @@ export function CreativeTemplate({ data }: { data: ResumeData }) {
       <Page size="A4" style={styles.page}>
 
         {/* LEFT SIDEBAR */}
-        <View style={styles.sidebar}>
+        {/* Sidebar — `fixed` makes this repeat on every page (Bug D fix). */}
+        <View style={styles.sidebar} fixed>
 
           {/* CONTACT INFO */}
           <View style={styles.sidebarSection}>

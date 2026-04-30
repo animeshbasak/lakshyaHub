@@ -6,20 +6,31 @@ import { parseBoldText } from '../utils/parseBoldText';
 import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
+  // Layout strategy for multi-page resumes:
+  // 1. Page is a normal block (no flexDirection: 'row') so content paginates
+  //    naturally by its main column.
+  // 2. Sidebar is `position: 'absolute'` + `fixed` so it repeats on every
+  //    page. Without `fixed`, @react-pdf/renderer renders the sidebar only
+  //    on page 1 — it's a single child View, not a per-page region.
+  // 3. Main column gets a left margin equal to the sidebar width so it
+  //    doesn't clobber the sidebar.
   page: {
     size: 'A4',
-    flexDirection: 'row',
     fontFamily: 'Helvetica',
     backgroundColor: '#FFFFFF',
   },
   sidebar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
     width: '32%',
     backgroundColor: '#0D9488',
     color: '#FFFFFF',
     padding: 25,
-    height: '100%',
   },
   main: {
+    marginLeft: '32%',
     width: '68%',
     padding: 30,
   },
@@ -117,8 +128,10 @@ export function TealSidebarTemplate({ data }: { data: ResumeData }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* SIDEBAR */}
-        <View style={styles.sidebar}>
+        {/* SIDEBAR — `fixed` makes this repeat on every page when the
+            main column paginates. Without it, page 2+ would lose the
+            sidebar entirely (Bug D fix). */}
+        <View style={styles.sidebar} fixed>
           <View style={styles.sidebarSection}>
             <Text style={styles.sidebarTitle}>Contact</Text>
             <Text style={styles.sidebarText}>{header.email}</Text>
