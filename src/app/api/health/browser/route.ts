@@ -10,6 +10,14 @@ import { chromium as playwright } from 'playwright-core'
  * access is a trivial DoS vector. Require HEALTH_SECRET header for any caller.
  */
 export async function GET(req: NextRequest) {
+  // Plan-aware preflight. See /api/qstash/check-liveness for rationale.
+  if (process.env.BROWSER_LIVENESS_ENABLED !== 'true') {
+    return NextResponse.json(
+      { ok: false, error: 'browser_liveness_disabled', hint: 'Set BROWSER_LIVENESS_ENABLED=true after upgrading to a Vercel plan with ≥1769 MB function memory.' },
+      { status: 503 },
+    )
+  }
+
   const secret = process.env.HEALTH_SECRET
   if (!secret || req.headers.get('x-health-secret') !== secret) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })

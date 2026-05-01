@@ -35,6 +35,16 @@ const Body = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  // Plan-aware preflight. Chromium needs ≥1769 MB; default Vercel function
+  // memory is 1024 MB. Until BROWSER_LIVENESS_ENABLED=true is set on a Pro
+  // (or higher) plan deployment, fail closed instead of OOM-crashing.
+  if (process.env.BROWSER_LIVENESS_ENABLED !== 'true') {
+    return NextResponse.json(
+      { ok: false, error: 'browser_liveness_disabled', hint: 'Set BROWSER_LIVENESS_ENABLED=true in Vercel env after upgrading to Pro plan with ≥1769 MB function memory.' },
+      { status: 503 },
+    )
+  }
+
   const signature = req.headers.get('upstash-signature') ?? ''
   if (!signature) {
     return NextResponse.json({ ok: false, error: 'missing_signature' }, { status: 401 })
