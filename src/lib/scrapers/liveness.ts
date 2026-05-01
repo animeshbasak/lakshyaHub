@@ -1,10 +1,19 @@
 /**
- * Liveness checker — classifies a job-posting page as live / expired / unknown
- * via regex patterns + heuristics on the rendered HTML.
+ * Liveness checker — classifies a job-posting page as active / expired /
+ * uncertain via regex patterns + heuristics on the rendered HTML.
  *
  * Ported from career-ops `liveness-core.mjs:1-40` (with the new "Applications
  * have closed" patterns from commit 7f8217e). Pure-function: no I/O, no
  * Chromium, no network. Caller is responsible for fetching HTML.
+ *
+ * Returned status matches the existing `jobs.liveness_status` schema (added
+ * in migration 003) so the future wire-in can persist directly without an
+ * enum-mapping shim:
+ *   - active     — content looks live (apply controls present, content
+ *                  rich, no expiry banners)
+ *   - expired    — definitively expired (banner / URL / listing-redirect)
+ *   - uncertain  — content too short / ambiguous to classify (default state
+ *                  in DB schema)
  *
  * This is the LITE liveness check (HTTP-only). The full Chromium-based
  * version is gated behind BROWSER_LIVENESS_ENABLED on the QStash routes
@@ -62,7 +71,11 @@ const EXPIRED_URL_PATTERNS: RegExp[] = [
  */
 const MIN_CONTENT_CHARS = 300
 
-export type LivenessStatus = 'live' | 'expired' | 'unknown'
+/**
+ * Status enum matches the existing `jobs.liveness_status` column from
+ * migration 003 — see file-level comment for rationale.
+ */
+export type LivenessStatus = 'active' | 'expired' | 'uncertain'
 
 export interface LivenessResult {
   status: LivenessStatus
@@ -77,8 +90,8 @@ export interface LivenessResult {
  *   2. Body text matches a HARD_EXPIRED_PATTERN → expired
  *      (apply button rendering doesn't override — closed-banner wins)
  *   3. Body text matches a LISTING_PAGE_PATTERN → expired (redirected to listing)
- *   4. Body text below MIN_CONTENT_CHARS → unknown
- *   5. Otherwise → live
+ *   4. Body text below MIN_CONTENT_CHARS → uncertain
+ *   5. Otherwise → active
  */
 export function checkLiveness(html: string, url: string): LivenessResult {
   const signals: string[] = []
@@ -119,14 +132,14 @@ export function checkLiveness(html: string, url: string): LivenessResult {
   }
 
   // Tier 4: minimum content threshold — if body is suspiciously short,
-  // we can't confidently say live (could be a 410 dressed as 200, or auth
+  // we can't confidently say active (could be a 410 dressed as 200, or auth
   // wall, or SPA shell waiting for hydration).
   if (bodyText.length < MIN_CONTENT_CHARS) {
     signals.push(`short:${bodyText.length}<${MIN_CONTENT_CHARS}`)
-    return { status: 'unknown', signals }
+    return { status: 'uncertain', signals }
   }
 
-  return { status: 'live', signals }
+  return { status: 'active', signals }
 }
 
 /** Test export — lets tests assert specific patterns are wired. */

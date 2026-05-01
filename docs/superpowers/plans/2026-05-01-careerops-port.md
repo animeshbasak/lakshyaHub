@@ -19,7 +19,7 @@
 ## Sequencing notes
 
 - F2 and F3 both eventually modify `src/lib/filters/jobFilters.ts` — landing as standalone utilities first (no jobFilters changes) avoids the merge dance.
-- Migration numbers reserved: F1 = `006_writing_style.sql`, F3 = `007_jobs_liveness.sql`.
+- Migration numbers reserved: F1 = `006_writing_style.sql`. F3 reuses the existing `liveness_status` column from migration `003_liveness_columns.sql` — the lite checker emits `active|expired|uncertain` matching the existing schema, no new migration needed.
 - All three features will be flag-gated when wired in: `WRITING_STYLE_ENABLED`, `JOB_DEDUP_FUZZY`, `JOB_LIVENESS_FILTER`.
 
 ## Feature 2 — Role-fuzzy match utility
@@ -50,7 +50,7 @@
 
 **Files (this session):**
 - `src/lib/scrapers/liveness.ts` — `checkLiveness(html, url): {status, signals}` ported from `liveness-core.mjs:1-40`. Patterns: `HARD_EXPIRED_PATTERNS` (incl. the 3 new "Applications have closed" variants from commit `7f8217e`), `LISTING_PAGE_PATTERNS`, `EXPIRED_URL_PATTERNS`, `MIN_CONTENT_CHARS`
-- `supabase/migrations/007_jobs_liveness.sql` — additive: `liveness` text column with check constraint (`'live'|'expired'|'unknown'`), `liveness_checked_at timestamptz`, index on `(user_id, liveness)`
+- (no new migration) — reuses `jobs.liveness_status` column added by migration `003_liveness_columns.sql`. Future wire-in writes via `update jobs set liveness_status = checkLiveness(...).status, liveness_checked_at = now()`.
 - `tests/lib/scrapers/liveness.test.ts` — 8+ tests covering each pattern + boundary cases
 
 **Edge cases handled:**
@@ -87,7 +87,7 @@
 ## Cross-feature concerns
 
 - **Feature flags everywhere.** No feature defaults on in production until 24–48h staging soak.
-- **Migration order:** ship F3's `007_jobs_liveness.sql` THIS session; F1's `006_writing_style.sql` next session. Migration numbers are reserved and consistent.
+- **Migration order:** F3 reuses existing migration 003's `liveness_status` column (no new migration). F1's `006_writing_style.sql` reserved for next session.
 - **Test infrastructure:** `vitest` is installed but no `npm test` script; runs via `npx vitest run`. Worth adding `"test": "vitest run"` to package.json scripts as a small QoL fix in a separate commit.
 
 ## Rollback plan (consolidated)

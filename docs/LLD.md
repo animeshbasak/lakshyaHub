@@ -107,7 +107,7 @@ Two parallel systems:
 - Each check is a pure predicate over `ResumeData`, weighted. Score = sum of passed weights.
 - Called synchronously in the builder preview; no network roundtrip.
 
-**LLM JD Match (5-dimension)** (`src/app/api/ai/jd-match-5d/route.ts`):
+**LLM JD Match (5-dimension)** (server-action `runJdMatch5dTask` in `src/lib/ai/taskRunner.ts`, invoked from `src/actions/scrapeJobs.ts`):
 1. Client posts `{ resumeText, jd }` to the route (or internally via `runJdMatch5dTask()` during scrape).
 2. Route auths the user, builds a prompt truncating both inputs to 3 000 chars, calls `runJdMatch5dTask()` (max_tokens 1800, temperature 0.2).
 3. Router picks `gemini → groq → openrouter`; retries `RATE_LIMIT`, `TIMEOUT`, `STRUCTURE_INVALID`.

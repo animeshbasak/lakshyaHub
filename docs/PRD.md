@@ -22,7 +22,7 @@ A full resume builder with 13 templates, section-by-section editing, PDF export 
 A Kanban board (`saved → applied → interview → offer → rejected`) built on `@dnd-kit`, persisting every move to a Supabase `applications` table. Each card opens a drawer with the job, the fit breakdown, notes, and the JD Match panel. See `src/features/job-board/components/KanbanBoard.tsx`.
 
 ### 4. ATS / JD Match
-Two complementary scoring systems: (a) a rule-based ATS engine (`src/lib/atsEngine.ts`) that checks the user's own resume against keyword / positioning / baseline pillars and returns a 0–100 with actionable tips; (b) an LLM-based 5-dimension JD match (skills, title, seniority, location, salary) that compares a specific job's description against the user's resume and returns a grade, verdict, and top gaps. See `src/app/api/ai/jd-match-5d/route.ts` and `src/features/job-board/components/JdMatchPanel.tsx`.
+Two complementary scoring systems: (a) a rule-based ATS engine (`src/lib/atsEngine.ts`) that checks the user's own resume against keyword / positioning / baseline pillars and returns a 0–100 with actionable tips; (b) an LLM-based 5-dimension JD match (skills, title, seniority, location, salary) that compares a specific job's description against the user's resume and returns a grade, verdict, and top gaps. The 5-D match runs server-side via `runJdMatch5dTask` invoked from `src/actions/scrapeJobs.ts` (per-job UI panel `src/features/job-board/components/JdMatchPanel.tsx` is feature-flagged off pending the A–G evaluator adapter rebuild).
 
 ## User journeys
 

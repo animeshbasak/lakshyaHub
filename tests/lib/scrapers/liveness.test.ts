@@ -93,7 +93,7 @@ describe('checkLiveness — URL-level signals', () => {
 describe('checkLiveness — content threshold', () => {
   it('returns unknown when body text is too short', () => {
     const r = checkLiveness('<html><body><p>Hi</p></body></html>', URL)
-    expect(r.status).toBe('unknown')
+    expect(r.status).toBe('uncertain')
     expect(r.signals[0]).toMatch(/^short:/)
   })
 
@@ -104,7 +104,7 @@ describe('checkLiveness — content threshold', () => {
       <p>${'Responsibilities and detail '.repeat(20)}</p>
       <a>Apply now</a>
     `
-    expect(checkLiveness(html(body), URL).status).toBe('live')
+    expect(checkLiveness(html(body), URL).status).toBe('active')
   })
 })
 
@@ -117,7 +117,7 @@ describe('checkLiveness — false-positive guards', () => {
       <p>${'Responsibilities '.repeat(30)}</p>
     `
     // "closed our seed round" doesn't match any of our patterns
-    expect(checkLiveness(html(body), URL).status).toBe('live')
+    expect(checkLiveness(html(body), URL).status).toBe('active')
   })
 
   it('does NOT flag legit "1234 applications" mention as closed', () => {
@@ -127,7 +127,7 @@ describe('checkLiveness — false-positive guards', () => {
       <p>${'Detail '.repeat(50)}</p>
     `
     // "applications received" shouldn't match "applications closed"
-    expect(checkLiveness(html(body), URL).status).toBe('live')
+    expect(checkLiveness(html(body), URL).status).toBe('active')
   })
 })
 
@@ -150,7 +150,7 @@ describe('__testInternals', () => {
   })
 
   it('LivenessStatus type matches expected values', () => {
-    const v: LivenessStatus = 'live'
-    expect(['live', 'expired', 'unknown']).toContain(v)
+    const v: LivenessStatus = 'active'
+    expect(['active', 'expired', 'uncertain']).toContain(v)
   })
 })
