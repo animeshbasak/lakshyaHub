@@ -62,6 +62,48 @@ describe('scorePersonalFit — disqualifiers', () => {
     })
     expect(r.disqualified).toBe(true)
   })
+
+  // False-positive guards — these would pass the original substring matcher
+  // but should NOT disqualify a real product co with `tcs`/`ey` in its name.
+  it('does NOT disqualify "Atcs" (substring `tcs` is mid-word)', () => {
+    const r = scorePersonalFit({
+      title: 'Lead Frontend Engineer',
+      company: 'Atcs',
+      location: 'Remote',
+      description: 'React TypeScript',
+    })
+    expect(r.disqualified).toBe(false)
+  })
+
+  it('does NOT disqualify "Honeycomb" (substring `ey` is mid-word)', () => {
+    const r = scorePersonalFit({
+      title: 'Lead Frontend Engineer',
+      company: 'Honeycomb.io',
+      location: 'Remote',
+      description: 'React TypeScript observability',
+    }, { ...PRESETS.US })
+    expect(r.disqualified).toBe(false)
+  })
+
+  it('does NOT disqualify "Linkedin" (substring `lti` is mid-word)', () => {
+    const r = scorePersonalFit({
+      title: 'Senior Engineer',
+      company: 'LinkedIn',
+      location: 'Remote',
+      description: 'React',
+    })
+    expect(r.disqualified).toBe(false)
+  })
+
+  it('still catches "EY" alone via word boundary', () => {
+    const r = scorePersonalFit({
+      title: 'Senior Consultant',
+      company: 'EY',
+      location: 'Mumbai',
+      description: 'React',
+    }, PRESETS.US)
+    expect(r.disqualified).toBe(true)
+  })
 })
 
 describe('scorePersonalFit — penalties', () => {
@@ -142,6 +184,72 @@ describe('scorePersonalFit — comp floor', () => {
     // Picks 80 — should land in comp-high band (80 >= 45*1.5 = 67.5)
     expect(r.reasons.find((x) => x.includes('comp-high'))).toBeTruthy()
   })
+
+  it('parses "45L" Indian shorthand', () => {
+    const r = scorePersonalFit({
+      title: 'Lead Frontend',
+      company: 'GenericCo',
+      location: 'Remote',
+      description: 'CTC range 50L-80L fixed',
+    })
+    expect(r.reasons.find((x) => x.includes('comp-high'))).toBeTruthy()
+  })
+
+  it('does NOT trip on volume mentions like "5L water"', () => {
+    const r = scorePersonalFit({
+      title: 'Senior Backend',
+      company: 'GenericCo',
+      location: 'Remote',
+      description: 'Office has 5L water dispenser. No comp listed.',
+    })
+    // 5L is below the 5-300 plausibility floor, ignored. So no comp signal
+    // should fire, but the title-no-match (Senior matches) should still apply.
+    expect(r.reasons.find((x) => x.startsWith('comp-'))).toBeFalsy()
+  })
+})
+
+describe('scorePersonalFit — USD comp floor (US preset)', () => {
+  it('flags USD comp below floor', () => {
+    const r = scorePersonalFit({
+      title: 'Lead Frontend',
+      company: 'GenericStartup',
+      location: 'Remote',
+      description: 'React role, comp $80k base',
+    }, PRESETS.US)
+    // US preset floor is $150k
+    expect(r.reasons.find((x) => x.startsWith('comp-low'))).toBeTruthy()
+  })
+
+  it('rewards USD comp >= 1.5x USD floor', () => {
+    const r = scorePersonalFit({
+      title: 'Lead Frontend',
+      company: 'BigCo',
+      location: 'Remote',
+      description: 'Comp $250k base + equity',
+    }, PRESETS.US)
+    expect(r.reasons.find((x) => x.startsWith('comp-high'))).toBeTruthy()
+  })
+
+  it('parses $150,000 long-form notation', () => {
+    const r = scorePersonalFit({
+      title: 'Lead',
+      company: 'GenericCo',
+      location: 'Remote',
+      description: 'Salary range $200,000 - $260,000',
+    }, PRESETS.US)
+    expect(r.reasons.find((x) => x.startsWith('comp-high'))).toBeTruthy()
+  })
+
+  it('falls through to USD when LPA-floor profile finds no LPA', () => {
+    // IN preset has both minCompLPA=45 and minCompUSD=80k. JD only quotes USD.
+    const r = scorePersonalFit({
+      title: 'Lead Frontend',
+      company: 'GlobalCo',
+      location: 'Remote',
+      description: 'Comp $100k base — fully remote-friendly',
+    })
+    expect(r.reasons.find((x) => x.includes('comp-meets-floor: $100k'))).toBeTruthy()
+  })
 })
 
 describe('scorePersonalFit — bounds', () => {
@@ -192,6 +300,10 @@ describe('scorePersonalFit — edge cases', () => {
 })
 
 describe('applyPersonalFit', () => {
+  it('returns empty array when input is empty', () => {
+    expect(applyPersonalFit([])).toEqual([])
+  })
+
   it('filters out disqualified jobs by default', () => {
     const jobs = [
       {

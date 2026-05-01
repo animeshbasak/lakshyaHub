@@ -28,12 +28,19 @@
 - Comp floor: `LPA` regex match against `salary_range` + JD; <floor → −20; ≥1.5×floor → +15
 
 **Test plan:**
-- 8 unit tests covering each signal lane (title, stack, location, remote, brand boost, brand kill, comp low, comp high)
-- 3 integration tests for `applyPersonalFit` filter behavior
-- Edge cases: missing fields, multilingual JD, multiple LPA mentions in a JD (highest wins)
+- 9 happy/disqualifier/penalty cases for `scorePersonalFit`
+- 4 false-positive guards for the substring matcher (Atcs / Honeycomb / LinkedIn / EY-alone)
+- 6 comp-floor cases (LPA low/meets/high/multi-mention/45L-shorthand/volume-no-trip)
+- 4 USD comp-floor cases for US preset
+- 1 score-cap test
+- 3 edge cases (missing fields, WFH detection, "work from home")
+- 4 `applyPersonalFit` filter behavior tests (incl. empty-array)
+- 5 regional-preset structure tests
+- 6 `resolveConfigForUser` cases (null / explicit / IN / US / EU / inference)
+- 1 `mergeConfig` undefined-vs-zero distinction
 
 **Effort:** S (~1h, no DB, no API)
-**Phase gate:** All 11 tests pass + manual smoke on a real scrape returns visibly cleaner top-10
+**Phase gate:** All 43 tests pass + manual smoke on a real scrape returns visibly cleaner top-10
 
 ---
 

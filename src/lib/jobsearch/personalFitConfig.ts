@@ -143,7 +143,9 @@ const INDIA_PRODUCT_BRANDS = [
   'fampay',
 ]
 
-/** India-focused IT services to disqualify. Body shops + known-low-quality. */
+/** India-focused IT services to disqualify. Word-boundary matched in the
+ *  reranker, so short tokens like `tcs` won't false-fire on `Atcs`. Multi-word
+ *  entries are matched as exact phrases. */
 const INDIA_IT_SERVICES_BLOCKLIST = [
   'tcs',
   'tata consultancy',
@@ -155,7 +157,7 @@ const INDIA_IT_SERVICES_BLOCKLIST = [
   'hcl technologies',
   'tech mahindra',
   'larsen & toubro infotech',
-  'l&t infotech',
+  'lti',
   'mphasis',
   'mindtree',
   'genpact',
@@ -167,16 +169,18 @@ const INDIA_IT_SERVICES_BLOCKLIST = [
   'syntel',
   'hexaware',
   'ntt data',
-  'iGate',
+  'igate',
 ]
 
-/** US-focused: notable consultancies + body shops some operators want to avoid. */
+/** US-focused: notable consultancies + body shops some operators want to avoid.
+ *  Word-boundary matched, so `ey` correctly catches "EY," and "EY" but not
+ *  "Honeycomb" or "key". */
 const US_CONSULTING_BLOCKLIST = [
   'deloitte',
   'kpmg',
   'pwc',
   'pricewaterhousecoopers',
-  'ey ',
+  'ey',
   'ernst & young',
   'mckinsey digital',
   'cgi inc',
