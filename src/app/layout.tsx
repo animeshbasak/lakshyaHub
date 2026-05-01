@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { RootSchemas } from "@/components/seo/RootSchemas";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lakshya Hub — Unified Career Command Center",
-  description: "Merge job tracking with AI-powered resume building. Land your dream job, systematically.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://lakshya.app'),
+  title: {
+    default: 'Lakshya — Aim before you apply',
+    template: '%s · Lakshya',
+  },
+  description: 'A-G evaluation for tech job seekers — backend, frontend, mobile, devops, ML, AI, PM. Score any JD against your resume in 30 seconds.',
+  keywords: ['tech job evaluator', 'job fit score', 'ATS resume', 'archetype career', 'career-ops', 'job search', 'backend job search', 'AI job evaluator'],
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    locale: 'en',
+    siteName: 'Lakshya',
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export default function RootLayout({
@@ -30,6 +43,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <RootSchemas />
         {children}
         <Toaster
           position="bottom-right"

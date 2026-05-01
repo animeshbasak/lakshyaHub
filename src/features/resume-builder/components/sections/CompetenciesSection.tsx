@@ -44,8 +44,8 @@ function SortableCompetency({ id, onRemove }: { id: string; onRemove: () => void
       {...listeners}
       className={`flex max-w-full cursor-grab items-center gap-2 rounded-[10px] border px-3 py-2 text-xs font-bold transition-all active:cursor-grabbing ${
         isDragging
-          ? 'scale-110 border-cyan-500 bg-cyan-500 text-white shadow-xl'
-          : 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20'
+          ? 'scale-110 border-white/40 bg-white text-white shadow-xl'
+          : 'border-white/20 bg-white/5 text-white hover:bg-white/10'
       }`}
     >
       <span className="min-w-0 break-words">{id}</span>
@@ -53,7 +53,7 @@ function SortableCompetency({ id, onRemove }: { id: string; onRemove: () => void
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={() => onRemove()}
-        className="ml-1 text-cyan-400/60 hover:text-red-400 transition-colors focus:outline-none"
+        className="ml-1 text-white/60 hover:text-red-400 transition-colors focus:outline-none"
       >
         <X size={14} />
       </button>
@@ -113,7 +113,7 @@ export function CompetenciesSection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <Target size={18} />
           </div>
           <div>
@@ -139,7 +139,7 @@ export function CompetenciesSection() {
           to add.
         </p>
 
-        <div className="flex min-h-[124px] flex-wrap items-start gap-3 rounded-[14px] border border-white/[0.06] bg-[#111118] p-4 shadow-none transition-all focus-within:border-cyan-500/30">
+        <div className="flex min-h-[124px] flex-wrap items-start gap-3 rounded-[14px] border border-white/[0.06] bg-[#111118] p-4 shadow-none transition-all focus-within:border-white/20">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

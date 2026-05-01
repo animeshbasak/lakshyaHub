@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Application, Job } from '@/types'
 import { FitBadge } from '@/components/ui/FitBadge'
+import { CadenceBadge } from './CadenceBadge'
 
 interface KanbanCardProps {
   job: Job
@@ -40,7 +41,7 @@ export function KanbanCard({ job, application, isDragging = false, onClick }: Ka
       <div
         ref={setNodeRef}
         style={style}
-        className="mb-2 p-4 rounded-xl bg-[#111118] border-2 border-dashed border-cyan-500/30 opacity-40 min-h-[90px]"
+        className="mb-2 p-4 rounded-xl bg-[#111118] border-2 border-dashed border-white/20 opacity-40 min-h-[90px]"
       />
     )
   }
@@ -57,8 +58,8 @@ export function KanbanCard({ job, application, isDragging = false, onClick }: Ka
         cursor-pointer select-none relative
         transition-all duration-150
         hover:border-white/10 hover:-translate-y-0.5 hover:bg-[#16161f]
-        focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none
-        ${isActiveDragging ? 'scale-[1.03] shadow-2xl border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.6)]' : 'shadow-[0_1px_3px_rgba(0,0,0,0.4)]'}
+        focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none
+        ${isActiveDragging ? 'scale-[1.03] shadow-2xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)]' : 'shadow-[0_1px_3px_rgba(0,0,0,0.4)]'}
       `}
     >
       {/* Source badge */}
@@ -81,8 +82,9 @@ export function KanbanCard({ job, application, isDragging = false, onClick }: Ka
         <p className="text-xs text-text-muted truncate mb-2">{job.location}</p>
       )}
 
-      {/* Footer: FitBadge bottom-right */}
-      <div className="flex items-center justify-end mt-1">
+      {/* Footer: cadence badge left, FitBadge right */}
+      <div className="flex items-center justify-between gap-2 mt-1 min-h-[20px]">
+        <CadenceBadge flag={application.cadence_flag} followUpDue={application.follow_up_due} />
         <FitBadge score={job.fit_score} />
       </div>
     </div>

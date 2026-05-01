@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(npx tsc *)",
+      "mcp__plugin_claude-mem_mcp-search__smart_outline",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "mcp__plugin_claude-mem_mcp-search__get_observations",
+      "mcp__plugin_claude-mem_mcp-search__smart_unfold",
+      "mcp__plugin_claude-mem_mcp-search__smart_search",
+      "Bash(wait)",
+      "Read(//private/tmp/career-ops/**)",
+      "WebSearch",
+      "Read(//tmp/career-ops/modes/**)",
+      "Read(//private/tmp/career-ops/modes/**)",
+      "Read(//tmp/career-ops/config/**)",
+      "Read(//private/tmp/career-ops/config/**)",
+      "Read(//tmp/career-ops/templates/**)",
+      "Read(//private/tmp/career-ops/templates/**)",
+      "Read(//tmp/career-ops/**)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(npm run *)",
+      "Read(//private/tmp/**)",
+      "Bash(python3 /Users/animeshbasak/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/.claude/skills/ui-ux-pro-max/scripts/search.py \"job search SaaS dashboard AI resume dark mode\" --design-system -p \"Lakshya Hub\" -f markdown)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Edit",
+      "Write"
+    ]
+  }
+}

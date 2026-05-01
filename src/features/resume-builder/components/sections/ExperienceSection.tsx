@@ -48,7 +48,7 @@ export function ExperienceSection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <Briefcase size={18} />
           </div>
           <div className="min-w-0">
@@ -70,7 +70,7 @@ export function ExperienceSection() {
           </div>
           <button
             onClick={addJob}
-            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all active:scale-95 hover:bg-cyan-500/20 min-h-[44px]"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all active:scale-95 hover:bg-white/10 min-h-[44px]"
           >
             <Plus size={16} />
             Add Job
@@ -105,7 +105,7 @@ export function ExperienceSection() {
             </p>
             <button
               onClick={addJob}
-              className="flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all hover:bg-cyan-500/20 active:scale-95 min-h-[44px]"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all hover:bg-white/10 active:scale-95 min-h-[44px]"
             >
               <Plus size={16} />
               Add your first job

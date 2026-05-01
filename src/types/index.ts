@@ -30,6 +30,10 @@ export interface Application {
   notes: string | null
   resume_version: string | null
   updated_at: string
+  // careerops cadence (migration 002)
+  follow_up_due?: string | null
+  follow_up_count?: number | null
+  cadence_flag?: 'ok' | 'urgent' | 'overdue' | 'cold' | null
 }
 
 export type ApplicationStatus =
@@ -119,7 +123,8 @@ export type TemplateType =
   | 'dark-header'
   | 'india-tech'
   | 'classic'
-  | 'creative';
+  | 'creative'
+  | 'latex-article';
 
 export type ResumeOrigin = 'blank' | 'demo' | 'imported' | 'saved';
 
@@ -206,20 +211,9 @@ export interface ScrapeLog {
 }
 
 // ── ATS ────────────────────────────────────────────────────────
-export interface ATSCheck {
-  id: string
-  label: string
-  pass: boolean
-  weight: number
-  category: 'keywords' | 'format' | 'content' | 'sections'
-}
-
-export interface ATSResult {
-  score: number
-  checks: ATSCheck[]
-  passCount: number
-  failCount: number
-}
+// Source of truth lives in src/lib/atsEngine.ts. We re-export here so
+// existing callers that import from '@/types' don't need to change.
+export type { ATSCheck, ATSResult } from '@/lib/atsEngine'
 
 // ── JD Match 5D ───────────────────────────────────────────────
 export interface JdMatch5dResult {

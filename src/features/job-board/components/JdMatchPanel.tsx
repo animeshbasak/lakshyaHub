@@ -59,7 +59,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 
 function computeGrade(overall: number): { letter: string; color: string } {
   if (overall >= 90) return { letter: 'A', color: 'text-emerald-400' }
-  if (overall >= 80) return { letter: 'B', color: 'text-cyan-400' }
+  if (overall >= 80) return { letter: 'B', color: 'text-white' }
   if (overall >= 70) return { letter: 'C', color: 'text-amber-400' }
   if (overall >= 60) return { letter: 'D', color: 'text-orange-400' }
   return { letter: 'F', color: 'text-red-400' }
@@ -70,7 +70,15 @@ export function JdMatchPanel({ jobId, fitBreakdown, jobDescription }: JdMatchPan
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // /api/ai/jd-match-5d was deleted in Phase 0 (replaced by A-G evaluator at /api/ai/evaluate).
+  // Toggle re-enables once the new evaluator UI adapter ships in UI-2.1 / UI-2.2.
+  const JD_MATCH_LEGACY_ENABLED = false
+
   const handleRunAnalysis = async () => {
+    if (!JD_MATCH_LEGACY_ENABLED) {
+      setError('JD Match is being rebuilt as the A-G evaluator. Use Evaluate from the sidebar instead.')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -105,7 +113,7 @@ export function JdMatchPanel({ jobId, fitBreakdown, jobDescription }: JdMatchPan
         <button
           onClick={handleRunAnalysis}
           disabled={loading || !jobDescription}
-          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+          className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-gradient-to-r from-white to-white/60 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
         >
           {loading ? (
             <>
@@ -196,9 +204,9 @@ export function JdMatchPanel({ jobId, fitBreakdown, jobDescription }: JdMatchPan
       {/* Tailor Resume CTA */}
       <Link
         href={`/resume?jd_id=${jobId}`}
-        className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500/50 focus-visible:outline-none text-sm"
+        className="w-full min-h-[44px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-5 py-2.5 rounded-xl hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:outline-none text-sm"
       >
-        <Sparkles className="w-4 h-4 text-cyan-400" />
+        <Sparkles className="w-4 h-4 text-white" />
         Tailor Resume
       </Link>
     </div>

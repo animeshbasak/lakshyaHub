@@ -39,9 +39,9 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
             key={i}
             className={`rounded-full transition-all duration-200 ${
               isCurrent
-                ? 'w-3 h-3 bg-cyan-500'
+                ? 'w-3 h-3 bg-white'
                 : isDone
-                ? 'w-2.5 h-2.5 bg-cyan-500/40'
+                ? 'w-2.5 h-2.5 bg-white/20'
                 : 'w-2.5 h-2.5 bg-white/10'
             }`}
           />
@@ -86,7 +86,7 @@ function SkillTagInput({
   return (
     <div className="space-y-3">
       <div
-        className="flex flex-wrap gap-2 min-h-[44px] bg-[#1a1a24] border border-white/10 rounded-xl px-3 py-2 focus-within:border-cyan-500/50 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all cursor-text"
+        className="flex flex-wrap gap-2 min-h-[44px] bg-[#1a1a24] border border-white/10 rounded-xl px-3 py-2 focus-within:border-white/30 focus-within:ring-2 focus-within:ring-white/10 transition-all cursor-text"
         onClick={(e) => {
           const input = (e.currentTarget as HTMLDivElement).querySelector('input')
           input?.focus()
@@ -95,14 +95,14 @@ function SkillTagInput({
         {skills.map((skill) => (
           <span
             key={skill}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/5 text-white border border-white/10"
           >
             {skill}
             <button
               type="button"
               onClick={() => removeSkill(skill)}
               aria-label={`Remove ${skill}`}
-              className="hover:text-cyan-200 transition-colors focus-visible:ring-1 focus-visible:ring-cyan-500/50 rounded-full"
+              className="hover:text-white transition-colors focus-visible:ring-1 focus-visible:ring-white/25 rounded-full"
             >
               <X className="w-3 h-3" />
             </button>
@@ -180,12 +180,14 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
         await supabase.auth.updateUser({ data: { full_name: data.name.trim() } })
       }
 
-      // Upsert resume_profiles
+      // Upsert resume_profiles. Only columns present in 001_initial_schema.sql.
+      // years_experience is collected by the form but not persisted yet — would
+      // require migration 006 to add the column. For now this is OK because the
+      // careerops eval pipeline doesn't read years_experience.
       const { error: upsertError } = await supabase.from('resume_profiles').upsert({
         id: user.id,
         target_titles: [data.targetRole].filter(Boolean),
         skills: data.skills,
-        years_experience: data.yearsExperience || null,
         updated_at: new Date().toISOString(),
         source: 'manual',
       })
@@ -255,7 +257,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                         onKeyDown={(e) => e.key === 'Enter' && canAdvance() && handleNext()}
                         placeholder="e.g. Priya Sharma"
                         autoFocus
-                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]"
+                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -277,7 +279,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                         onKeyDown={(e) => e.key === 'Enter' && canAdvance() && handleNext()}
                         placeholder="e.g. Software Engineer"
                         autoFocus
-                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]"
+                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -299,7 +301,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                         onKeyDown={(e) => e.key === 'Enter' && canAdvance() && handleNext()}
                         placeholder="e.g. Senior Frontend Engineer"
                         autoFocus
-                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px]"
+                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -317,7 +319,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                         id="onboarding-years"
                         value={data.yearsExperience}
                         onChange={(e) => update('yearsExperience', e.target.value as YearsExperience | '')}
-                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all min-h-[44px] appearance-none cursor-pointer"
+                        className="w-full bg-[#1a1a24] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-white/25 focus:ring-2 focus:ring-white/10 focus:outline-none transition-all min-h-[44px] appearance-none cursor-pointer"
                         autoFocus
                       >
                         <option value="" className="bg-[#1a1a24]">Select…</option>
@@ -356,7 +358,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                 <button
                   onClick={handleBack}
                   disabled={submitting}
-                  className="flex-1 bg-white/5 border border-white/10 text-white font-medium px-5 py-3 rounded-xl hover:bg-white/10 transition-colors min-h-[44px] focus-visible:ring-2 focus-visible:ring-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-white/5 border border-white/10 text-white font-medium px-5 py-3 rounded-xl hover:bg-white/10 transition-colors min-h-[44px] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Back
                 </button>
@@ -366,7 +368,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                 <button
                   onClick={handleNext}
                   disabled={!canAdvance()}
-                  className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity min-h-[44px] focus-visible:ring-2 focus-visible:ring-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-white to-white/60 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity min-h-[44px] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
@@ -374,7 +376,7 @@ export default function OnboardingModal({ isOpen, onComplete }: OnboardingModalP
                 <button
                   onClick={handleFinish}
                   disabled={!canAdvance() || submitting}
-                  className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity min-h-[44px] focus-visible:ring-2 focus-visible:ring-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-white to-white/60 text-white font-bold px-5 py-3 rounded-xl hover:opacity-90 transition-opacity min-h-[44px] focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>

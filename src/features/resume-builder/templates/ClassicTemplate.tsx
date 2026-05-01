@@ -3,6 +3,7 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeData } from '@/types';
 import { parseBoldText } from '../utils/parseBoldText';
+import { renderProjectSection } from './rendering';
 
 const styles = StyleSheet.create({
   page: {
@@ -147,7 +148,21 @@ const styles = StyleSheet.create({
 });
 
 export function ClassicTemplate({ data }: { data: ResumeData }) {
-  const { header, summary, skills, experience, education, competencies } = data;
+  const { header, summary, skills, experience, education, competencies, projects = [] } = data;
+
+  const projectSectionTitleStyle = {
+    fontSize: 12,
+    fontFamily: 'Times-Bold',
+    color: '#000000',
+    textTransform: 'uppercase' as const,
+    textAlign: 'center' as const,
+    letterSpacing: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000000',
+    marginTop: 12,
+    marginBottom: 8,
+    paddingBottom: 2,
+  };
 
   return (
     <Document>
@@ -249,6 +264,20 @@ export function ClassicTemplate({ data }: { data: ResumeData }) {
             ))}
           </View>
         )}
+
+        {renderProjectSection(projects, {
+          sectionTitle: projectSectionTitleStyle,
+          projectItem: { marginBottom: 10 },
+          projectHeader: styles.jobHeader,
+          projectTitle: styles.jobTitle,
+          projectPeriod: styles.jobDate,
+          projectMeta: styles.jobCompany,
+          projectDescription: styles.summaryLine,
+          bulletRow: styles.bulletRow,
+          bulletDot: styles.bulletDot,
+          bulletText: styles.bulletText,
+          bold: styles.boldSpan,
+        }, 'Projects', { splitOngoingLearning: true })}
 
         {/* EDUCATION */}
         {education.length > 0 && (

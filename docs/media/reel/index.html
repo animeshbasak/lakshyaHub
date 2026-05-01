@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lakshya — Hero Reel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root { --bg:#0a0e1a; --bg2:#0f1729; --bg3:#1a0b2e; --fg:#fff; --dim:#94a3b8; --violet:#7c3aed; --cyan:#06b6d4; --green:#10b981; --amber:#f59e0b; --red:#ef4444; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1920px; height:1080px; overflow:hidden; font-family:'Inter',-apple-system,system-ui,sans-serif; background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,var(--bg3) 100%); color:var(--fg); }
+  .stage { position:relative; width:100%; height:100%; }
+  .clip { position:absolute; opacity:0; }
+  .glow { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.4; }
+  .glow-a { width:600px; height:600px; background:var(--violet); top:-200px; left:-200px; }
+  .glow-b { width:500px; height:500px; background:var(--cyan); bottom:-150px; right:-100px; }
+
+  /* SCENE 1 — TITLE */
+  #scene1 { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  #title { font-size:160px; font-weight:900; letter-spacing:-6px; background:linear-gradient(90deg,#fff 0%,#a5b4fc 50%,#67e8f9 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #subtitle { margin-top:24px; font-size:34px; font-weight:500; color:var(--dim); letter-spacing:0.3px; }
+  #underline { margin-top:32px; height:6px; width:0; background:linear-gradient(90deg,var(--violet),var(--cyan),var(--green)); border-radius:3px; }
+
+  /* SCENE 2 — RESUME → ATS SCORE */
+  #scene2 { width:100%; height:100%; display:flex; align-items:center; justify-content:center; gap:120px; }
+  .resume-card { width:380px; height:520px; background:#fff; color:#0f172a; border-radius:16px; padding:36px; box-shadow:0 30px 60px rgba(124,58,237,0.4); }
+  .resume-card h3 { font-size:24px; font-weight:800; margin-bottom:6px; }
+  .resume-card .role { font-size:16px; color:#64748b; margin-bottom:18px; }
+  .resume-card .bar { height:8px; background:#e2e8f0; border-radius:4px; margin:10px 0; }
+  .resume-card .bar.full { background:linear-gradient(90deg,var(--violet),var(--cyan)); width:0%; }
+  .resume-card .skill { display:inline-block; padding:5px 12px; background:#f1f5f9; border-radius:20px; font-size:12px; margin:3px; color:#334155; font-weight:600; }
+  .arrow { width:120px; height:6px; background:linear-gradient(90deg,transparent,var(--cyan),var(--cyan)); position:relative; }
+  .arrow::after { content:''; position:absolute; right:-1px; top:-12px; border:15px solid transparent; border-left-color:var(--cyan); }
+  .score-ring { width:340px; height:340px; position:relative; display:flex; align-items:center; justify-content:center; }
+  .score-ring svg { position:absolute; inset:0; transform:rotate(-90deg); }
+  .score-ring .score-num { font-size:120px; font-weight:900; color:var(--green); }
+  .score-ring .score-lbl { position:absolute; bottom:-50px; font-size:22px; color:var(--dim); letter-spacing:2px; font-weight:600; }
+
+  /* SCENE 3 — 7 JOB SOURCES */
+  #scene3 { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:60px; }
+  #scene3 h2 { font-size:64px; font-weight:800; }
+  #scene3 h2 b { color:var(--cyan); }
+  .sources { display:grid; grid-template-columns:repeat(7,1fr); gap:20px; }
+  .src { width:160px; height:90px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#e2e8f0; backdrop-filter:blur(10px); }
+
+  /* SCENE 4 — A-G RANKING */
+  #scene4 { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:32px; padding:60px; }
+  #scene4 h2 { font-size:54px; font-weight:800; margin-bottom:20px; }
+  #scene4 h2 b { color:var(--violet); }
+  .job-card { display:flex; align-items:center; gap:24px; width:1100px; padding:22px 32px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:14px; backdrop-filter:blur(10px); }
+  .grade { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; flex-shrink:0; }
+  .grade.A { background:var(--green); color:#022c22; }
+  .grade.B { background:var(--cyan); color:#083344; }
+  .grade.C { background:var(--amber); color:#451a03; }
+  .job-info { flex:1; }
+  .job-info .role { font-size:24px; font-weight:700; }
+  .job-info .co { font-size:18px; color:var(--dim); margin-top:4px; }
+  .fit { font-size:28px; font-weight:800; color:var(--green); }
+
+  /* SCENE 5 — CTA */
+  #scene5 { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:40px; }
+  #scene5 .big { font-size:120px; font-weight:900; letter-spacing:-4px; background:linear-gradient(90deg,var(--green),var(--cyan),var(--violet)); -webkit-background-clip:text; background-clip:text; color:transparent; text-align:center; line-height:1.1; }
+  #scene5 .sub { font-size:32px; color:var(--dim); }
+  .pill-row { display:flex; gap:16px; margin-top:20px; }
+  .pill { padding:14px 28px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:30px; font-size:20px; font-weight:600; color:#e2e8f0; }
+</style>
+</head>
+<body>
+<div class="stage" data-composition-id="lakshya-hero" data-width="1920" data-height="1080" data-start="0">
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <!-- SCENE 1: 0-2.4s -->
+  <div id="scene1" class="clip" data-start="0" data-duration="2.4" data-track-index="1">
+    <h1 id="title">Lakshya</h1>
+    <p id="subtitle">Your AI job-hunt copilot</p>
+    <div id="underline"></div>
+  </div>
+
+  <!-- SCENE 2: 2.4-4.8s — resume → score -->
+  <div id="scene2" class="clip" data-start="2.4" data-duration="2.4" data-track-index="2">
+    <div class="resume-card" id="resume">
+      <h3>Animesh Basak</h3>
+      <div class="role">AI Platform Engineer</div>
+      <div class="bar"><div class="bar full" id="bar1" style="height:8px"></div></div>
+      <div class="bar"><div class="bar full" id="bar2" style="height:8px"></div></div>
+      <div style="margin-top:18px;">
+        <span class="skill">Python</span><span class="skill">React</span><span class="skill">LLM</span><span class="skill">RAG</span><span class="skill">Pytorch</span>
+      </div>
+    </div>
+    <div class="arrow" id="arrow"></div>
+    <div class="score-ring">
+      <svg width="340" height="340" viewBox="0 0 340 340">
+        <circle cx="170" cy="170" r="150" stroke="rgba(255,255,255,0.08)" stroke-width="14" fill="none"/>
+        <circle id="scoreCircle" cx="170" cy="170" r="150" stroke="url(#scoreGrad)" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="942" stroke-dashoffset="942"/>
+        <defs><linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+      </svg>
+      <div class="score-num" id="scoreNum">0</div>
+      <div class="score-lbl">ATS FIT SCORE</div>
+    </div>
+  </div>
+
+  <!-- SCENE 3: 4.8-7.2s — 7 sources -->
+  <div id="scene3" class="clip" data-start="4.8" data-duration="2.4" data-track-index="3">
+    <h2>Discover from <b>7 sources</b>, instantly</h2>
+    <div class="sources">
+      <div class="src">Adzuna</div>
+      <div class="src">Greenhouse</div>
+      <div class="src">Ashby</div>
+      <div class="src">Lever</div>
+      <div class="src">Workday</div>
+      <div class="src">BambooHR</div>
+      <div class="src">Teamtailor</div>
+    </div>
+    <div style="font-size:22px; color:var(--dim); margin-top:20px;">3,184 live postings · zero scraping cost</div>
+  </div>
+
+  <!-- SCENE 4: 7.2-9.8s — AI A-G rank -->
+  <div id="scene4" class="clip" data-start="7.2" data-duration="2.6" data-track-index="4">
+    <h2>AI ranks every job <b>A–G</b></h2>
+    <div class="job-card jc1"><div class="grade A">A</div><div class="job-info"><div class="role">Senior AI Platform Engineer</div><div class="co">Anthropic · Remote · $220k–$310k</div></div><div class="fit">94%</div></div>
+    <div class="job-card jc2"><div class="grade A">A</div><div class="job-info"><div class="role">Forward-Deployed Engineer</div><div class="co">Stripe · NYC · $200k–$280k</div></div><div class="fit">89%</div></div>
+    <div class="job-card jc3"><div class="grade B">B</div><div class="job-info"><div class="role">LLM Infra Engineer</div><div class="co">Mistral AI · Paris · €130k–€180k</div></div><div class="fit">76%</div></div>
+    <div class="job-card jc4"><div class="grade C">C</div><div class="job-info"><div class="role">Solutions Architect</div><div class="co">Generic Co · Onsite · $120k</div></div><div class="fit">52%</div></div>
+  </div>
+
+  <!-- SCENE 5: 9.8-12s — CTA -->
+  <div id="scene5" class="clip" data-start="9.8" data-duration="2.2" data-track-index="5">
+    <div class="big">Stop guessing.<br/>Start landing.</div>
+    <div class="sub">Tailored CV · A–G triage · Kanban tracker</div>
+    <div class="pill-row">
+      <div class="pill">github.com/animeshbasak/lakshyaHub</div>
+      <div class="pill">100% open source</div>
+      <div class="pill">Local-first AI</div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.__timelines = window.__timelines || {};
+const tl = gsap.timeline({ paused:true });
+
+// Scene 1: 0 - 2.4
+tl.fromTo("#scene1",{opacity:0},{opacity:1,duration:0.3},0)
+  .fromTo("#title",{y:60,opacity:0},{y:0,opacity:1,duration:0.7,ease:"power3.out"},0)
+  .fromTo("#subtitle",{y:20,opacity:0},{y:0,opacity:1,duration:0.6,ease:"power2.out"},0.3)
+  .to("#underline",{width:520,duration:0.8,ease:"power2.out"},0.5)
+  .to("#scene1",{opacity:0,duration:0.3},2.1)
+  .set("#scene1",{visibility:"hidden"},2.4);
+
+// Scene 2: 2.4 - 4.8
+tl.fromTo("#scene2",{opacity:0},{opacity:1,duration:0.3},2.4)
+  .fromTo("#resume",{x:-80,opacity:0,scale:0.9},{x:0,opacity:1,scale:1,duration:0.6,ease:"power3.out"},2.4)
+  .to("#bar1",{width:"85%",duration:0.5},2.8)
+  .to("#bar2",{width:"72%",duration:0.5},3.0)
+  .fromTo("#arrow",{scaleX:0,opacity:0,transformOrigin:"left"},{scaleX:1,opacity:1,duration:0.4,ease:"power2.out"},3.0)
+  .to("#scoreCircle",{strokeDashoffset:115,duration:1.2,ease:"power2.out"},3.3)
+  .to("#scoreNum",{innerText:87,duration:1.2,ease:"power2.out",snap:{innerText:1},onUpdate:function(){this.targets()[0].innerHTML=Math.round(this.targets()[0].innerText||0)}},3.3)
+  .to("#scene2",{opacity:0,duration:0.3},4.5)
+  .set("#scene2",{visibility:"hidden"},4.8);
+
+// Scene 3: 4.8 - 7.2
+tl.fromTo("#scene3",{opacity:0},{opacity:1,duration:0.3},4.8)
+  .fromTo("#scene3 h2",{y:30,opacity:0},{y:0,opacity:1,duration:0.5},4.8)
+  .fromTo("#scene3 .src",{y:40,opacity:0,scale:0.9},{y:0,opacity:1,scale:1,duration:0.4,stagger:0.07,ease:"back.out(1.7)"},5.1)
+  .to("#scene3",{opacity:0,duration:0.3},6.9)
+  .set("#scene3",{visibility:"hidden"},7.2);
+
+// Scene 4: 7.2 - 9.8
+tl.fromTo("#scene4",{opacity:0},{opacity:1,duration:0.3},7.2)
+  .fromTo("#scene4 h2",{y:30,opacity:0},{y:0,opacity:1,duration:0.5},7.2)
+  .fromTo(".jc1",{x:-60,opacity:0},{x:0,opacity:1,duration:0.4},7.6)
+  .fromTo(".jc2",{x:-60,opacity:0},{x:0,opacity:1,duration:0.4},7.9)
+  .fromTo(".jc3",{x:-60,opacity:0},{x:0,opacity:1,duration:0.4},8.2)
+  .fromTo(".jc4",{x:-60,opacity:0},{x:0,opacity:1,duration:0.4},8.5)
+  .to("#scene4",{opacity:0,duration:0.3},9.5)
+  .set("#scene4",{visibility:"hidden"},9.8);
+
+// Scene 5: 9.8 - 12.0
+tl.fromTo("#scene5",{opacity:0},{opacity:1,duration:0.3},9.8)
+  .fromTo("#scene5 .big",{y:40,opacity:0,scale:0.95},{y:0,opacity:1,scale:1,duration:0.7,ease:"power3.out"},9.8)
+  .fromTo("#scene5 .sub",{y:20,opacity:0},{y:0,opacity:1,duration:0.5},10.2)
+  .fromTo("#scene5 .pill",{y:20,opacity:0},{y:0,opacity:1,duration:0.4,stagger:0.1},10.4);
+
+window.__timelines["lakshya-hero"] = tl;
+</script>
+</body>
+</html>

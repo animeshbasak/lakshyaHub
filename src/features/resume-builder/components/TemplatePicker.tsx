@@ -32,7 +32,7 @@ export function TemplatePicker({ currentTemplate, onSelect }: Props) {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-1">
       {entries.map(([key, label]) => {
         const isSelected = currentTemplate === key
-        const accentColor = ACCENT_COLORS[key] ?? 'bg-cyan-600'
+        const accentColor = ACCENT_COLORS[key] ?? 'bg-white/80'
 
         return (
           <button
@@ -41,9 +41,9 @@ export function TemplatePicker({ currentTemplate, onSelect }: Props) {
             onClick={() => onSelect(key)}
             className={twMerge(
               'group relative flex flex-col overflow-hidden rounded-lg border transition-all duration-150',
-              'bg-[#111118] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+              'bg-[#111118] text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25',
               isSelected
-                ? 'border-cyan-400 ring-2 ring-cyan-400/60 shadow-lg shadow-cyan-500/10'
+                ? 'border-white/40 ring-2 ring-white/25 shadow-lg shadow-black/30'
                 : 'border-white/[0.06] hover:border-white/[0.14] hover:shadow-md hover:shadow-black/30'
             )}
             aria-pressed={isSelected}
@@ -67,7 +67,7 @@ export function TemplatePicker({ currentTemplate, onSelect }: Props) {
               <span
                 className={twMerge(
                   'mt-2 text-xs font-medium leading-tight',
-                  isSelected ? 'text-cyan-300' : 'text-white/70 group-hover:text-white/90'
+                  isSelected ? 'text-white/80' : 'text-white/70 group-hover:text-white/90'
                 )}
               >
                 {label}
@@ -77,7 +77,7 @@ export function TemplatePicker({ currentTemplate, onSelect }: Props) {
             {/* Selected check badge */}
             {isSelected && (
               <span
-                className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-400"
+                className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-white"
                 aria-hidden
               >
                 <svg

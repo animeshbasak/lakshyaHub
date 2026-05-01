@@ -69,7 +69,7 @@ export function ProjectsSection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <Boxes size={18} />
           </div>
           <div className="min-w-0">
@@ -83,7 +83,7 @@ export function ProjectsSection() {
           </p>
           <button
             onClick={() => addProject('side-project')}
-            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all active:scale-95 hover:bg-cyan-500/20 min-h-[44px]"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all active:scale-95 hover:bg-white/10 min-h-[44px]"
           >
             <Plus size={16} />
             Add Project
@@ -114,7 +114,7 @@ export function ProjectsSection() {
                   type="text"
                   value={project.name}
                   onChange={(e) => updateProject(project.id, 'name', e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                   placeholder="e.g. Lakshya Resume"
                 />
               </div>
@@ -126,7 +126,7 @@ export function ProjectsSection() {
                 <select
                   value={project.kind || 'project'}
                   onChange={(e) => updateProject(project.id, 'kind', e.target.value as any)}
-                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                 >
                   <option value="project">Project</option>
                   <option value="side-project">Side Project</option>
@@ -142,7 +142,7 @@ export function ProjectsSection() {
                   type="text"
                   value={project.period}
                   onChange={(e) => updateProject(project.id, 'period', e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-medium text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                   placeholder="e.g. 2025 - Present"
                 />
               </div>
@@ -155,7 +155,7 @@ export function ProjectsSection() {
                   value={project.description}
                   onChange={(e) => updateProject(project.id, 'description', e.target.value)}
                   rows={3}
-                  className="min-h-[96px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="min-h-[96px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                   placeholder="What it is, why it matters, and what makes it distinct."
                 />
               </div>
@@ -168,7 +168,7 @@ export function ProjectsSection() {
                   value={project.technologies.join(', ')}
                   onChange={(e) => updateProjectTechnologies(project.id, e.target.value)}
                   rows={2}
-                  className="min-h-[72px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="min-h-[72px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                   placeholder="React, TypeScript, Supabase, Groq..."
                 />
               </div>
@@ -182,7 +182,7 @@ export function ProjectsSection() {
                   type="text"
                   value={project.link}
                   onChange={(e) => updateProject(project.id, 'link', e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                   placeholder="https://..."
                 />
               </div>
@@ -193,7 +193,7 @@ export function ProjectsSection() {
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#94a3b8]">Project Bullets</p>
                 <button
                   onClick={() => addProjectBullet(project.id)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#94a3b8] transition-all hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-cyan-400 min-h-[44px]"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#94a3b8] transition-all hover:border-white/20 hover:bg-white/5 hover:text-white min-h-[44px]"
                 >
                   <Plus size={14} />
                   Add Bullet
@@ -208,7 +208,7 @@ export function ProjectsSection() {
                       value={bullet.text}
                       onChange={(e) => updateProjectBullet(project.id, bullet.id, e.target.value)}
                       rows={2}
-                      className="min-h-[72px] flex-1 resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+                      className="min-h-[72px] flex-1 resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
                       placeholder="Add a bulletized project impact line."
                     />
                     <button
@@ -236,7 +236,7 @@ export function ProjectsSection() {
             </p>
             <button
               onClick={() => addProject('side-project')}
-              className="flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all hover:bg-cyan-500/20 active:scale-95 min-h-[44px]"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all hover:bg-white/10 active:scale-95 min-h-[44px]"
             >
               <Plus size={16} />
               Add your first project

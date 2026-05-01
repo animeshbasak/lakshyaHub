@@ -40,7 +40,10 @@ function countFakeRoles(parsed: ParsedResumeSchema) {
   return parsed.experience.filter((item) => {
     if (item.role.endsWith('.')) return true;
     const wordCount = item.role.split(/\s+/).length;
-    return !VALID_ROLE_PATTERN.test(item.role) && wordCount <= 3;
+    // Mixed-case short phrases without role keywords are project names, not fake roles.
+    // Only flag all-lowercase short phrases as fake.
+    const isAllLower = item.role === item.role.toLowerCase();
+    return !VALID_ROLE_PATTERN.test(item.role) && wordCount <= 3 && isAllLower;
   }).length;
 }
 
@@ -120,9 +123,24 @@ function buildStructuralSummary(input: {
   const extractionScore =
     extraction?.quality === 'high' ? 1 : extraction?.quality === 'medium' ? 0.68 : extraction?.quality === 'low' ? 0.25 : 0.5;
 
-  const headingRecoveryFailures = normalizedHeadings.filter((heading) => heading.detectedKind === null).length;
-  const recognizedHeadings = normalizedHeadings.filter((heading) => heading.detectedKind !== null).length;
-  const headingScore = normalizedHeadings.length === 0 ? 0.65 : clampScore(recognizedHeadings / normalizedHeadings.length);
+  // Only count true section-header candidates as recovery failures.
+  // Entry-title lines (role/date lines, project headers, name lines) are
+  // detected as heading-like but intentionally have no detectedKind — they
+  // should not penalise the heading score.
+  const trueHeaderCandidates = normalizedHeadings.filter((heading) => {
+    if (heading.detectedKind !== null) return true;
+    // Exclude lines that contain a year (date in the heading = entry title, not section header)
+    if (/\b(?:19|20)\d{2}\b/.test(heading.rawText)) return false;
+    // Exclude lines that look like "Name Surname" (all caps but < 4 tokens, no section keyword)
+    const tokenCount = heading.rawText.trim().split(/\s+/).length;
+    if (tokenCount <= 2 && /^[A-Z\s]+$/.test(heading.rawText.trim())) return false;
+    // Exclude short single-word fragments (continuation lines like "LLMs")
+    if (tokenCount === 1) return false;
+    return true;
+  });
+  const headingRecoveryFailures = trueHeaderCandidates.filter((heading) => heading.detectedKind === null).length;
+  const recognizedHeadings = trueHeaderCandidates.filter((heading) => heading.detectedKind !== null).length;
+  const headingScore = trueHeaderCandidates.length === 0 ? 0.65 : clampScore(recognizedHeadings / trueHeaderCandidates.length);
 
   const nonContactSections = sections.filter((section) => section.kind !== 'contact');
   const sectionScore = clampScore(nonContactSections.length >= 3 ? 1 : nonContactSections.length / 3);
@@ -372,6 +390,58 @@ export function validateParsedResume(
       section: 'other',
       confidence: parsed.unclassified.length > 5 ? 'low' : 'medium',
       message: 'Some content could not be mapped safely and was left for review.',
+    });
+  }
+
+  if (context?.rawText) {
+    const originalBulletLines = context.rawText
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => /^[•\-–—›»·*]\s+/.test(line) || /^[0-9]+[.)]\s+/.test(line));
+    const originalBulletCount = originalBulletLines.length;
+    const parsedBulletCount =
+      parsed.experience.reduce((sum, item) => sum + (item.bullets?.length ?? 0), 0) +
+      parsed.projects.reduce((sum, item) => sum + (item.bullets?.length ?? 0), 0) +
+      parsed.sideProjects.reduce((sum, item) => sum + (item.bullets?.length ?? 0), 0);
+
+    if (originalBulletCount >= 5 && parsedBulletCount / originalBulletCount < 0.9) {
+      pushIssue(
+        issues,
+        'experience',
+        'warning',
+        'bullet_recall_low',
+        `Only ${parsedBulletCount} of ~${originalBulletCount} bullets were recovered. Review the imported content.`
+      );
+      reviewBadges.push({
+        section: 'experience',
+        confidence: parsedBulletCount / originalBulletCount < 0.6 ? 'low' : 'medium',
+        message: `Recovered ${parsedBulletCount}/${originalBulletCount} bullets from the source.`,
+      });
+    }
+
+    const rawLower = context.rawText.toLowerCase();
+    parsed.experience.forEach((item, index) => {
+      if (item.company && item.company.length >= 3 && !rawLower.includes(item.company.toLowerCase())) {
+        pushIssue(
+          issues,
+          'experience',
+          'warning',
+          `experience_company_not_in_source_${index}`,
+          `Company "${item.company}" was not found verbatim in the source text.`
+        );
+      }
+      if (item.startDate) {
+        const yearMatch = item.startDate.match(/\b(19|20)\d{2}\b/);
+        if (yearMatch && !rawLower.includes(yearMatch[0])) {
+          pushIssue(
+            issues,
+            'experience',
+            'warning',
+            `experience_date_not_in_source_${index}`,
+            `Start date ${item.startDate} was not found in the source text.`
+          );
+        }
+      }
     });
   }
 

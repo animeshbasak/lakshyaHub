@@ -215,7 +215,7 @@ export function CompactProTemplate({ data }: { data: ResumeData }) {
           bulletDot: styles.bulletDot,
           bulletText: styles.bulletText,
           bold: styles.bold,
-        }, 'Projects & Side Builds', { splitOngoingLearning: true })}
+        }, 'Projects', { splitOngoingLearning: true })}
 
         {/* EDUCATION */}
         {education.length > 0 && (

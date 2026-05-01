@@ -45,6 +45,7 @@ export interface ProjectStyles extends BulletStyles {
 export interface ProjectRenderOptions {
   splitOngoingLearning?: boolean;
   ongoingLearningTitle?: string;
+  dividerAfterTitle?: React.ReactNode;
 }
 
 export interface ContactLinkItem {
@@ -84,16 +85,11 @@ function hasText(value: string | undefined | null) {
   return Boolean(value && value.trim());
 }
 
-function projectKindLabel(kind?: ProjectEntry['kind']) {
-  switch (kind) {
-    case 'side-project':
-      return 'Side Project';
-    case 'ongoing-learning':
-      return 'Ongoing Learning';
-    case 'project':
-    default:
-      return 'Project';
-  }
+function projectKindLabel(_kind?: ProjectEntry['kind']) {
+  // Kind is an internal builder category (project / side-project / ongoing-learning)
+  // and should NOT leak into the rendered PDF meta line. Recruiters don't want
+  // "Side Project · React · TypeScript" — just the tech stack.
+  return '';
 }
 
 export function renderBulletList(
@@ -134,7 +130,7 @@ export function renderSkillRows(skills: SkillRow[], styles: SkillStyles) {
 export function renderProjectSection(
   projects: ProjectEntry[],
   styles: ProjectStyles,
-  title = 'Projects & Side Builds',
+  title = 'Projects',
   options: ProjectRenderOptions = {}
 ) {
   const safeProjects = projects.filter(
@@ -163,6 +159,7 @@ export function renderProjectSection(
     return (
       <View>
         <Text style={styles.sectionTitle}>{heading}</Text>
+        {options.dividerAfterTitle ?? null}
         {items.map((project) => {
           const meta = [
             omitKindLabel ? '' : projectKindLabel(project.kind),

@@ -26,9 +26,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       return
     }
 
-    supabase.auth.getSession()
-      .then(async ({ data: { session } }) => {
-        if (!session) {
+    // Use getUser() not getSession() — getSession returns the locally cached
+    // JWT without re-validating with Supabase Auth. Per Supabase docs, never
+    // make security decisions on getSession() output. Real enforcement is the
+    // server middleware (src/middleware.ts); this is a UX guard.
+    supabase.auth.getUser()
+      .then(async ({ data: { user } }) => {
+        if (!user) {
           router.push('/login')
           return
         }
@@ -40,7 +44,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           const { count } = await supabase
             .from('resume_profiles')
             .select('*', { count: 'exact', head: true })
-            .eq('id', session.user.id)
+            .eq('id', user.id)
 
           if ((count ?? 0) === 0) {
             setShowOnboarding(true)
@@ -69,7 +73,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-screen bg-bg text-text-muted font-mono">
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 mb-4 animate-spin shadow-lg shadow-cyan-500/20" />
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white to-white/60 mb-4 animate-spin shadow-lg shadow-black/30" />
       <span className="text-xs uppercase tracking-widest animate-pulse">Initialising Lakshya...</span>
     </div>
   )

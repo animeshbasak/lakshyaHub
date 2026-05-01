@@ -2,131 +2,400 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Compass, Kanban, FileText, UserCircle, LogOut } from 'lucide-react'
+import {
+  Home,
+  Search,
+  Kanban,
+  FileText,
+  Settings,
+  ChevronsLeft,
+  ChevronsRight,
+  ChevronRight,
+  Zap,
+  LogOut,
+  Target,
+  PieChart,
+  BookOpen,
+  TrendingUp,
+} from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { BrandMark } from './BrandMark'
+import { useCmdK } from './CmdKProvider'
+import { useTweaks } from './TweaksProvider'
 
-const NAV_LINKS = [
-  { href: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
-  { href: '/discover',  label: 'Match Jobs', icon: Compass },
-  { href: '/board',     label: 'Job Board',  icon: Kanban },
-  { href: '/resume',    label: 'Resume Hub', icon: FileText },
-  { href: '/profile',   label: 'Profile',    icon: UserCircle },
+const NAV_ITEMS = [
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/evaluate', label: 'Evaluate', icon: Target, badge: 'NEW' },
+  { href: '/archetypes', label: 'Archetypes', icon: PieChart },
+  { href: '/stories', label: 'Stories', icon: BookOpen },
+  { href: '/discover', label: 'Discover', icon: Search, badge: 'LIVE' },
+  { href: '/board', label: 'Pipeline', icon: Kanban },
+  { href: '/insights', label: 'Insights', icon: TrendingUp, badge: 'NEW' },
+  { href: '/resume', label: 'Resume', icon: FileText },
 ]
+
+const NAV_SECONDARY = [{ href: '/profile', label: 'Profile', icon: Settings }]
 
 function getInitials(user: User): string {
   const name = user.user_metadata?.full_name as string | undefined
-  if (name) {
-    return name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-  }
+  if (name) return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
   return (user.email?.[0] ?? '?').toUpperCase()
 }
-
 function getDisplayName(user: User): string {
-  return (user.user_metadata?.full_name as string | undefined)
-    ?? user.email
-    ?? 'User'
+  return (user.user_metadata?.full_name as string | undefined) ?? user.email ?? 'User'
 }
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { open: openCmdK } = useCmdK()
+  const { tweaks } = useTweaks()
   const [user, setUser] = useState<User | null>(null)
+  const [collapsed, setCollapsed] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
+    try {
+      const v = localStorage.getItem('lk_sidebar_collapsed')
+      if (v === '1') setCollapsed(true)
+    } catch {}
+  }, [])
+  useEffect(() => {
+    try {
+      localStorage.setItem('lk_sidebar_collapsed', collapsed ? '1' : '0')
+    } catch {}
+  }, [collapsed])
+
+  useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
     return () => subscription.unsubscribe()
   }, [])
 
   const handleLogout = async () => {
     setLoggingOut(true)
     try {
-      const supabase = createClient()
-      await supabase.auth.signOut()
-    } catch (err) {
-      console.error('[logout] signOut failed:', err)
+      await createClient().auth.signOut()
     } finally {
       router.push('/login')
     }
   }
 
+  const isActive = (href: string) =>
+    pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+
   return (
-    <aside className="fixed left-0 top-0 w-64 h-screen bg-bg-card border-r border-white/5 flex flex-col z-50">
-      {/* Logo */}
-      <Link href="/dashboard" className="p-6 block hover:opacity-80 transition-opacity">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <span className="text-white font-bold text-xl">ल</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-bold text-white tracking-tight leading-none">Lakshya</span>
-            <span className="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Hub</span>
-          </div>
-        </div>
+    <aside
+      data-nav-role="sidebar"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: collapsed ? 'var(--rail-w-collapsed)' : 'var(--rail-w)',
+        background: 'var(--bg-1)',
+        borderRight: '1px solid var(--hair)',
+        padding: collapsed ? '12px 8px' : '12px 14px',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 50,
+        transition: 'width 0.22s, padding 0.22s',
+      }}
+    >
+      {/* Brand */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          height: 44,
+          marginBottom: 14,
+        }}
+      >
+        <Link
+          href="/dashboard"
+          style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}
+        >
+          <BrandMark size={30} />
+          {!collapsed && (
+            <div style={{ lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>Lakshya</div>
+              <div
+                className="mono"
+                style={{ fontSize: 9.5, color: 'var(--fg-3)', letterSpacing: '0.12em' }}
+              >
+                HUB · v2
+              </div>
+            </div>
+          )}
+        </Link>
+        {!collapsed && (
+          <button
+            className="btn icon sm ghost"
+            onClick={() => setCollapsed(true)}
+            title="Collapse sidebar"
+            style={{ color: 'var(--fg-3)' }}
+          >
+            <ChevronsLeft size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* CmdK trigger */}
+      <button
+        onClick={openCmdK}
+        title="Quick actions — ⌘K"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 9,
+          height: 34,
+          padding: collapsed ? 0 : '0 10px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          width: '100%',
+          borderRadius: 8,
+          background: 'var(--bg-inset)',
+          border: '1px solid var(--hair)',
+          color: 'var(--fg-3)',
+          fontSize: 12.5,
+          marginBottom: 6,
+          cursor: 'pointer',
+        }}
+      >
+        <Search size={14} />
+        {!collapsed && (
+          <>
+            <span style={{ flex: 1, textAlign: 'left' }}>Quick search...</span>
+            <span style={{ display: 'flex', gap: 3 }}>
+              <span className="kbd">⌘</span>
+              <span className="kbd">K</span>
+            </span>
+          </>
+        )}
+      </button>
+
+      {/* Primary CTA */}
+      <Link
+        href="/discover"
+        className="btn primary"
+        style={{
+          width: '100%',
+          height: 36,
+          marginTop: 4,
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          padding: collapsed ? 0 : '0 12px',
+          gap: 9,
+        }}
+      >
+        <Zap size={14} fill="currentColor" />
+        {!collapsed && <span>Find Jobs</span>}
+        {!collapsed && (
+          <span
+            style={{ marginLeft: 'auto', fontSize: 10, opacity: 0.6 }}
+            className="mono"
+          >
+            ⌘J
+          </span>
+        )}
       </Link>
 
-      {/* Nav */}
-      <nav className="flex-1 px-4 py-4 space-y-1">
-        {NAV_LINKS.map((link) => {
-          const Icon = link.icon
-          const active = pathname === link.href ||
-            (link.href !== '/dashboard' && pathname.startsWith(link.href))
+      <div style={{ height: 1, background: 'var(--hair)', margin: '14px 0 10px' }} />
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={twMerge(
-                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-sm font-medium',
-                active
-                  ? 'bg-cyan-500/10 text-cyan-400 shadow-[inset_0_0_12px_rgba(34,211,238,0.1)]'
-                  : 'text-text-2 hover:bg-white/5 hover:text-white'
-              )}
+      {/* Primary nav */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {!collapsed && (
+          <div
+            className="eyebrow"
+            style={{ padding: '0 10px 4px', fontSize: 10 }}
+          >
+            Workspace
+          </div>
+        )}
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            Icon={item.icon}
+            badge={tweaks.showBadges ? item.badge : undefined}
+            active={isActive(item.href)}
+            collapsed={collapsed}
+          />
+        ))}
+      </div>
+
+      <div style={{ flex: 1 }} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 10 }}>
+        {NAV_SECONDARY.map((item) => (
+          <NavLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            Icon={item.icon}
+            active={isActive(item.href)}
+            collapsed={collapsed}
+          />
+        ))}
+      </div>
+
+      {/* User card */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: collapsed ? 4 : 8,
+          width: '100%',
+          borderRadius: 8,
+          border: '1px solid var(--hair)',
+          background: 'var(--bg-2)',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 7,
+            background: 'var(--bg-3)',
+            border: '1px solid var(--hair)',
+            display: 'grid',
+            placeItems: 'center',
+            color: 'var(--fg)',
+            fontWeight: 600,
+            fontSize: 12,
+            flexShrink: 0,
+          }}
+        >
+          {user ? getInitials(user) : '…'}
+        </div>
+        {!collapsed && (
+          <div style={{ flex: 1, minWidth: 0, textAlign: 'left', lineHeight: 1.25 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
             >
-              <Icon className={twMerge(
-                'w-5 h-5 transition-colors',
-                active ? 'text-cyan-400' : 'text-text-muted group-hover:text-text-2'
-              )} />
-              {link.label}
-            </Link>
-          )
-        })}
-      </nav>
-
-      {/* Footer — real user */}
-      <div className="p-4 mt-auto border-t border-white/5">
-        <div className="bg-white/5 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold shrink-0 text-sm">
-              {user ? getInitials(user) : '…'}
+              {user ? getDisplayName(user) : '—'}
             </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold text-white truncate">
-                {user ? getDisplayName(user) : '—'}
-              </span>
-              <span className="text-[10px] text-text-muted truncate uppercase tracking-wider">
-                {user?.email ?? 'loading…'}
-              </span>
+            <div
+              style={{
+                fontSize: 10.5,
+                color: 'var(--fg-3)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {user?.email ?? 'loading…'}
             </div>
           </div>
+        )}
+        {!collapsed && (
           <button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-text-muted hover:text-red-400 transition-all text-xs border border-transparent hover:border-red-500/20 disabled:opacity-50"
+            className="btn icon sm ghost"
+            title="Sign out"
+            style={{ color: 'var(--fg-3)' }}
           >
-            <LogOut className="w-3.5 h-3.5" />
-            {loggingOut ? 'Signing out…' : 'Sign Out'}
+            <LogOut size={13} />
           </button>
-        </div>
+        )}
       </div>
+
+      {collapsed && (
+        <button
+          className="btn icon sm ghost"
+          onClick={() => setCollapsed(false)}
+          title="Expand sidebar"
+          style={{ color: 'var(--fg-3)', marginTop: 8, alignSelf: 'center' }}
+        >
+          <ChevronsRight size={14} />
+        </button>
+      )}
     </aside>
+  )
+}
+
+type NavLinkProps = {
+  href: string
+  label: string
+  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  badge?: string
+  active: boolean
+  collapsed: boolean
+}
+
+function NavLink({ href, label, Icon, badge, active, collapsed }: NavLinkProps) {
+  return (
+    <Link
+      href={href}
+      title={collapsed ? label : undefined}
+      className={twMerge(
+        'group',
+        'transition-all'
+      )}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        height: 32,
+        padding: collapsed ? 0 : '0 10px',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        borderRadius: 7,
+        color: active ? 'var(--fg)' : 'var(--fg-2)',
+        background: active ? 'var(--bg-3)' : 'transparent',
+        border: active
+          ? '1px solid var(--hair-strong)'
+          : '1px solid transparent',
+        position: 'relative',
+        fontSize: 13,
+        fontWeight: active ? 500 : 400,
+      }}
+    >
+      {active && !collapsed && (
+        <span
+          style={{
+            position: 'absolute',
+            left: -14,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 2,
+            height: 16,
+            borderRadius: 2,
+            background: 'var(--grad-brand)',
+          }}
+        />
+      )}
+      <Icon size={15} />
+      {!collapsed && <span style={{ flex: 1 }}>{label}</span>}
+      {!collapsed && badge && (
+        <span
+          className="mono"
+          style={{
+            fontSize: 9,
+            letterSpacing: '0.08em',
+            color: 'var(--emerald)',
+            padding: '1px 5px',
+            borderRadius: 4,
+            background: 'var(--emerald-dim)',
+            fontWeight: 600,
+          }}
+        >
+          {badge}
+        </span>
+      )}
+    </Link>
   )
 }

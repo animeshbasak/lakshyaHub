@@ -43,7 +43,7 @@ function SortableSkillRow({ id, skill }: { id: string; skill: any }) {
       style={style}
       className={`rounded-[14px] border p-4 transition-all duration-200 ${
         isDragging
-          ? 'z-50 border-cyan-500/50 bg-white/[0.04] shadow-lg'
+          ? 'z-50 border-white/30 bg-white/[0.04] shadow-lg'
           : 'border-white/[0.06] bg-[#111118] shadow-none'
       }`}
     >
@@ -86,7 +86,7 @@ function SortableSkillRow({ id, skill }: { id: string; skill: any }) {
             value={skill.category}
             onChange={(e) => updateSkillRow(id, 'category', e.target.value)}
             placeholder="e.g. Frontend"
-            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] outline-none break-words transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20"
+            className="w-full rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm font-bold text-[#f1f5f9] outline-none break-words transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10"
           />
         </div>
         <div>
@@ -98,7 +98,7 @@ function SortableSkillRow({ id, skill }: { id: string; skill: any }) {
             onChange={(e) => updateSkillRow(id, 'values', e.target.value)}
             placeholder="ReactJS, TypeScript, Design Systems, Performance Optimization..."
             rows={3}
-            className="min-h-[88px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 break-words"
+            className="min-h-[88px] w-full resize-y rounded-xl border border-white/[0.06] bg-[#1a1a24] px-4 py-3 text-sm leading-relaxed text-[#f1f5f9] placeholder:text-[#94a3b8]/50 outline-none transition-all focus:border-white/25 focus:ring-2 focus:ring-white/10 break-words"
           />
         </div>
       </div>
@@ -136,7 +136,7 @@ export function SkillsSection() {
     <section className="space-y-5">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <Wrench size={18} />
           </div>
           <div className="min-w-0">
@@ -158,7 +158,7 @@ export function SkillsSection() {
           </div>
           <button
             onClick={addSkillRow}
-            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all active:scale-95 hover:bg-cyan-500/20 min-h-[44px]"
+            className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all active:scale-95 hover:bg-white/10 min-h-[44px]"
           >
             <Plus size={16} />
             Add Category
@@ -190,7 +190,7 @@ export function SkillsSection() {
             </p>
             <button
               onClick={addSkillRow}
-              className="flex items-center gap-2 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-400 transition-all hover:bg-cyan-500/20 active:scale-95 min-h-[44px]"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all hover:bg-white/10 active:scale-95 min-h-[44px]"
             >
               <Plus size={16} />
               Add your first category

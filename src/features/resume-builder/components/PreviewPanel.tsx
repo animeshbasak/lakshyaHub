@@ -54,8 +54,8 @@ export function PreviewPanel() {
               onClick={() => updateTemplate(id)}
               className={`whitespace-nowrap rounded-xl border px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all min-h-[44px] ${
                 template === id
-                  ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400 shadow-lg shadow-cyan-500/10'
-                  : 'border-white/[0.06] bg-white/[0.02] text-[#94a3b8] hover:border-cyan-500/20 hover:text-[#f1f5f9]'
+                  ? 'border-white/20 bg-white/5 text-white shadow-lg shadow-black/30'
+                  : 'border-white/[0.06] bg-white/[0.02] text-[#94a3b8] hover:border-white/10 hover:text-[#f1f5f9]'
               }`}
             >
               {name}

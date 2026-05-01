@@ -45,7 +45,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
       
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -53,7 +53,7 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500 to-purple-500 shadow-xl shadow-cyan-500/20 mx-auto mb-6 flex items-center justify-center text-white">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-white to-white/60 shadow-xl shadow-black/30 mx-auto mb-6 flex items-center justify-center text-white">
             <Sparkles className="w-8 h-8" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-sm text-white focus:border-cyan-500/50 outline-none transition-all"
+                className="w-full bg-white/5 border border-white/5 rounded-2xl px-5 py-4 text-sm text-white focus:border-white/25 outline-none transition-all"
               />
             </div>
             <button 

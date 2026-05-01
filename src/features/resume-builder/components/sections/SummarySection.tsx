@@ -11,7 +11,7 @@ export function SummarySection() {
     <section className="space-y-6">
       <div className="space-y-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-cyan-400">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-white">
             <AlignLeft size={18} />
           </div>
           <div className="min-w-0">
@@ -43,7 +43,7 @@ export function SummarySection() {
           return (
             <div
               key={idx}
-              className="relative rounded-[14px] border border-white/[0.06] bg-[#111118] p-1 transition-all focus-within:border-cyan-500/30 focus-within:bg-white/[0.04]"
+              className="relative rounded-[14px] border border-white/[0.06] bg-[#111118] p-1 transition-all focus-within:border-white/20 focus-within:bg-white/[0.04]"
             >
               <label
                 htmlFor={fieldId}

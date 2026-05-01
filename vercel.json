@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "src/app/api/qstash/check-liveness/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/health/browser/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}
