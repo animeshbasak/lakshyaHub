@@ -10,9 +10,9 @@
 
 <sub>12-second feature reel · rendered deterministically with <a href="https://github.com/heygen-com/hyperframes">hyperframes</a> · <a href="docs/media/lakshya-reel.mp4">download MP4 (1.1 MB)</a></sub>
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-RLS-3ECF8E?logo=supabase)](https://supabase.com)
-[![Tests](https://img.shields.io/badge/tests-138%2F138-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/tests-188%20passing-brightgreen)](#tests)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![Status](https://img.shields.io/badge/status-active%20development-blue)](#roadmap)
 
@@ -61,7 +61,7 @@ flowchart LR
 | **Discover** | Parallel multi-source scrape (LinkedIn, Naukri, Indeed, Glassdoor, Web/ATS APIs), India-filtered, deduplicated, top-50 enriched via Apify RAG | `src/lib/scrapers/`, `src/actions/scrapeJobs.ts` |
 | **Resume** | 13 templates · section editing · PDF export · ATS scoring · AI bullet rewriting · PDF/DOCX import with LLM gap-fill | `src/features/resume-builder/`, `src/lib/resumeImport/` |
 | **Pipeline** | Kanban (Saved → Applied → Interview → Offer → Rejected) on `@dnd-kit`, every move persisted to Supabase | `src/features/job-board/` |
-| **ATS / JD Match** | Rule-based ATS (0–100 + tips) + LLM 5-dimension JD match (skills, title, seniority, location, salary) returning A–G grade, verdict, and gap list | `src/lib/atsEngine.ts`, `src/app/api/ai/jd-match-5d/` |
+| **ATS / JD Match** | Rule-based ATS (0–100 + tips) + LLM 5-dimension JD match (skills, title, seniority, location, salary) returning A–G grade, verdict, and gap list | `src/lib/atsEngine.ts`, `src/actions/scrapeJobs.ts` (`runJdMatch5dTask`) — per-job UI panel rebuilding, server-side path live |
 
 ---
 
@@ -108,7 +108,7 @@ npm run build     # type-check + production bundle
 2. **Import an existing resume** — `/resume` → upload PDF/DOCX → pdfjs/mammoth extracts text → heuristic segmentation → LLM gap-fill via `/api/ai/resume-import-parse` → store hydrated → user reviews low-confidence sections.
 3. **Daily job check** — `/discover` → query + location + source toggles → Find Jobs → live scrape log streams from `scrape_logs` → top-50 sorted by fit-score with A–G badges → Save promising ones (upserts `applications` row at status=`saved`).
 4. **Apply to a job** — JobDrawer → external apply URL → drag card to "Applied" in `/board` → notes saved via `updateApplicationStatus()`.
-5. **Tune resume for a JD** — "Match against my resume" → `/resume?jd_id=…` → 5-dimension breakdown + missing keywords → AI rewrite bullets → ATS panel live-updates → save triggers `syncResumeProfile()` for next scrape.
+5. **Tune resume for a JD** — "Match against my resume" → `/resume?jd_id=…` → 5-dimension breakdown + missing keywords → AI rewrite bullets → ATS panel live-updates → save triggers `syncResumeProfile()` for next scrape. (Per-job match panel in UI is currently feature-flagged off pending the A–G evaluator adapter rebuild — server-side scoring during scrape still runs.)
 6. **Track pipeline** — `/board` Kanban → drag-and-drop status → `/dashboard` shows funnel counts, average fit, recent apps.
 
 ---
@@ -132,7 +132,7 @@ npm run build     # type-check + production bundle
 ```
 lakshyaHub/
 ├── src/
-│   ├── app/                Next.js 15 App Router (routes + API handlers)
+│   ├── app/                Next.js 16 App Router (routes + API handlers)
 │   ├── actions/            Server actions (scrape, save, sync)
 │   ├── features/           Domain modules (resume-builder, job-board)
 │   ├── lib/
@@ -152,14 +152,14 @@ lakshyaHub/
     └── media/              Reel + screenshots
 ```
 
-**Stack:** Next.js 15 · React 19 · Supabase (Auth + Postgres + RLS) · `@dnd-kit` · `@react-pdf/renderer` · Apify (premium scrapers) · Gemini / Groq / OpenRouter (BYO keys) · Vitest
+**Stack:** Next.js 16 · React 19 · Supabase (Auth + Postgres + RLS) · `@dnd-kit` · `@react-pdf/renderer` · Apify (premium scrapers) · Gemini / Groq / OpenRouter (BYO keys) · Vitest
 
 ---
 
 ## Tests
 
 ```
-138/138 passing · 1 skipped · 11 todo · build clean
+188 passing · 1 skipped · 11 todo · 200 total · build clean (Vitest, 22 files)
 ```
 
 Run locally:

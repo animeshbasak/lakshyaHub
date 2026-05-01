@@ -1,8 +1,14 @@
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { runCoverLetterDraftTask } from '@/lib/ai/taskRunner'
+
+const BodySchema = z.object({
+  resumeId: z.string().uuid(),
+  jobId: z.string().uuid(),
+})
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,18 +18,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { resumeId, jobId } = body as { resumeId: string; jobId: string }
-
-    if (!resumeId || !jobId) {
-      return NextResponse.json({ success: false, error: 'resumeId and jobId are required' }, { status: 400 })
+    const parsed = BodySchema.safeParse(await req.json())
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: 'resumeId and jobId must be valid UUIDs', details: z.treeifyError(parsed.error) },
+        { status: 400 },
+      )
     }
+    const { resumeId, jobId } = parsed.data
 
-    // Fetch resume profile
+    // Defense in depth: scope resume lookup to the authed user at the app layer
+    // even though RLS already gates `id = auth.uid()`. Two reasons:
+    //   1. Misconfigured RLS in the future would leak; app-layer check fails closed.
+    //   2. resumeId is user-supplied; without this, an attacker could probe other
+    //      UUIDs and the 404 vs 500 timing would leak existence.
     const { data: profile, error: profileError } = await supabase
       .from('resume_profiles')
       .select('full_resume_text')
       .eq('id', resumeId)
+      .eq('id', user.id)
       .maybeSingle()
 
     if (profileError || !profile) {
