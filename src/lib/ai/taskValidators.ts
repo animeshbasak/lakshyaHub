@@ -89,6 +89,28 @@ export function validateJobStructureOutput(output: unknown): string[] {
   return [];
 }
 
+export function validateWritingStyleExtractionOutput(output: unknown): string[] {
+  // Detail validation lives in lib/writingStyle/extractStyle.ts via Zod;
+  // here we just sanity-check it's an object with the 8 expected keys.
+  if (!output || typeof output !== 'object') return ['Output must be an object.'];
+  const value = output as Record<string, unknown>;
+  const required = [
+    'tone',
+    'avgSentenceLength',
+    'openingPattern',
+    'punctuationHabits',
+    'vocabularyPrefs',
+    'structurePatterns',
+    'voiceSignatures',
+    'avoidList',
+  ];
+  const errors: string[] = [];
+  for (const key of required) {
+    if (!(key in value)) errors.push(`Missing field: ${key}`);
+  }
+  return errors;
+}
+
 export function validateResumeImportParseOutput(output: unknown): string[] {
   if (!output || typeof output !== 'object') {
     return ['Output must be an object.'];

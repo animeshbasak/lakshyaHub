@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { runCoverLetterDraftTask } from '@/lib/ai/taskRunner'
+import { buildStyleClause } from '@/lib/writingStyle/buildStyleClause'
+import {
+  WritingStyleProfileSchema,
+  type WritingStyleProfile,
+} from '@/lib/writingStyle/types'
 
 const BodySchema = z.object({
   resumeId: z.string().uuid(),
@@ -32,9 +37,12 @@ export async function POST(req: NextRequest) {
     //   1. Misconfigured RLS in the future would leak; app-layer check fails closed.
     //   2. resumeId is user-supplied; without this, an attacker could probe other
     //      UUIDs and the 404 vs 500 timing would leak existence.
+    // Pulls writing_style alongside resume — when present (migration 006 +
+    // /api/writing-style/recalibrate has been run), conditions the LLM
+    // prompt on the user's voice. NULL → falls through to legacy GPT-default.
     const { data: profile, error: profileError } = await supabase
       .from('resume_profiles')
-      .select('full_resume_text')
+      .select('full_resume_text, writing_style')
       .eq('id', resumeId)
       .eq('id', user.id)
       .maybeSingle()
@@ -42,6 +50,15 @@ export async function POST(req: NextRequest) {
     if (profileError || !profile) {
       return NextResponse.json({ success: false, error: 'Resume not found' }, { status: 404 })
     }
+
+    // Validate persisted style descriptor; silently fall back to no
+    // calibration if the JSON in DB doesn't match the schema.
+    let styleProfile: WritingStyleProfile | null = null
+    if (profile.writing_style) {
+      const parsedStyle = WritingStyleProfileSchema.safeParse(profile.writing_style)
+      if (parsedStyle.success) styleProfile = parsedStyle.data
+    }
+    const styleClause = buildStyleClause(styleProfile)
 
     // Fetch job
     const { data: job, error: jobError } = await supabase
@@ -60,6 +77,7 @@ export async function POST(req: NextRequest) {
       job.description ?? '',
       job.title ?? '',
       job.company ?? '',
+      styleClause,
     )
 
     if (!result.success) {

@@ -8,6 +8,7 @@ import {
   validateProfileSummaryGenOutput,
   validateResumeImportParseOutput,
   validateJobStructureOutput,
+  validateWritingStyleExtractionOutput,
 } from './taskValidators';
 import type { AiResponse } from './router.types';
 
@@ -46,7 +47,14 @@ export async function runCoverLetterDraftTask(
   jd: string,
   jobTitle: string,
   company: string,
+  styleClause?: string,
 ): Promise<AiResponse> {
+  // styleClause is the writing-style calibration fragment from
+  // lib/writingStyle/buildStyleClause — when present, biases the LLM
+  // toward the user's actual voice (anti-AI-detection). Empty string
+  // means no calibration on file → legacy GPT-default behaviour.
+  const styleSection = styleClause ? `\n\n${styleClause}\n` : '';
+
   const prompt = `Write a professional cover letter for the following job application.
 
 ## Job
@@ -57,7 +65,7 @@ ${jd.slice(0, 2000)}
 
 ## Candidate Resume
 ${resumeText.slice(0, 2000)}
-
+${styleSection}
 Write a compelling, personalized cover letter (3–4 paragraphs). Be specific. Do not use generic filler phrases.`;
   return await aiRouter.execute({
     task: 'cover_letter_draft',
@@ -65,6 +73,26 @@ Write a compelling, personalized cover letter (3–4 paragraphs). Be specific. D
     validate: validateCoverLetterDraftOutput,
     maxTokens: 2000,
     temperature: 0.7,
+  });
+}
+
+/**
+ * Writing-style extraction task. Used by /api/writing-style/recalibrate
+ * to derive abstract style descriptors from user-uploaded samples.
+ *
+ * Lower temperature (0.2) — we want stable, repeatable descriptors. JSON
+ * output gated by the system prompt + validator + Zod schema downstream.
+ */
+export async function runWritingStyleExtractionTask(
+  systemPrompt: string,
+  userPrompt: string,
+): Promise<AiResponse> {
+  return await aiRouter.execute({
+    task: 'writing_style_extraction',
+    input: { prompt: `${systemPrompt}\n\n${userPrompt}` },
+    validate: validateWritingStyleExtractionOutput,
+    maxTokens: 1200,
+    temperature: 0.2,
   });
 }
 
