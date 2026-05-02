@@ -39,13 +39,15 @@ export default function LoginPage() {
   // initializer runs once on client mount only.
   const [supabase] = useState(() => createClient())
 
-  // Send OTP to email. We send WITHOUT emailRedirectTo so the email
-  // template's {{ .Token }} (6-digit code) path is the user's expected
-  // affordance. The link path still works if the user clicks it
-  // (Supabase emails include both unless the dashboard template is
-  // overridden), but the code path is the one we instruct them to use —
-  // bypasses Gmail / Outlook link-prefetcher consuming the OTP before
-  // the user clicks (the otp_expired error users were hitting).
+  // Send OTP to email. We pass `emailRedirectTo` so that if the Supabase
+  // email template still contains {{ .ConfirmationURL }} (the magic link)
+  // — which is the default until the user updates the template in the
+  // Supabase dashboard — clicking the link still lands on /auth/callback
+  // and signs the user in.
+  //
+  // Once the dashboard template is updated to use {{ .Token }} (the
+  // 6-digit code) instead, the link goes away from emails and only the
+  // code path remains. Either way works.
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
@@ -55,8 +57,10 @@ export default function LoginPage() {
       email,
       options: {
         // shouldCreateUser default is true — first-time emails create the user.
-        // No emailRedirectTo: forces the email template's code path to be the
-        // primary user-facing instruction.
+        // emailRedirectTo: keeps the magic-link fallback path working until
+        // the user's Supabase dashboard email template is updated to send
+        // {{ .Token }} (6-digit code) instead of {{ .ConfirmationURL }}.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
@@ -104,7 +108,12 @@ export default function LoginPage() {
     if (loading || secondsLeft > 0) return
     setCode('')
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOtp({ email })
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
     if (error) {
       toast.error(error.message)
     } else {
