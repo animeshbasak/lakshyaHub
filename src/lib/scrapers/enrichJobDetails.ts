@@ -1,5 +1,6 @@
 // src/lib/scrapers/enrichJobDetails.ts
 import type { RawJobPartial } from '@/lib/scrapers/types'
+import { checkLiveness } from '@/lib/scrapers/liveness'
 
 export async function enrichJobDetails(
   job: RawJobPartial,
@@ -33,9 +34,17 @@ export async function enrichJobDetails(
 
     if (text.length > 100) {
       console.log(`[enrichJobDetails] Successfully enriched: ${job.title}`)
+      // Lite liveness check — gated. When flag off, skip the regex pass
+      // entirely so behaviour matches pre-wire-in. Persistence reads
+      // `liveness_status` from the returned object.
+      const liveness_status =
+        process.env.JOB_LIVENESS_FILTER === 'true'
+          ? checkLiveness(text, job.url).status
+          : undefined
       return {
         ...job,
-        description: text.slice(0, 5000) // Keep it manageable
+        description: text.slice(0, 5000), // Keep it manageable
+        liveness_status,
       }
     }
   } catch (err) {

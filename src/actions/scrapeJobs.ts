@@ -6,6 +6,9 @@ import { buildSearchQueries } from '@/lib/scrapers/buildSearchQuery'
 import { enrichJobDetails } from '@/lib/scrapers/enrichJobDetails'
 import { runJdMatch5dTask, runJobStructureTask } from '@/lib/ai/taskRunner'
 import { applyPostScrapeFilters } from '@/lib/filters/jobFilters'
+import { applyPersonalFit } from '@/lib/jobsearch/personalFit'
+import { resolveConfigForUser } from '@/lib/jobsearch/personalFitConfig'
+import { canonicalRoleSignature } from '@/lib/dedup/roleSimilarity'
 import type { ScrapeConfig } from '@/lib/scrapers/types'
 import type { ResumeProfile } from '@/types'
 
@@ -59,16 +62,44 @@ export async function scrapeJobs(config: ScrapeConfig) {
     const rawJobs = applyPostScrapeFilters(rawJobsUnfiltered)
     await log('info', `Filtered to ${rawJobs.length} India-relevant jobs (from ${rawJobsUnfiltered.length} raw).`)
 
-    // 5. Enrich and Score (Top 50 only for cost/speed)
-    await log('info', `Processing ${rawJobs.length} jobs... Enriching top 50 with full details.`)
+    // 4b. Personal-fit reranker (gated). Two wins when enabled:
+    //   1. Hard-disqualified brands (IT services blocklist) drop here, BEFORE
+    //      we burn LLM tokens on the top-50 enrichment + JD-match step.
+    //   2. Roles matching the user's archetype/locations/comp floor bubble to
+    //      the top-50 cut, so LLM evaluation is spent on relevant jobs.
+    // Resolves a per-user config (IN/US/EU/GLOBAL preset) from the resume
+    // profile's target_locations.
+    const sortedRawJobs = (() => {
+      if (process.env.LAKSHYA_PERSONAL_FIT !== 'true') return rawJobs
+      const fitConfig = resolveConfigForUser({
+        target_locations: (profile as ResumeProfile | null)?.target_locations ?? null,
+      })
+      const scored = applyPersonalFit(rawJobs, fitConfig)
+      return scored.sort((a, b) => b.personalFitScore - a.personalFitScore)
+    })()
+    if (process.env.LAKSHYA_PERSONAL_FIT === 'true') {
+      await log('info', `Personal-fit reranker: ${rawJobs.length} → ${sortedRawJobs.length} after disqualifier filter.`)
+    }
 
-    const jobsToProcess = rawJobs.slice(0, 50)
-    const otherJobs = rawJobs.slice(50)
+    // 5. Enrich and Score (Top 50 only for cost/speed)
+    await log('info', `Processing ${sortedRawJobs.length} jobs... Enriching top 50 with full details.`)
+
+    const jobsToProcess = sortedRawJobs.slice(0, 50)
+    const otherJobs = sortedRawJobs.slice(50)
 
     const processedJobs = await Promise.all(
       jobsToProcess.map(async (raw) => {
         const enriched = await enrichJobDetails(raw, APIFY_API_TOKEN!)
-        const dedup_hash = await computeDedupHash(raw.title, raw.company)
+        // JOB_DEDUP_FUZZY: when enabled, hash uses the stopword-filtered
+        // canonical role signature instead of the raw title — collapsing
+        // "Senior Backend Engineer Bangalore" and "Backend Engineer Mumbai"
+        // (same role, different city) into a single dedup_hash so the unique
+        // constraint catches the cross-source duplicate.
+        const canonicalTitle =
+          process.env.JOB_DEDUP_FUZZY === 'true'
+            ? canonicalRoleSignature(raw.title)
+            : undefined
+        const dedup_hash = await computeDedupHash(raw.title, raw.company, canonicalTitle)
 
         let fit_score = 0
         let fit_breakdown = null
@@ -107,6 +138,10 @@ export async function scrapeJobs(config: ScrapeConfig) {
           salary_range: raw.salary || null,
           fit_score,
           fit_breakdown,
+          // liveness_status comes from enrichJobDetails when JOB_LIVENESS_FILTER=true;
+          // otherwise undefined → DB default 'unknown' from migration 003.
+          liveness_status: enriched.liveness_status as string | undefined,
+          liveness_checked_at: enriched.liveness_status ? new Date().toISOString() : undefined,
           raw_data: { ...raw, structured },
           dedup_hash,
           scraped_at: new Date().toISOString(),
@@ -115,22 +150,28 @@ export async function scrapeJobs(config: ScrapeConfig) {
     )
 
     const otherProcessed = await Promise.all(
-      otherJobs.map(async (raw) => ({
-        user_id: user.id,
-        session_id: session.id,
-        source: raw.source,
-        title: raw.title,
-        company: raw.company,
-        location: raw.location || null,
-        description: raw.description || null,
-        url: raw.url || null,
-        salary_range: raw.salary || null,
-        fit_score: 0,
-        fit_breakdown: null,
-        raw_data: raw,
-        dedup_hash: await computeDedupHash(raw.title, raw.company),
-        scraped_at: new Date().toISOString(),
-      }))
+      otherJobs.map(async (raw) => {
+        const canonicalTitle =
+          process.env.JOB_DEDUP_FUZZY === 'true'
+            ? canonicalRoleSignature(raw.title)
+            : undefined
+        return {
+          user_id: user.id,
+          session_id: session.id,
+          source: raw.source,
+          title: raw.title,
+          company: raw.company,
+          location: raw.location || null,
+          description: raw.description || null,
+          url: raw.url || null,
+          salary_range: raw.salary || null,
+          fit_score: 0,
+          fit_breakdown: null,
+          raw_data: raw,
+          dedup_hash: await computeDedupHash(raw.title, raw.company, canonicalTitle),
+          scraped_at: new Date().toISOString(),
+        }
+      })
     )
 
     const finalBatch = [...processedJobs, ...otherProcessed]
