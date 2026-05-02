@@ -13,6 +13,7 @@ const DEFAULT_TASK_ROUTING: Record<AiTask, Array<'gemini' | 'groq' | 'openrouter
   profile_summary_gen: ['gemini', 'groq', 'openrouter'],
   resume_import_parse: ['gemini', 'groq', 'openrouter'],
   job_structure: ['groq', 'gemini', 'openrouter'],
+  writing_style_extraction: ['groq', 'gemini', 'openrouter'],
 };
 
 function readEnvValue(name: string) {
