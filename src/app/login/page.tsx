@@ -1,6 +1,6 @@
 // src/app/login/page.tsx
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
+  // Resend cooldown — Supabase rate-limits OTP sends to 1 per email per 60s
+  // by default. We mirror that on the client so spam-clicks don't trigger
+  // a confusing `over_email_send_rate_limit` toast.
+  const [cooldownEndsAt, setCooldownEndsAt] = useState(0)
+  const [secondsLeft, setSecondsLeft] = useState(0)
   const router = useRouter()
+
+  useEffect(() => {
+    if (cooldownEndsAt === 0) return
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((cooldownEndsAt - Date.now()) / 1000))
+      setSecondsLeft(remaining)
+      if (remaining === 0) setCooldownEndsAt(0)
+    }
+    tick()
+    const id = setInterval(tick, 250)
+    return () => clearInterval(id)
+  }, [cooldownEndsAt])
   // Lazy-init: @supabase/ssr's createBrowserClient touches document.cookie,
   // undefined during SSR. Calling at the top of the component body throws
   // on the server pass under Next.js 16 + Turbopack and the page renders
@@ -58,24 +75,33 @@ export default function LoginPage() {
     e.preventDefault()
     if (code.length < 6) return
     setLoading(true)
-
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: code,
-      type: 'email',
-    })
-
-    if (error) {
-      toast.error(error.message)
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: 'email',
+      })
+      if (error) {
+        toast.error(error.message)
+        return
+      }
+      toast.success('Signed in.')
+      // refresh BEFORE push so the layout's RSC cache invalidates first;
+      // /dashboard's AuthGate then sees the just-set sb-*-auth-token cookie
+      // when it does its server-side getUser().
+      router.refresh()
+      router.push('/dashboard')
+    } finally {
+      // Always reset loading — covers happy-path (button unfreezes if user
+      // hits Back from /dashboard) and error path symmetrically.
       setLoading(false)
-      return
     }
-    toast.success('Signed in.')
-    router.push('/dashboard')
-    router.refresh()
   }
 
   const handleResendCode = async () => {
+    // Race + rate-limit guard: don't fire while a request is already in
+    // flight, and don't fire while the 60s Supabase cooldown is active.
+    if (loading || secondsLeft > 0) return
     setCode('')
     setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({ email })
@@ -83,6 +109,7 @@ export default function LoginPage() {
       toast.error(error.message)
     } else {
       toast.success('New code sent.')
+      setCooldownEndsAt(Date.now() + 60_000)
     }
     setLoading(false)
   }
@@ -90,6 +117,7 @@ export default function LoginPage() {
   const handleBackToEmail = () => {
     setPhase('email')
     setCode('')
+    setCooldownEndsAt(0)
   }
 
   const handleSocialLogin = async (provider: 'github' | 'google') => {
@@ -214,10 +242,10 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={handleResendCode}
-                  disabled={loading}
-                  className="hover:text-white transition-colors disabled:opacity-50"
+                  disabled={loading || secondsLeft > 0}
+                  className="hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Resend code
+                  {secondsLeft > 0 ? `Resend in ${secondsLeft}s` : 'Resend code'}
                 </button>
               </div>
             </form>
