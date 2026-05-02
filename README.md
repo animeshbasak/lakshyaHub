@@ -12,7 +12,8 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-RLS-3ECF8E?logo=supabase)](https://supabase.com)
-[![Tests](https://img.shields.io/badge/tests-188%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/tests-290%20passing-brightgreen)](#tests)
+[![Voice Calibration](https://img.shields.io/badge/voice%20calibration-anti--AI--detection-purple)](#what-makes-it-different)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![Status](https://img.shields.io/badge/status-active%20development-blue)](#roadmap)
 
@@ -62,6 +63,8 @@ flowchart LR
 | **Resume** | 13 templates · section editing · PDF export · ATS scoring · AI bullet rewriting · PDF/DOCX import with LLM gap-fill | `src/features/resume-builder/`, `src/lib/resumeImport/` |
 | **Pipeline** | Kanban (Saved → Applied → Interview → Offer → Rejected) on `@dnd-kit`, every move persisted to Supabase | `src/features/job-board/` |
 | **ATS / JD Match** | Rule-based ATS (0–100 + tips) + LLM 5-dimension JD match (skills, title, seniority, location, salary) returning A–G grade, verdict, and gap list | `src/lib/atsEngine.ts`, `src/actions/scrapeJobs.ts` (`runJdMatch5dTask`) — per-job UI panel rebuilding, server-side path live |
+| **Voice Calibration** | Anti-AI-detection cover letters: upload your actual writing samples → LLM extracts 8 abstract style descriptors (tone, sentence length, opening, punctuation, vocabulary, structure, voice signatures, avoid-list) → cover-letter generation conditions on your voice instead of GPT-default. PII pre-stripped; only abstract descriptors persisted. | `src/lib/writingStyle/`, `src/app/api/writing-style/`, `/profile/writing-style` UI |
+| **Personal-Fit Reranker** *(opt-in via env)* | Deterministic, no-LLM persona pre-filter: hard-disqualifies IT services brands, sorts by archetype/location/comp fit so LLM tokens go to relevant roles. Regional presets (IN/US/EU/GLOBAL) auto-resolve from your profile. | `src/lib/jobsearch/personalFit.ts`, `LAKSHYA_PERSONAL_FIT=true` |
 
 ---
 
@@ -75,6 +78,7 @@ flowchart LR
 | **Ghost-job + legitimacy filter** | ✓ | — | — | — |
 | **Open source, self-hostable** | ✓ MIT | — | — | rare |
 | **BYO AI provider keys (Gemini / Groq / OpenRouter)** | ✓ | — | — | rare |
+| **Anti-AI-detection writing-style calibration** | ✓ | — | — | — |
 
 ---
 
@@ -159,7 +163,7 @@ lakshyaHub/
 ## Tests
 
 ```
-188 passing · 1 skipped · 11 todo · 200 total · build clean (Vitest, 22 files)
+290 passing · 1 skipped · 11 todo · 302 total · build clean (Vitest, 28 files)
 ```
 
 Run locally:
@@ -169,7 +173,7 @@ npm run test:run    # CI mode
 npm run test:ui     # Vitest UI
 ```
 
-What's covered: resume parser fixtures, ATS engine rules, India filters, dedup, 5-D match scoring, scrape adapters, ghost-job heuristics.
+What's covered: resume parser fixtures, ATS engine rules, India filters, dedup, 5-D match scoring, scrape adapters, ghost-job heuristics, personal-fit reranker (43 tests across regional presets + USD/LPA comp parsing), role-fuzzy match (16), liveness checker (20), writing-style PII strip + clause builder + extractor (24).
 
 ---
 
