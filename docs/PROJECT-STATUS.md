@@ -155,7 +155,7 @@ The good news: nothing shipped today is actively wrong. It's just early.
 
 | # | Track | Task | Effort | Source |
 |---|---|---|---|---|
-| 13 | 🔴 Bug | Fix schema: `cv_documents`→`resumes`, `user_profiles`→`resume_profiles`, `markdown`→`data jsonb`, `narrative`→`full_resume_text` in `src/app/api/ai/evaluate/route.ts:56-66` | 1h | Eng BLOCK #1 |
+| 13 | ✅ resolved | Schema in `evaluate/route.ts` already uses `resume_profiles.full_resume_text` (line 267) — doc was stale | — | Verified 2026-05-02 |
 | 24 | 🔴 Bug NEW | Fix prompt loader: convert `fs.readFile` in `promptLoader.ts` to `import ... as ...?raw` OR add `outputFileTracingIncludes` to `next.config.ts` | 1h | Eng BLOCK #2 |
 | 25 | 🟡 Bug NEW | Idempotency: pre-insert `pending` row + `unique(user_id, jd_url)` + handle empty LLM as 502 not silent insert | 1h | Eng Needs-Fix #3 |
 | 26 | 🟡 Bug NEW | `next.config.ts`: migrate `webpack(canvas: false)` to `turbopack.resolveAlias.canvas` | 30m | Eng Needs-Fix #5 |
@@ -261,7 +261,7 @@ The good news: nothing shipped today is actively wrong. It's just early.
 
 **Top-5 must-fix before merging:**
 
-1. **🔴 BLOCK — Schema mismatch.** `evaluate/route.ts:56-66` queries `cv_documents.markdown` + `user_profiles.narrative`. Schema has `resumes(data jsonb, …)` + `resume_profiles(full_resume_text)`. Every auth'd call → `{error: 'no active CV'}` because Supabase 42P01 masked as empty row. **Already tracked as Task #13 — promote to absolute P0.**
+1. ~~**🔴 BLOCK — Schema mismatch.**~~ **✅ STALE.** Route at `evaluate/route.ts:267` queries `resume_profiles.full_resume_text` correctly — resolved before this audit was run. Verified 2026-05-02.
 
 2. **🔴 BLOCK — Prompt loader FS reads fail on Vercel Lambda.** `promptLoader.ts:29,38,47` uses `fs.readFile(process.cwd() + 'src/prompts/...')`. Turbopack only traces imported files; runtime `fs.readFile` of markdown does NOT trigger output tracing. Expected: ENOENT on first prod eval. **NEW P0 — add `outputFileTracingIncludes` in `next.config.ts` OR convert to `import x from '@/prompts/...?raw'` imports.**
 
@@ -293,8 +293,7 @@ The good news: nothing shipped today is actively wrong. It's just early.
 
 **Verdict: NOT SAFE TO SHIP.** 1 Critical, 4 High, 5 Medium, 2 Low.
 
-**🔴 CRITICAL — `src/proxy.ts` is dead code; middleware never runs.**
-Next.js expects `src/middleware.ts` — the file is misnamed `proxy.ts` and never loaded. Every `PROTECTED_PATHS` redirect + session refresh is decorative. Only auth check on routes is client-side `AuthGate.tsx` — bypassable by direct API calls. **All API routes and dashboard pages are publicly accessible.** Fix: rename file + redeploy.
+~~**🔴 CRITICAL — `src/proxy.ts` is dead code; middleware never runs.**~~ **✅ STALE.** As of Next.js 16 the convention changed: `src/proxy.ts` (with `export async function proxy(...)`) IS the supported middleware filename, replacing the legacy `src/middleware.ts`. Build output confirms `ƒ Proxy (Middleware)` is registered and active. The audit was written against pre-Next-16 conventions. Verified 2026-05-02.
 
 **🟠 HIGH — IDOR on `loadResume` + `deleteResume`.** `src/actions/resumeActions.ts:52-57, 66-69` query `resumes.eq('id', id)` with NO `user_id` filter. Any auth'd user can read/delete any resume UUID. Fix: add `.eq('user_id', user.id)`.
 

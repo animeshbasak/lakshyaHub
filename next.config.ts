@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
   // auto-trace dynamic fs.readFile, so the files would otherwise be absent
   // from the deployed bundle and the route would ENOENT on first call.
   outputFileTracingIncludes: {
-    '/api/ai/evaluate': ['./src/prompts/**/*.md'],
+    '/**/*': ['./src/prompts/**/*.md'],
   },
   // Baseline security headers (Security plan S6; audit Medium finding).
   // CSP is deferred to middleware with nonce (Security plan S6.2) — not yet shipped.
