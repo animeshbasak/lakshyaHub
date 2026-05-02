@@ -14,18 +14,22 @@ function buildCsp(nonce: string): string {
   const supaWs = supa.replace(/^https/, 'wss')
   const isDev = process.env.NODE_ENV !== 'production'
 
-  // React + Next.js dev-mode tooling uses eval() for HMR error overlays + stack
-  // reconstruction. Add 'unsafe-eval' in dev only; never ship to production.
+  // CSP script-src — 'strict-dynamic' removed (was breaking Next.js hydration:
+  // strict-dynamic ignores 'self' + host allowlists + 'unsafe-inline' and
+  // demands every script be nonced; Next.js dev mode + RSC don't reliably
+  // nonce all their inline scripts). Without it, 'self' + 'unsafe-inline' +
+  // the per-request nonce work as a layered allowlist. Dev adds 'unsafe-eval'
+  // for React Refresh / HMR error overlays.
   const scriptSrc = isDev
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval' https:`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:`
+    ? `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' https:`
+    : `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' https:`
 
   return [
     `default-src 'self'`,
     scriptSrc,
-    // Workers (pdfjs-dist /pdf.worker.min.mjs, mammoth) need their own
-    // directive — script-src 'strict-dynamic' otherwise blocks workers loaded
-    // by URL because the loader script isn't nonce-trusted.
+    // Workers (pdfjs-dist /pdf.worker.min.mjs, mammoth) load their own bundle
+    // by URL. Allow 'self' + blob: which covers both static workers and any
+    // blob-URL workers libs generate.
     `worker-src 'self' blob:`,
     `style-src 'self' 'unsafe-inline'`,                              // Tailwind hydration injects inline
     `img-src 'self' data: blob: https:`,
@@ -33,7 +37,11 @@ function buildCsp(nonce: string): string {
     // PDF upload (resume import) reads blob: URLs via fetch; @react-pdf/renderer
     // generates blob: URLs that embed font + image data. data: covers inline
     // resources (fonts, small images) the same libs sometimes generate.
-    `connect-src 'self' blob: data: ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com https://*.upstash.io https://o*.ingest.sentry.io https://*.ingest.sentry.io`,
+    // Sentry: ONLY 'https://*.ingest.sentry.io' is valid CSP — wildcards
+    // must sit at a subdomain boundary, not mid-token. The earlier
+    // 'https://o*.ingest.sentry.io' was silently dropped by browsers per
+    // https://www.w3.org/TR/CSP3/#match-source-expression
+    `connect-src 'self' blob: data: ${supa} ${supaWs} https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com https://*.upstash.io https://*.ingest.sentry.io`,
     // PDF preview iframes (@react-pdf/renderer) and downloadable blob: previews
     // need to be embeddable. Stripe Elements / hooks remain explicit.
     `frame-src 'self' blob: data: https://js.stripe.com https://hooks.stripe.com`,
