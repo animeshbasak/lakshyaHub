@@ -11,7 +11,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  // Lazy-init: @supabase/ssr's createBrowserClient touches document.cookie,
+  // undefined during SSR. Calling at the top of the component body throws
+  // on the server pass under Next.js 16 + Turbopack and the page renders
+  // as the Suspense fallback (null → blank page). useState's lazy
+  // initializer runs once on client mount only.
+  const [supabase] = useState(() => createClient())
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
