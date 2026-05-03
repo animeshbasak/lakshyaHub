@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Pen, Sparkles, Trash2, Upload, RotateCcw, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -114,11 +113,8 @@ export default function WritingStylePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 text-white">
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-10"
-      >
+      {/* Same anti-pattern as the login page — see fix/login-blank-page-hydration. */}
+      <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <Pen className="w-5 h-5 text-white/70" />
           <h1 className="text-2xl font-bold tracking-tight">Writing Style</h1>
@@ -128,7 +124,7 @@ export default function WritingStylePage() {
           posts, anything in your voice. Recalibrate, and your AI-drafted cover
           letters will sound like you wrote them, not like ChatGPT.
         </p>
-      </motion.div>
+      </div>
 
       {/* Privacy callout */}
       <div className="mb-8 p-4 rounded-2xl bg-white/[0.03] border border-white/5 text-[13px] text-text-muted flex items-start gap-3">
