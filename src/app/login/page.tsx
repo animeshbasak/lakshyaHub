@@ -1,7 +1,6 @@
 // src/app/login/page.tsx
 'use client'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -143,11 +142,14 @@ export default function LoginPage() {
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 blur-[120px] rounded-full pointer-events-none" />
       
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md relative z-10"
-      >
+      {/*
+        Was wrapped in <motion.div initial={{ opacity: 0, scale: 0.95 }}>.
+        SSR rendered the page at opacity:0; if framer-motion failed to mount
+        on the client (Next 16 + Turbopack + React 19 hydration edge), the
+        entire login UI stayed invisible — reported as a "blank page". Plain
+        div is reliable and the entrance fade was purely cosmetic.
+      */}
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-white to-white/60 shadow-xl shadow-black/30 mx-auto mb-6 flex items-center justify-center text-white">
             <Sparkles className="w-8 h-8" />
@@ -264,7 +266,7 @@ export default function LoginPage() {
         <p className="text-center mt-8 text-[11px] text-text-muted font-medium uppercase tracking-widest">
           Secure Authentication by <span className="text-white">Supabase</span>
         </p>
-      </motion.div>
+      </div>
     </div>
   )
 }
