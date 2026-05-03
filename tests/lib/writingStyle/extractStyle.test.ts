@@ -37,6 +37,9 @@ describe('extractStyle — happy path', () => {
     vi.mocked(runWritingStyleExtractionTask).mockResolvedValue({
       success: true,
       output: validProfile,
+      provider: 'mock',
+      model: 'mock-model',
+      latencyMs: 0,
     })
   })
 
@@ -82,6 +85,10 @@ describe('extractStyle — failure paths', () => {
     vi.mocked(runWritingStyleExtractionTask).mockResolvedValue({
       success: false,
       error: 'all providers failed',
+      provider: 'mock',
+      model: 'mock-model',
+      output: null,
+      latencyMs: 0,
     })
     const r = await extractStyle([sampleA])
     expect(r.success).toBe(false)
@@ -92,6 +99,9 @@ describe('extractStyle — failure paths', () => {
     vi.mocked(runWritingStyleExtractionTask).mockResolvedValue({
       success: true,
       output: { tone: 'short' /* missing 7 fields */ },
+      provider: 'mock',
+      model: 'mock-model',
+      latencyMs: 0,
     })
     const r = await extractStyle([sampleA])
     expect(r.success).toBe(false)
@@ -102,6 +112,9 @@ describe('extractStyle — failure paths', () => {
     vi.mocked(runWritingStyleExtractionTask).mockResolvedValue({
       success: true,
       output: { ...validProfile, avgSentenceLength: 'enormous' },
+      provider: 'mock',
+      model: 'mock-model',
+      latencyMs: 0,
     })
     const r = await extractStyle([sampleA])
     expect(r.success).toBe(false)
