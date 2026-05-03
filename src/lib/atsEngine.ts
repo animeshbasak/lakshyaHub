@@ -277,13 +277,36 @@ export interface ATSResult {
 }
 
 export const calculateATSScore = (resume: ResumeData): ATSResult => {
+  // Defensive normalization. Many ATS_CHECKS access r.skills.flatMap(),
+  // r.experience.length, r.header.email.length, etc. WITHOUT null guards.
+  // When the resume is in a partial state (fresh import, Zustand store
+  // mid-hydration, manual reset), any of these throws, the outer try/catch
+  // in AIPanel.scoreResume swallows it, and the panel renders empty —
+  // exactly the "ATS section not working" symptom users hit. Normalize
+  // once here so every downstream check sees well-shaped data.
+  const r: ResumeData = {
+    ...resume,
+    skills: resume.skills ?? [],
+    experience: resume.experience ?? [],
+    education: resume.education ?? [],
+    projects: resume.projects ?? [],
+    summary: resume.summary ?? [],
+    // Object.assign avoids TS's "specified more than once" warning that fires
+    // when a literal key + spread that could-contain-the-same-key are combined.
+    header: Object.assign(
+      { name: '', email: '', phone: '' },
+      resume.header ?? {},
+    ) as ResumeData['header'],
+    competencies: resume.competencies ?? [],
+  };
+
   // Safety: check parse quality first
-  const quality = assessParseQuality(resume);
+  const quality = assessParseQuality(r);
   if (quality === 'unparseable') return { score: 0, error: 'unparseable', parseQuality: 'unparseable' };
 
   const results = ATS_CHECKS.map(check => ({
     ...check,
-    passed: (() => { try { return check.test(resume); } catch { return false; } })()
+    passed: (() => { try { return check.test(r); } catch { return false; } })()
   }));
 
   // Three pillar scores — weighted exactly as real ATS research shows
@@ -310,7 +333,7 @@ export const calculateATSScore = (resume: ResumeData): ATSResult => {
     .sort((a, b) => b.weight - a.weight)
     .map(c => ({
       ...c,
-      specificTip: generateSpecificTip(c, resume)
+      specificTip: generateSpecificTip(c, r)
     }));
 
   const passing = results.filter(c => c.passed);
