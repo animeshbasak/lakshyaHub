@@ -11,6 +11,8 @@ import { weworkremotelyAdapter } from './adapters/weworkremotely'
 import { naukriSitemapAdapter } from './adapters/naukri-sitemap'
 import { atsPortalsAdapter } from './adapters/ats-portals'
 import { adzunaAdapter } from './adapters/adzuna'
+import { instahyreAdapter } from './adapters/instahyre'
+import { ycWaasAdapter } from './adapters/yc-waas'
 import { withTimeout, rankByRecency } from './util'
 
 const ADAPTERS: JobSearchAdapter[] = [
@@ -23,6 +25,13 @@ const ADAPTERS: JobSearchAdapter[] = [
   // Activates only when ADZUNA_APP_ID + ADZUNA_APP_KEY are set; otherwise
   // the aggregator skips it via isAvailable().
   adzunaAdapter,
+  // India-focused product-co board (Razorpay/CRED/Phonepe/etc.). Gated
+  // behind INSTAHYRE_ENABLED=true while we verify the JSON endpoint
+  // shape against production traffic.
+  instahyreAdapter,
+  // YC Work-at-a-Startup — every YC-funded company hiring. GLOBAL +
+  // REMOTE regions. Gated behind YC_WAAS_ENABLED=true pending smoke test.
+  ycWaasAdapter,
 ]
 
 export interface AggregateOutput {
